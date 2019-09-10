@@ -18,7 +18,8 @@
         "symfony/serializer": "^4.0",
         "w2w/apie": "dev-master",
         "madewithlove/illuminate-psr-cache-bridge": "^1.0",
-        "ramsey/uuid": "^3.8"
+        "ramsey/uuid": "^3.8",
+        "symfony/psr-http-message-bridge": "^1.2"
     },
     "autoload": {
         "psr-4": {
