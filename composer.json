@@ -1,0 +1,43 @@
+{
+    "name": "w2w/laravel-apie",
+    "description": "Laravel wrapper for w2w/apie",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Pieter Jordaan",
+            "email": "pieter.jordaan@way2web.nl"
+        }
+    ],
+    "require": {
+        "php": "^7.0",
+        "illuminate/contracts": "^5.0|^6.0",
+        "illuminate/database": "^5.0|^6.0",
+        "symfony/serializer": "^4.0",
+        "w2w/apie": "dev-master",
+        "madewithlove/illuminate-psr-cache-bridge": "^1.0",
+        "ramsey/uuid": "^3.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "W2w\\Laravel\\Apie\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "W2w\\Laravel\\Apie\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "W2w\\Laravel\\Apie\\Providers\\ApiResourceServiceProvider"
+            ],
+            "aliases": {
+                "ApiResource": " W2w\\Lib\\Apie\\ApiResourceFacade"
+            }
+        }
+    }
+}
