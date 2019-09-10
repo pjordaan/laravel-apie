@@ -38,10 +38,10 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use W2w\Lib\Apie\BaseGroupLoader;
-use W2w\Lib\Apie\Normalizer\ContextualNormalizer;
-use W2w\Lib\Apie\Normalizer\EvilReflectionPropertyNormalizer;
-use W2w\Lib\Apie\Normalizer\ExceptionNormalizer;
-use W2w\Lib\Apie\Normalizer\StringValueObjectNormalizer;
+use W2w\Lib\Apie\Normalizers\ContextualNormalizer;
+use W2w\Lib\Apie\Normalizers\EvilReflectionPropertyNormalizer;
+use W2w\Lib\Apie\Normalizers\ExceptionNormalizer;
+use W2w\Lib\Apie\Normalizers\StringValueObjectNormalizer;
 
 
 class SymfonySerializerProvider extends ServiceProvider

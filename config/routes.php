@@ -7,11 +7,11 @@ use W2w\Lib\Apie\Controllers\GetController;
 use W2w\Lib\Apie\Controllers\DeleteController;
 Route::name('apie.')->group(function () {
     Route::prefix(config('api-resource.api-url'))->group(function () {
-        Route::get('/doc.json', DocsController::class)->name('apie.docs');
-        Route::post('/{resource}/', PostController::class);
-        Route::put('/{resource}/{id}', PutController::class);
-        Route::get('/{resource}/', GetAllController::class);
-        Route::get('/{resource}/{id}', GetController::class);
-        Route::delete('/{resource}/{id}', DeleteController::class);
+        Route::get('/doc.json', DocsController::class)->name('docs');
+        Route::post('/{resource}/', PostController::class)->name('post');
+        Route::put('/{resource}/{id}', PutController::class)->name('put');
+        Route::get('/{resource}/', GetAllController::class)->name('all');
+        Route::get('/{resource}/{id}', GetController::class)->name('get');
+        Route::delete('/{resource}/{id}', DeleteController::class)->name('delete');
     });
 });

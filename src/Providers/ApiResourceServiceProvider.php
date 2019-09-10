@@ -13,10 +13,9 @@ use W2w\Lib\Apie\ApiResources;
 use W2w\Lib\Apie\ClassResourceConverter;
 use W2w\Lib\Apie\Mock\MockApiResourceFactory;
 use W2w\Lib\Apie\Mock\MockApiResourceRetriever;
+use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
 use W2w\Lib\Apie\Retriever\AppRetriever;
 use W2w\Lib\Apie\Retriever\StatusCheckRetriever;
-use W2w\Lib\Apie\Schema\OpenApiSpecGenerator;
-use W2w\Lib\Apie\Schema\SchemaGenerator;
 use W2w\Laravel\Apie\Services\StatusCheck\StatusFromDatabaseRetriever;
 use DateTimeInterface;
 use erasys\OpenApi\Spec\v3\Contact;
@@ -44,7 +43,6 @@ class ApiResourceServiceProvider extends ServiceProvider
             __DIR__ . '/../../config/api-resource.php' => config_path('api-resource.php'),
         ]);
 
-        $this->loadRoutesFrom(__DIR__ . '/../../config/routes.php');
         $this->loadMigrationsFrom(__DIR__ . '/../../migrations');
     }
 
@@ -133,6 +131,8 @@ class ApiResourceServiceProvider extends ServiceProvider
         $this->app->singleton(ApiResourceFacade::class);
 
         $this->addStatusResourceServices();
+
+        $this->loadRoutesFrom(__DIR__ . '/../../config/routes.php');
     }
 
     private function addOpenApiServices()
