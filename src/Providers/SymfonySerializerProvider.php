@@ -2,12 +2,7 @@
 
 namespace W2w\Laravel\Apie\Providers;
 
-use W2w\Laravel\Apie\Application;
-use W2w\Lib\Apie\BaseGroupLoader;
-use W2w\Lib\Apie\Normalizer\ContextualNormalizer;
-use W2w\Lib\Apie\Normalizer\EvilReflectionPropertyNormalizer;
-use W2w\Lib\Apie\Normalizer\ExceptionNormalizer;
-use W2w\Lib\Apie\Normalizer\StringValueObjectNormalizer;
+use Illuminate\Foundation\Application;
 use Carbon\CarbonInterface;
 use Doctrine\Common\Annotations\Reader;
 use GBProd\UuidNormalizer\UuidDenormalizer;
@@ -42,6 +37,12 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
+use W2w\Lib\Apie\BaseGroupLoader;
+use W2w\Lib\Apie\Normalizer\ContextualNormalizer;
+use W2w\Lib\Apie\Normalizer\EvilReflectionPropertyNormalizer;
+use W2w\Lib\Apie\Normalizer\ExceptionNormalizer;
+use W2w\Lib\Apie\Normalizer\StringValueObjectNormalizer;
+
 
 class SymfonySerializerProvider extends ServiceProvider
 {
