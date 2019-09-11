@@ -7,8 +7,8 @@ return [
     'resources'              => [App::class, Status::class],
     'mock'                   => env('APIE_MOCK_SERVER', false),
     'mock-skipped-resources' => [AppRetriever::class, StatusCheckRetriever::class],
-    'base-url'               => '/',
-    'api-url'                => 'api',
+    'base-url'               => '',
+    'api-url'                => '/api',
     'metadata'               => [
         'title'            => env('APIE_OPENAPI_TITLE', 'Laravel REST api'),
         'version'          => env('APIE_OPENAPI_VERSION', '1.0'),

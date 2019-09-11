@@ -14,6 +14,8 @@ use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Psr\Cache\CacheItemPoolInterface;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
 use W2w\Laravel\Apie\Services\Retrievers\EloquentModelRetriever;
@@ -28,6 +30,7 @@ use W2w\Lib\Apie\ClassResourceConverter;
 use W2w\Lib\Apie\Mocks\MockApiResourceFactory;
 use W2w\Lib\Apie\Mocks\MockApiResourceRetriever;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
+use W2w\Lib\Apie\OpenApiSchema\SchemaGenerator;
 use W2w\Lib\Apie\Retrievers\AppRetriever;
 use W2w\Lib\Apie\Retrievers\StatusCheckRetriever;
 use W2w\Laravel\Apie\Services\StatusChecks\StatusFromDatabaseRetriever;
@@ -78,9 +81,13 @@ class ApiResourceServiceProvider extends ServiceProvider
                   ->give($config->get('api-resource.base-url') . $config->get('api-resource.api-url'));
 
         // SchemaGenerator: generates a OpenAPI Schema from a api resource class.
-        $this->app->singleton(SchemaGenerator::class);
-
-        $this->app->extend(SchemaGenerator::class, function ($service) {
+        $this->app->singleton(SchemaGenerator::class, function (Container $app) {
+            $service = new SchemaGenerator(
+                $app->get(ClassMetadataFactory::class),
+                $app->get(PropertyInfoExtractor::class),
+                $app->get(ClassResourceConverter::class),
+                $app->get(NameConverterInterface::class)
+            );
             $service->defineSchemaForResource(Uuid::class, new Schema(['type' => 'string', 'format' => 'uuid']));
             $service->defineSchemaForResource(DateTimeInterface::class, new Schema(['type' => 'string', 'format' => 'date-time']));
             return $service;
