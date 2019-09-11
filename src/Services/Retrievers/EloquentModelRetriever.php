@@ -3,13 +3,14 @@
 namespace W2w\Laravel\Apie\Services\Retrievers;
 
 use UnexpectedValueException;
-use W2w\Lib\Apie\Normalizers\ContextualNormalizer;
-use W2w\Lib\Apie\Normalizers\EvilReflectionPropertyNormalizer;
-use W2w\Lib\Apie\Persisters\ApiResourcePersisterInterface;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use W2w\Lib\Apie\Normalizers\ContextualNormalizer;
+use W2w\Lib\Apie\Normalizers\EvilReflectionPropertyNormalizer;
+use W2w\Lib\Apie\Persisters\ApiResourcePersisterInterface;
+use W2w\Lib\Apie\Retrievers\ApiResourceRetrieverInterface;
 
 /**
  * Maps a domain object to an eloquent model. Remember that foreign key constraints can be confusing, so it might be

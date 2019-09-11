@@ -105,14 +105,17 @@ class ApiResourceServiceProvider extends ServiceProvider
                 return new CacheItemPool($repository);
             });
             $this->app->when(MockApiResourceRetriever::class)
-                ->needs(CacheItemPoolInterface::class)
-                ->give(function () {
-                    return $this->app->get('api-resource-mock-cache');
-                });
+                      ->needs(CacheItemPoolInterface::class)
+                      ->give(function () {
+                          return $this->app->get('api-resource-mock-cache');
+                      });
             $this->app->alias(MockApiResourceFactory::class, ApiResourceFactoryInterface::class);
             $this->app->when(MockApiResourceFactory::class)
-                ->needs('$skippedResources')
-                ->give(config('api-resource.mock-skipped-resources'));
+                      ->needs('$skippedResources')
+                      ->give(config('api-resource.mock-skipped-resources'));
+            $this->app->when(MockApiResourceFactory::class)
+                      ->needs(ApiResourceFactoryInterface::class)
+                      ->give(ApiResourceFactory::class);
         } else {
             $this->app->alias(ApiResourceFactory::class, ApiResourceFactoryInterface::class);
         }
