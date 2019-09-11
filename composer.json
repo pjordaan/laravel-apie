@@ -38,7 +38,7 @@
                 "W2w\\Laravel\\Apie\\Providers\\ApiResourceServiceProvider"
             ],
             "aliases": {
-                "ApiResource": " W2w\\Lib\\Apie\\ApiResourceFacade"
+                "ApiResource": "W2w\\Lib\\Apie\\ApiResourceFacade"
             }
         }
     }
