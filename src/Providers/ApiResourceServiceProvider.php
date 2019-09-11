@@ -75,7 +75,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         $this->app->singleton(OpenApiSpecGenerator::class);
         $this->app->when(OpenApiSpecGenerator::class)
                   ->needs('$baseUrl')
-                  ->give($config->get('api-resource.api-url'));
+                  ->give($config->get('api-resource.base-url') . $config->get('api-resource.api-url'));
 
         // SchemaGenerator: generates a OpenAPI Schema from a api resource class.
         $this->app->singleton(SchemaGenerator::class);
