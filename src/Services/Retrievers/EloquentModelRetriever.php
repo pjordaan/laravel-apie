@@ -2,12 +2,12 @@
 
 namespace W2w\Laravel\Apie\Services\Retrievers;
 
+use UnexpectedValueException;
 use W2w\Lib\Apie\Normalizers\ContextualNormalizer;
 use W2w\Lib\Apie\Normalizers\EvilReflectionPropertyNormalizer;
 use W2w\Lib\Apie\Persisters\ApiResourcePersisterInterface;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Model;
-use RuntimeException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -97,7 +97,7 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
         $resourceClass = get_class($resource);
         $array = $this->normalizer->normalize($resource);
         if (!is_array($array)) {
-            throw new RuntimeException('Resource ' . get_class($resource) . ' was normalized to a non array field');
+            throw new UnexpectedValueException('Resource ' . get_class($resource) . ' was normalized to a non array field');
         }
         $modelClass = $this->getModelClass($resourceClass, $context);
         $modelClass::unguard();
@@ -126,7 +126,7 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
         $modelInstance = $modelClass::where(['id' => $id])->firstOrFail();
         $array = $this->normalizer->normalize($resource);
         if (!is_array($array)) {
-            throw new RuntimeException('Resource ' . get_class($resource) . ' was normalized to a non array field');
+            throw new UnexpectedValueException('Resource ' . get_class($resource) . ' was normalized to a non array field');
         }
         unset($array['id']);
         $modelInstance->unguard();
