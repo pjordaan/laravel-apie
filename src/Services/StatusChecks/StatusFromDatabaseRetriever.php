@@ -7,6 +7,7 @@ use Throwable;
 use W2w\Laravel\Apie\Models\Status;
 use W2w\Lib\Apie\ApiResources\Status as ResourceStatus;
 use W2w\Lib\Apie\StatusChecks\StaticStatusCheck;
+use W2w\Lib\Apie\StatusChecks\StatusCheckListInterface;
 
 /**
  * Adds an extra check for the Status api resource to do a database check. Any record stored in the database
