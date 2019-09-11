@@ -15,6 +15,8 @@ use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Psr\Cache\CacheItemPoolInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
+use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
+use W2w\Laravel\Apie\Services\Retrievers\EloquentModelRetriever;
 use W2w\Lib\Apie\ApiResourceFacade;
 use W2w\Lib\Apie\ApiResourceFactory;
 use W2w\Lib\Apie\ApiResourceFactoryInterface;
