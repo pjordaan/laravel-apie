@@ -28,7 +28,7 @@ use W2w\Lib\Apie\Mock\MockApiResourceRetriever;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
 use W2w\Lib\Apie\Retrievers\AppRetriever;
 use W2w\Lib\Apie\Retrievers\StatusCheckRetriever;
-use W2w\Laravel\Apie\Services\StatusCheck\StatusFromDatabaseRetriever;
+use W2w\Laravel\Apie\Services\StatusChecks\StatusFromDatabaseRetriever;
 
 /**
  * Install apie classes to Laravel.
