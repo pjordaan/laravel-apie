@@ -2,7 +2,19 @@
 
 namespace W2w\Laravel\Apie\Providers;
 
-use Illuminate\Foundation\Application;
+use DateTimeInterface;
+use erasys\OpenApi\Spec\v3\Contact;
+use erasys\OpenApi\Spec\v3\Info;
+use erasys\OpenApi\Spec\v3\License;
+use erasys\OpenApi\Spec\v3\Schema;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Illuminate\Support\ServiceProvider;
+use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
+use Psr\Cache\CacheItemPoolInterface;
+use Ramsey\Uuid\Uuid;
+use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use W2w\Lib\Apie\ApiResourceFacade;
 use W2w\Lib\Apie\ApiResourceFactory;
 use W2w\Lib\Apie\ApiResourceFactoryInterface;
@@ -14,22 +26,13 @@ use W2w\Lib\Apie\ClassResourceConverter;
 use W2w\Lib\Apie\Mock\MockApiResourceFactory;
 use W2w\Lib\Apie\Mock\MockApiResourceRetriever;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
-use W2w\Lib\Apie\Retriever\AppRetriever;
-use W2w\Lib\Apie\Retriever\StatusCheckRetriever;
+use W2w\Lib\Apie\Retrievers\AppRetriever;
+use W2w\Lib\Apie\Retrievers\StatusCheckRetriever;
 use W2w\Laravel\Apie\Services\StatusCheck\StatusFromDatabaseRetriever;
-use DateTimeInterface;
-use erasys\OpenApi\Spec\v3\Contact;
-use erasys\OpenApi\Spec\v3\Info;
-use erasys\OpenApi\Spec\v3\License;
-use erasys\OpenApi\Spec\v3\Schema;
-use Illuminate\Contracts\Cache\Repository as CacheRepository;
-use Illuminate\Contracts\Config\Repository as ConfigRepository;
-use Illuminate\Support\ServiceProvider;
-use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
-use Psr\Cache\CacheItemPoolInterface;
-use Ramsey\Uuid\Uuid;
-use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
+/**
+ * Install apie classes to Laravel.
+ */
 class ApiResourceServiceProvider extends ServiceProvider
 {
     /**
@@ -96,7 +99,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         $this->app->singleton(MockApiResourceFactory::class);
 
         if ($config->get('api-resource.mock', false)) {
-            $this->app->singleton('api-resource-mock-cache', function (Application $app) {
+            $this->app->singleton('api-resource-mock-cache', function (Container $app) {
                 $repository = $app->make(CacheRepository::class);
 
                 return new CacheItemPool($repository);
@@ -115,7 +118,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         }
 
         // ClassResourceConverter: converts from url slug to class name and vice versa.
-        $this->app->singleton(ClassResourceConverter::class, function (Application $app) use (&$config) {
+        $this->app->singleton(ClassResourceConverter::class, function (Container $app) use (&$config) {
             return new ClassResourceConverter(
                 $app->get(NameConverterInterface::class),
                 $app->get(ApiResources::class),
@@ -123,7 +126,14 @@ class ApiResourceServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->singleton(AppRetriever::class);
+        $this->app->singleton(AppRetriever::class, function (Container $app) use (&$config) {
+            return new AppRetriever(
+                $config->get('app.name'),
+                $config->get('app.env'),
+                $config->get('api-resource.metadata.hash'),
+                $config->get('app.debug')
+            );
+        });
         $this->app->singleton(EloquentModelRetriever::class);
         $this->app->singleton(DatabaseQueryRetriever::class);
 
@@ -155,7 +165,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         });
 
         // Provides OpenAPI info to the OpenAPI spec.
-        $this->app->singleton(Info::class, function (Application $app) {
+        $this->app->singleton(Info::class, function () {
             return new Info(
                 config('api-resource.metadata.title'),
                 config('api-resource.metadata.version'),

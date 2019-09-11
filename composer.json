@@ -13,8 +13,10 @@
     ],
     "require": {
         "php": "^7.0",
+        "illuminate/container": "^5.0|^6.0",
         "illuminate/contracts": "^5.0|^6.0",
         "illuminate/database": "^5.0|^6.0",
+        "illuminate/http": "^5.0|^6.0",
         "symfony/serializer": "^4.0",
         "w2w/apie": "dev-master",
         "madewithlove/illuminate-psr-cache-bridge": "^1.0",

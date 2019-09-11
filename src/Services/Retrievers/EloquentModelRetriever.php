@@ -11,6 +11,13 @@ use RuntimeException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
+/**
+ * Maps a domain object to an eloquent model. Remember that foreign key constraints can be confusing, so it might be
+ * a good idea to make your own retriever and persister class if the model becomes more complex.
+ *
+ * It uses the fill and toArray method of the Eloquent model. Mass alignment is disabled to map the fields as we
+ * assume the domain object does the protection.
+ */
 class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResourcePersisterInterface
 {
     private $normalizer;
@@ -19,6 +26,11 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
 
     private $gate;
 
+    /**
+     * @param NormalizerInterface $normalizer
+     * @param DenormalizerInterface $denormalizer
+     * @param Gate $gate
+     */
     public function __construct(NormalizerInterface $normalizer, DenormalizerInterface $denormalizer, Gate $gate)
     {
         $this->normalizer = $normalizer;
@@ -26,6 +38,14 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
         $this->gate = $gate;
     }
 
+    /**
+     * Retrieves a single instance.
+     *
+     * @param string $resourceClass
+     * @param $id
+     * @param array $context
+     * @return Model
+     */
     public function retrieve(string $resourceClass, $id, array $context)
     {
         $modelClass = $this->getModelClass($resourceClass, $context);
@@ -36,6 +56,16 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
         return $result;
     }
 
+    /**
+     * Retrieves all resources. Since the filtering whether you are allowed to see a model instance is done afterwards,
+     * the pagination could show a less amount of records than indicated. This is only for performance reasons.
+     *
+     * @param string $resourceClass
+     * @param array $context
+     * @param int $pageIndex
+     * @param int $numberOfItems
+     * @return Model[]
+     */
     public function retrieveAll(string $resourceClass, array $context, int $pageIndex, int $numberOfItems): iterable
     {
         $modelClass = $this->getModelClass($resourceClass, $context);
@@ -54,6 +84,13 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
         );
     }
 
+    /**
+     * Creates a new Eloquent model from an api resource.
+     *
+     * @param mixed $resource
+     * @param array $context
+     * @return Model
+     */
     public function persistNew($resource, array $context = [])
     {
         $this->gate->authorize('post', $resource);
@@ -73,6 +110,14 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
         return $this->denormalize($modelInstance->toArray(), $resourceClass);
     }
 
+    /**
+     * Stores an api resource to an existing Eloquent model instance.
+     *
+     * @param $resource
+     * @param $id
+     * @param array $context
+     * @return array|mixed|object
+     */
     public function persistExisting($resource, $id, array $context = [])
     {
         $this->gate->authorize('put', $resource);
@@ -95,6 +140,13 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
         return $this->denormalize($modelInstance->toArray(), $resourceClass);
     }
 
+    /**
+     * Removes a resource from the database.
+     *
+     * @param string $resourceClass
+     * @param $id
+     * @param array $context
+     */
     public function remove(string $resourceClass, $id, array $context)
     {
         $modelClass = $this->getModelClass($resourceClass, $context);
@@ -107,6 +159,14 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
         $modelClass::destroy($id);
     }
 
+    /**
+     * Denormalizes from an array to an api resource with the EvilReflectionPropertyNormalizer active, so a domain
+     * with only a getter will be hydrated correctly.
+     *
+     * @param array $array
+     * @param string $resourceClass
+     * @return array|object
+     */
     private function denormalize(array $array, string $resourceClass)
     {
         ContextualNormalizer::enableDenormalizer(EvilReflectionPropertyNormalizer::class);
@@ -119,11 +179,24 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
         return $res;
     }
 
+    /**
+     * Returns the name of the model class associated to a api resource class.
+     *
+     * @param string $resourceClass
+     * @return string
+     */
     private function determineModel(string $resourceClass): string
     {
         return str_replace('\\ApiResources\\', '\\Models\\', $resourceClass);
     }
 
+    /**
+     * Returns the name of the model class associated to a api resource class and a context.
+     *
+     * @param string $resourceClass
+     * @param array $context
+     * @return string
+     */
     private function getModelClass(string $resourceClass, array $context): string
     {
         $modelClass = $context[0] ?? $context['model'] ?? $this->determineModel($resourceClass);

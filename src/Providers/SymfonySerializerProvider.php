@@ -2,11 +2,11 @@
 
 namespace W2w\Laravel\Apie\Providers;
 
-use Illuminate\Foundation\Application;
 use Carbon\CarbonInterface;
 use Doctrine\Common\Annotations\Reader;
 use GBProd\UuidNormalizer\UuidDenormalizer;
 use GBProd\UuidNormalizer\UuidNormalizer;
+use Illuminate\Container\Container;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
@@ -43,7 +43,9 @@ use W2w\Lib\Apie\Normalizers\EvilReflectionPropertyNormalizer;
 use W2w\Lib\Apie\Normalizers\ExceptionNormalizer;
 use W2w\Lib\Apie\Normalizers\StringValueObjectNormalizer;
 
-
+/**
+ * Installs a symfony serializer instance that can be used together with apie.
+ */
 class SymfonySerializerProvider extends ServiceProvider
 {
     /**
@@ -56,14 +58,14 @@ class SymfonySerializerProvider extends ServiceProvider
                 return new ArrayAdapter(0, true);
             });
         } else {
-            $this->app->singleton('serializer-cache', function (Application $app) {
+            $this->app->singleton('serializer-cache', function (Container $app) {
                 $repository = $app->make(Repository::class);
 
                 return new CacheItemPool($repository);
             });
         }
 
-        $this->app->singleton(PropertyAccessor::class, function (Application $app) {
+        $this->app->singleton(PropertyAccessor::class, function (Container $app) {
             return PropertyAccess::createPropertyAccessorBuilder()
                 ->setCacheItemPool($app->make('serializer-cache'))
                 ->getPropertyAccessor();
@@ -72,7 +74,7 @@ class SymfonySerializerProvider extends ServiceProvider
         $this->app->singleton(CamelCaseToSnakeCaseNameConverter::class);
         $this->app->alias(CamelCaseToSnakeCaseNameConverter::class, NameConverterInterface::class);
 
-        $this->app->singleton(PropertyInfoExtractor::class, function (Application $app) {
+        $this->app->singleton(PropertyInfoExtractor::class, function (Container $app) {
             $factory = $app->get(ClassMetadataFactory::class);
             $reflectionExtractor = new ReflectionExtractor();
             $phpDocExtractor = new PhpDocExtractor();
