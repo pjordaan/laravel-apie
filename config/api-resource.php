@@ -11,7 +11,7 @@ return [
     'metadata'               => [
         'title'            => env('APIE_OPENAPI_TITLE', 'Laravel REST api'),
         'version'          => env('APIE_OPENAPI_VERSION', '1.0'),
-        'hash'             => env('APIE_OPENAPI_HASH') ?? `git rev-parse HEAD`,
+        'hash'             => env('APIE_OPENAPI_HASH') ?? trim(`git rev-parse HEAD`),
         'description'      => env('APIE_OPENAPI_DESCRIPTION', ''),
         'terms-of-service' => env('APIE_OPENAPI_TERMS_OF_SERVICE_URL', ''),
         'license'          => env('APIE_OPENAPI_LICENSE', 'Apache 2.0'),
