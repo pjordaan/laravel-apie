@@ -37,6 +37,9 @@
             "W2w\\Laravel\\Apie\\Tests\\": "tests/"
         }
     },
+    "archive": {
+        "exclude": ["/tests", "/docs"]
+    },
     "extra": {
         "laravel": {
             "providers": [
