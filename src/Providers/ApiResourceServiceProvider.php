@@ -19,6 +19,7 @@ use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Psr\Cache\CacheItemPoolInterface;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
@@ -37,6 +38,7 @@ use W2w\Lib\Apie\Mocks\MockApiResourceRetriever;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
 use W2w\Lib\Apie\OpenApiSchema\SchemaGenerator;
 use W2w\Lib\Apie\Retrievers\AppRetriever;
+use W2w\Lib\Apie\Retrievers\FileStorageRetriever;
 use W2w\Lib\Apie\Retrievers\StatusCheckRetriever;
 use W2w\Laravel\Apie\Services\StatusChecks\StatusFromDatabaseRetriever;
 
@@ -165,6 +167,9 @@ class ApiResourceServiceProvider extends ServiceProvider
         });
         $this->app->singleton(EloquentModelRetriever::class);
         $this->app->singleton(DatabaseQueryRetriever::class);
+        $this->app->singleton(FileStorageRetriever::class, function (Container $app) {
+            return new FileStorageRetriever(storage_path('api-file-storage'), $app->get(PropertyAccessor::class));
+        });
 
         // ApiResourceFacade: class that calls all the right services with a simple interface.
         $this->app->singleton(ApiResourceFacade::class);
