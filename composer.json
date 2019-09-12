@@ -22,7 +22,9 @@
         "madewithlove/illuminate-psr-cache-bridge": "^1.0",
         "ramsey/uuid": "^3.8",
         "symfony/psr-http-message-bridge": "^1.2",
-        "gbprod/uuid-normalizer": "^1.1"
+        "gbprod/uuid-normalizer": "^1.1",
+        "doctrine/cache": "^1.8",
+        "doctrine/annotations": "^1.7"
     },
     "autoload": {
         "psr-4": {

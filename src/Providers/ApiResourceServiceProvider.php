@@ -3,6 +3,10 @@
 namespace W2w\Laravel\Apie\Providers;
 
 use DateTimeInterface;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Annotations\Reader;
+use Doctrine\Common\Cache\PhpFileCache;
 use erasys\OpenApi\Spec\v3\Contact;
 use erasys\OpenApi\Spec\v3\Info;
 use erasys\OpenApi\Spec\v3\License;
@@ -63,6 +67,17 @@ class ApiResourceServiceProvider extends ServiceProvider
         if ($config->get('api-resource.enable-serializer', true)) {
             $this->app->register(SymfonySerializerProvider::class);
         }
+
+        if ($config->get('api-resource.enable-reader', true)) {
+            $this->app->singleton(Reader::class, function () use (&$config) {
+                return new CachedReader(
+                    new AnnotationReader(),
+                    new PhpFileCache(storage_path('doctrine-cache')),
+                    (bool) $config->get('app.debug')
+                );
+            });
+        }
+
         // ApiResources: returns all class names that should be used as class resource.
         $this->app->singleton(ApiResources::class, function () use (&$config) {
             return new ApiResources($config->get('api-resource.resources', []));

@@ -1,14 +1,42 @@
 <?php
 use W2w\Lib\Apie\ApiResources\App;
 use W2w\Lib\Apie\ApiResources\Status;
+use W2w\Lib\Apie\Retrievers\AppRetriever;
+use W2w\Lib\Apie\Retrievers\StatusCheckRetriever;
 
 return [
+    /**
+     * Enables registering the symfony serializer by this package. If you have your own implementation, set this to false
+     */
     'enable-serializer'      => true,
+    /**
+     * Enables registering the doctrine annotation reader by this package. If you have your own implementation, set this to false
+     */
+    'enable-reader'          => true,
+    /**
+     * A list of classes to be used as Api resources.
+     */
     'resources'              => [App::class, Status::class],
+    /**
+     * If true, all persisting and retrieving will be mocked, so you will effectively get a mock api server.
+     */
     'mock'                   => env('APIE_MOCK_SERVER', false),
+    /**
+     * If mock is true, some retrievers can be skipped and will keep working.
+     */
     'mock-skipped-resources' => [AppRetriever::class, StatusCheckRetriever::class],
+    /**
+     * In case your application is not in the root of the website you require to configure the base url to get the correct
+     * paths in the open api spec.
+     */
     'base-url'               => '',
+    /**
+     * Route prefix of your api calls.
+     */
     'api-url'                => '/api',
+    /**
+     * Specific metadata used in the output of the open api specs.
+     */
     'metadata'               => [
         'title'            => env('APIE_OPENAPI_TITLE', 'Laravel REST api'),
         'version'          => env('APIE_OPENAPI_VERSION', '1.0'),
