@@ -130,6 +130,7 @@ const ui = SwaggerUIBundle({
 ```
     
 Now if you refresh you will see your REST API right away.
+![screenshot](https://github.com/pieterw2w/laravel-apie/blob/master/docs/l5swagger-screenshot.png?raw=true)
 
 ## Automate registering api resources.
 It is possible to automate registering api resources without having to manually update the resources list in config/api-resource.php
