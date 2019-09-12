@@ -4,6 +4,7 @@ namespace W2w\Laravel\Apie\Providers;
 
 use DateTimeInterface;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Cache\PhpFileCache;
@@ -69,6 +70,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         }
 
         if ($config->get('api-resource.enable-reader', true)) {
+            AnnotationRegistry::registerLoader('class_exists');
             $this->app->singleton(Reader::class, function () use (&$config) {
                 return new CachedReader(
                     new AnnotationReader(),
