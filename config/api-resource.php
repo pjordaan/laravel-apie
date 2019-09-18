@@ -6,14 +6,6 @@ use W2w\Lib\Apie\Retrievers\StatusCheckRetriever;
 
 return [
     /**
-     * Enables registering the symfony serializer by this package. If you have your own implementation, set this to false
-     */
-    'enable-serializer'      => true,
-    /**
-     * Enables registering the doctrine annotation reader by this package. If you have your own implementation, set this to false
-     */
-    'enable-reader'          => true,
-    /**
      * A list of classes to be used as Api resources.
      */
     'resources'              => [App::class, Status::class],
