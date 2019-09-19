@@ -16,6 +16,9 @@ use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -23,6 +26,7 @@ use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
 use W2w\Laravel\Apie\Services\Retrievers\EloquentModelRetriever;
 use W2w\Lib\Apie\ApiResourceFacade;
 use W2w\Lib\Apie\ApiResourceFactory;
+use W2w\Lib\Apie\ApiResources;
 use W2w\Lib\Apie\Mocks\MockApiResourceFactory;
 use W2w\Lib\Apie\Mocks\MockApiResourceRetriever;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
@@ -65,7 +69,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         );
         $factory->setContainer($this->app);
         $factory->runBeforeInstantiation(function () use (&$factory) {
-            $normalizers = $this->app->tagged(NormalizerInterface::class);
+            $normalizers = iterator_to_array($this->app->tagged(NormalizerInterface::class));
             $normalizers[] = new UuidNormalizer();
             $normalizers[] = new UuidDenormalizer();
             $factory->setAdditionalNormalizers($normalizers);
@@ -84,6 +88,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         // OpenApiSpecGenerator: generated an OpenAPI 3.0 spec file from a list of resources.
         $this->addOpenApiServices();
         $this->app->singleton(OpenApiSpecGenerator::class, function () use (&$factory, &$config) {
+            $this->app->get(SchemaGenerator::class);
             $factory->setInfo($this->app->get(Info::class));
             return $factory->getOpenApiSpecGenerator($config->get('api-resource.base-url') . $config->get('api-resource.api-url'));
         });
@@ -114,12 +119,18 @@ class ApiResourceServiceProvider extends ServiceProvider
             );
         }
 
+        $this->app->singleton(ApiResources::class, function () use (&$factory) {
+            return $factory->getApiResources();
+        });
+
         $this->app->singleton(Serializer::class, function () use (&$factory) {
             return $factory->getSerializer();
         });
-        $this->app->alias(SerializerInterface::class, Serializer::class);
-        $this->app->alias(NormalizerInterface::class, Serializer::class);
-        $this->app->alias(DenormalizerInterface::class, Serializer::class);
+        $this->app->bind(SerializerInterface::class, Serializer::class);
+        $this->app->bind(NormalizerInterface::class, Serializer::class);
+        $this->app->bind(DenormalizerInterface::class, Serializer::class);
+        $this->app->singleton(CamelCaseToSnakeCaseNameConverter::class);
+        $this->app->bind(NameConverterInterface::class, CamelCaseToSnakeCaseNameConverter::class);
 
         $this->app->singleton(AppRetriever::class, function (Container $app) use (&$config) {
             return new AppRetriever(
