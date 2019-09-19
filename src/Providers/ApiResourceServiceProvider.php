@@ -17,6 +17,8 @@ use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\SerializerInterface;
 use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
 use W2w\Laravel\Apie\Services\Retrievers\EloquentModelRetriever;
 use W2w\Lib\Apie\ApiResourceFacade;
@@ -111,6 +113,13 @@ class ApiResourceServiceProvider extends ServiceProvider
                 )
             );
         }
+
+        $this->app->singleton(Serializer::class, function () use (&$factory) {
+            return $factory->getSerializer();
+        });
+        $this->app->alias(SerializerInterface::class, Serializer::class);
+        $this->app->alias(NormalizerInterface::class, Serializer::class);
+        $this->app->alias(DenormalizerInterface::class, Serializer::class);
 
         $this->app->singleton(AppRetriever::class, function (Container $app) use (&$config) {
             return new AppRetriever(
