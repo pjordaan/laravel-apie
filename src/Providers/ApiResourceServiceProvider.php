@@ -69,9 +69,15 @@ class ApiResourceServiceProvider extends ServiceProvider
         );
         $factory->setContainer($this->app);
         $factory->runBeforeInstantiation(function () use (&$factory) {
-            $normalizers = iterator_to_array($this->app->tagged(NormalizerInterface::class));
-            $normalizers[] = new UuidNormalizer();
-            $normalizers[] = new UuidDenormalizer();
+            $normalizers = [
+                new UuidNormalizer(),
+                new UuidDenormalizer()
+            ];
+            $taggedNormalizers = $this->app->tagged(NormalizerInterface::class);
+            // app->tagged return type is hazy....
+            foreach ($taggedNormalizers as $taggedNormalizer) {
+                $normalizers[] = $taggedNormalizer;
+            }
             $factory->setAdditionalNormalizers($normalizers);
         });
 
