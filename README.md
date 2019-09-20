@@ -143,15 +143,16 @@ composer require haydenpierce/class-finder
 ```php
 <?php
 //config/api-resource.php
-use HaydenPierce\ClassFinder\ClassFinder;
+use W2w\Lib\Apie\Resources\ApiResourcesFromNamespace;
+use W2w\Lib\Apie\Resources\ChainedResources;
 use W2w\Lib\Apie\ApiResources\App;
 use W2w\Lib\Apie\ApiResources\Status;
 
-$resources = ClassFinder::getClassesInNamespace('App\RestApi\ApiResources');
-$resources[] = App::class;
-$resources[] = Status::class;
-
 return [
-    'resource' => $resources
+    'resources' => new ChainedResources([
+        new ApiResourcesFromNamespace('App\RestApi\ApiResources'),
+        App::class,
+        Status::class,
+    ]),
 ];
 ```
