@@ -13,6 +13,7 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Ramsey\Uuid\Uuid;
@@ -31,6 +32,7 @@ use W2w\Lib\Apie\Mocks\MockApiResourceFactory;
 use W2w\Lib\Apie\Mocks\MockApiResourceRetriever;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
 use W2w\Lib\Apie\OpenApiSchema\SchemaGenerator;
+use W2w\Lib\Apie\Resources\ApiResourcesInterface;
 use W2w\Lib\Apie\Retrievers\AppRetriever;
 use W2w\Lib\Apie\Retrievers\FileStorageRetriever;
 use W2w\Lib\Apie\Retrievers\StatusCheckRetriever;
@@ -49,9 +51,13 @@ class ApiResourceServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->publishes([
-            __DIR__ . '/../../config/api-resource.php' => config_path('api-resource.php'),
-        ]);
+        if (function_exists('config_path')) {
+            $this->publishes(
+                [
+                    __DIR__ . '/../../config/api-resource.php' => config_path('api-resource.php'),
+                ]
+            );
+        }
 
         $this->loadMigrationsFrom(__DIR__ . '/../../migrations');
     }
@@ -67,6 +73,7 @@ class ApiResourceServiceProvider extends ServiceProvider
             (bool) $config->get('app.debug'),
             storage_path('api-resource-cache')
         );
+        $this->app->instance(ApiResourcesInterface::class, $factory->getApiResources());
         $factory->setContainer($this->app);
         $factory->runBeforeInstantiation(function () use (&$factory) {
             $normalizers = [
@@ -94,9 +101,13 @@ class ApiResourceServiceProvider extends ServiceProvider
         // OpenApiSpecGenerator: generated an OpenAPI 3.0 spec file from a list of resources.
         $this->addOpenApiServices();
         $this->app->singleton(OpenApiSpecGenerator::class, function () use (&$factory, &$config) {
+            $baseUrl = $config->get('api-resource.base-url') . $config->get('api-resource.api-url');
+            if ($this->app->has(Request::class)) {
+                $baseUrl = $this->app->get(Request::class)->getSchemeAndHttpHost() . $baseUrl;
+            }
             $this->app->get(SchemaGenerator::class);
             $factory->setInfo($this->app->get(Info::class));
-            return $factory->getOpenApiSpecGenerator($config->get('api-resource.base-url') . $config->get('api-resource.api-url'));
+            return $factory->getOpenApiSpecGenerator($baseUrl);
         });
 
         // SchemaGenerator: generates a OpenAPI Schema from a api resource class.
@@ -159,6 +170,10 @@ class ApiResourceServiceProvider extends ServiceProvider
 
         $this->addStatusResourceServices();
 
+        if (strpos($this->app->version(), 'Lumen') === false) {
+            require __DIR__ . '/../../config/routes-lumen.php';
+            return;
+        }
         $this->loadRoutesFrom(__DIR__ . '/../../config/routes.php');
     }
 
