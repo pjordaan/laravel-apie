@@ -27,6 +27,10 @@ return [
      */
     'api-url'                => '/api',
     /**
+     * Disable loading the routes by the service provider.
+     */
+    'disable-routes'         => false,
+    /**
      * Specific metadata used in the output of the open api specs.
      */
     'metadata'               => [

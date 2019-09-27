@@ -170,6 +170,9 @@ class ApiResourceServiceProvider extends ServiceProvider
 
         $this->addStatusResourceServices();
 
+        if ($config->get('api-resource.disable-routes')) {
+            return;
+        }
         if (strpos($this->app->version(), 'Lumen') === false) {
             require __DIR__ . '/../../config/routes-lumen.php';
             return;
