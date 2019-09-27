@@ -13,6 +13,7 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
@@ -23,6 +24,7 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
+use W2w\Laravel\Apie\Controllers\SwaggerUiController;
 use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
 use W2w\Laravel\Apie\Services\Retrievers\EloquentModelRetriever;
 use W2w\Lib\Apie\ApiResourceFacade;
@@ -168,6 +170,11 @@ class ApiResourceServiceProvider extends ServiceProvider
             return $factory->getApiResourceFacade();
         });
 
+        $this->app->bind(SwaggerUiController::class, function () {
+            $urlGenerator = $this->app->get(UrlGenerator::class);
+            return new SwaggerUiController($urlGenerator, __DIR__ . '/../../resources/open-api.html');
+        });
+
         $this->addStatusResourceServices();
 
         if ($config->get('api-resource.disable-routes')) {
@@ -175,9 +182,15 @@ class ApiResourceServiceProvider extends ServiceProvider
         }
         if (strpos($this->app->version(), 'Lumen') === false) {
             require __DIR__ . '/../../config/routes-lumen.php';
+            if ($config->get('api-resource.swagger-ui-test-page')) {
+                require __DIR__ . '/../../config/routes-lumen-openapi.php';
+            }
             return;
         }
         $this->loadRoutesFrom(__DIR__ . '/../../config/routes.php');
+        if ($config->get('api-resource.swagger-ui-test-page')) {
+            $this->loadRoutesFrom(__DIR__ . '/../../config/routes-openapi.php');
+        }
     }
 
     private function addOpenApiServices()
