@@ -26,6 +26,12 @@ class SwaggerUiController
 
     public function __invoke()
     {
-        return new TextResponse(str_replace('{{ url }}', $this->urlGenerator->route('apie.docs'), file_get_contents($this->htmlLocation)));
+        return new TextResponse(
+            str_replace('{{ url }}', $this->urlGenerator->route('apie.docs'), file_get_contents($this->htmlLocation)),
+            200,
+            [
+                'content-type' => 'text/html'
+            ]
+        );
     }
 }
