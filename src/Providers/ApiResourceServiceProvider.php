@@ -171,7 +171,11 @@ class ApiResourceServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(SwaggerUiController::class, function () {
-            $urlGenerator = $this->app->get(UrlGenerator::class);
+            if ($this->app->has(UrlGenerator::class)) {
+                $urlGenerator = $this->app->get(UrlGenerator::class);
+            } else {
+                $urlGenerator = new \Laravel\Lumen\Routing\UrlGenerator($this->app);
+            }
             return new SwaggerUiController($urlGenerator, __DIR__ . '/../../resources/open-api.html');
         });
 
@@ -181,16 +185,16 @@ class ApiResourceServiceProvider extends ServiceProvider
             return;
         }
         if (strpos($this->app->version(), 'Lumen') === false) {
-            require __DIR__ . '/../../config/routes-lumen.php';
             if ($config->get('api-resource.swagger-ui-test-page')) {
-                require __DIR__ . '/../../config/routes-lumen-openapi.php';
+                $this->loadRoutesFrom(__DIR__ . '/../../config/routes-openapi.php');
             }
+            $this->loadRoutesFrom(__DIR__ . '/../../config/routes.php');
             return;
         }
-        $this->loadRoutesFrom(__DIR__ . '/../../config/routes.php');
         if ($config->get('api-resource.swagger-ui-test-page')) {
-            $this->loadRoutesFrom(__DIR__ . '/../../config/routes-openapi.php');
+            require __DIR__ . '/../../config/routes-lumen-openapi.php';
         }
+        require __DIR__ . '/../../config/routes-lumen.php';
     }
 
     private function addOpenApiServices()

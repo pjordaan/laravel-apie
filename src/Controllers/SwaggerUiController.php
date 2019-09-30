@@ -1,7 +1,8 @@
 <?php
 namespace W2w\Laravel\Apie\Controllers;
 
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Contracts\Routing\UrlGenerator as LaravelUrlGenerator;
+use Laravel\Lumen\Routing\UrlGenerator as LumenUrlGenerator;
 use Zend\Diactoros\Response\TextResponse;
 
 /**
@@ -13,7 +14,11 @@ class SwaggerUiController
 
     private $htmlLocation;
 
-    public function __construct(UrlGenerator $urlGenerator, string $htmlLocation)
+    /**
+     * @param LaravelUrlGenerator|LumenUrlGenerator $urlGenerator
+     * @param string $htmlLocation
+     */
+    public function __construct($urlGenerator, string $htmlLocation)
     {
         $this->urlGenerator = $urlGenerator;
         $this->htmlLocation = $htmlLocation;
