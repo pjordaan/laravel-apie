@@ -19,7 +19,7 @@ artisan publish
 artisan migrate
 ```
 
-Now visit /api/doc.json to see the generated OpenApi spec. It will only contain specs for the default installed api resources, which is a check to identify your REST API and a health check resource. It will check if it can connect to the database.
+Now visit /swagger-ui to see the generated OpenApi spec. It will only contain specs for the default installed api resources, which is a check to identify your REST API and a health check resource. It will check if it can connect to the database.
 
 ## Adding a new api resource
 create this class in your app/ApiResources:
@@ -82,13 +82,14 @@ class SumExample
 ```
 Now in config/api-resources.php we should add the class to add it to the api resources:
 ```php
+<?php
 use App\ApiResources\SumExample;
 use W2w\Lib\Apie\ApiResources\App;
 use W2w\Lib\Apie\ApiResources\Status;
 
 //config/api-resources.php
 return [
-'resources' => [App:class, Status::class, SumExample::class]
+'resources' => [App::class, Status::class, SumExample::class]
 ];
 ```
 
@@ -110,6 +111,40 @@ You would get:
   "divison": 13
 }
 ```
+## Display a swagger UI testpage.
+In case you want to have more functionality I advise you to look at the laravel package darkaonline/l5-swagger, but this
+Laravel package contains a simple Swagger UI page to test/view your REST api calls in the browser.
+All you have to do is open config/api-resource.php and fill in the url of the page:
+```php
+<?php
+//config/api-resource.php
+return [
+    'swagger-ui-test-page'      => '/swagger-ui',
+];
+````
+
+By default the test page is found on /swagger-ui. 
+
+## Automate registering api resources.
+It is possible to automate registering api resources without having to manually update the resources list in config/api-resource.php
+We can auto-register all classes in a specific namespace with this:
+
+- In a terminal run:
+```bash
+composer require haydenpierce/class-finder
+```
+- Open config/api-resource.php
+- Edit the file like this:
+```php
+<?php
+//config/api-resource.php
+use W2w\Lib\Apie\Resources\ApiResourcesFromNamespace;
+
+return [
+    'resources' => ApiResourcesFromNamespace::createApiResources('App\RestApi\ApiResources'),
+];
+```
+Now if I put a class inside the namespace App\RestApi\ApiResources, the class will be registered for Apie.
 
 ## Integrate with l5-swagger
 There is a laravel package called darkaonline/l5-swagger that is created to display a swagger ui page that shows the REST API in a browser-friendly interface. With a little bit of tweaking it is possible to use this package to show the OpenAPI spec created by this tool.
@@ -131,28 +166,3 @@ const ui = SwaggerUIBundle({
     
 Now if you refresh you will see your REST API right away.
 ![screenshot](https://github.com/pieterw2w/laravel-apie/blob/master/docs/l5swagger-screenshot.png?raw=true)
-
-## Automate registering api resources.
-It is possible to automate registering api resources without having to manually update the resources list in config/api-resource.php
-- Run
-```bash
-composer require haydenpierce/class-finder
-```
-- Open config/api-resource.php
-- Edit the file like this:
-```php
-<?php
-//config/api-resource.php
-use W2w\Lib\Apie\Resources\ApiResourcesFromNamespace;
-use W2w\Lib\Apie\Resources\ChainedResources;
-use W2w\Lib\Apie\ApiResources\App;
-use W2w\Lib\Apie\ApiResources\Status;
-
-return [
-    'resources' => new ChainedResources([
-        new ApiResourcesFromNamespace('App\RestApi\ApiResources'),
-        App::class,
-        Status::class,
-    ]),
-];
-```
