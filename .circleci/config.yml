@@ -55,7 +55,7 @@ jobs:
       # run tests with phpunit or codecept
       - run: phpdbg -qrr vendor/bin/phpunit --coverage-html build/coverage-report --coverage-clover=coverage.xml
       #- run: ./vendor/bin/codecept build
-      # - run: bash <(curl -s https://codecov.io/bash) -t 112b4a21-0fb8-4286-805e-d2b58a28dafd
+      - run: bash <(curl -s https://codecov.io/bash) -t 7bba8f33-2222-4c90-bad5-662d4dc7acba
       #- run: ./vendor/bin/codecept run
       - store_artifacts:
           path: build/coverage-report
