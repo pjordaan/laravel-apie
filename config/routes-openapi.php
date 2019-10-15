@@ -1,4 +1,4 @@
 <?php
 use W2w\Laravel\Apie\Controllers\SwaggerUiController;
 
-Route::get(config('api-resource.swagger-ui-test-page', SwaggerUiController::class))->name('apie.swagger-ui');
+Route::get(resolve('apie.config')['swagger-ui-test-page'], SwaggerUiController::class)->name('apie.swagger-ui');

@@ -9,15 +9,14 @@ use erasys\OpenApi\Spec\v3\License;
 use erasys\OpenApi\Spec\v3\Schema;
 use GBProd\UuidNormalizer\UuidDenormalizer;
 use GBProd\UuidNormalizer\UuidNormalizer;
-use Illuminate\Container\Container;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Cache\Repository;
-use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -29,7 +28,6 @@ use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
 use W2w\Laravel\Apie\Services\Retrievers\EloquentModelRetriever;
 use W2w\Lib\Apie\ApiResourceFacade;
 use W2w\Lib\Apie\ApiResourceFactory;
-use W2w\Lib\Apie\ApiResources;
 use W2w\Lib\Apie\Mocks\MockApiResourceFactory;
 use W2w\Lib\Apie\Mocks\MockApiResourceRetriever;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
@@ -62,6 +60,21 @@ class ApiResourceServiceProvider extends ServiceProvider
         }
 
         $this->loadMigrationsFrom(__DIR__ . '/../../migrations');
+        $config = $this->app->get('apie.config');
+        if ($config['disable-routes']) {
+            return;
+        }
+        if (strpos($this->app->version(), 'Lumen') === false) {
+            if ($config['swagger-ui-test-page']) {
+                $this->loadRoutesFrom(__DIR__ . '/../../config/routes-openapi.php');
+            }
+            $this->loadRoutesFrom(__DIR__ . '/../../config/routes.php');
+            return;
+        }
+        if ($config['swagger-ui-test-page']) {
+            require __DIR__ . '/../../config/routes-lumen-openapi.php';
+        }
+        require __DIR__ . '/../../config/routes-lumen.php';
     }
 
     /**
@@ -69,31 +82,61 @@ class ApiResourceServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $config = $this->app->get(ConfigRepository::class);
-        $factory = new ServiceLibraryFactory(
-            $config->get('api-resource.resources'),
-            (bool) $config->get('app.debug'),
-            storage_path('api-resource-cache')
-        );
-        $this->app->instance(ApiResourcesInterface::class, $factory->getApiResources());
-        $factory->setContainer($this->app);
-        $factory->runBeforeInstantiation(function () use (&$factory) {
-            $normalizers = [
-                new UuidNormalizer(),
-                new UuidDenormalizer()
-            ];
-            $taggedNormalizers = $this->app->tagged(NormalizerInterface::class);
-            // app->tagged return type is hazy....
-            foreach ($taggedNormalizers as $taggedNormalizer) {
-                $normalizers[] = $taggedNormalizer;
-            }
-            $factory->setAdditionalNormalizers($normalizers);
+        $this->app->singleton('apie.config', function () {
+            $config = $this->app->get('config');
+
+            $resolver = new OptionsResolver();
+            $defaults = require __DIR__ . '/../../config/api-resource.php';
+            $resolver->setDefaults($defaults);
+            return $resolver->resolve($config->get('api-resource') ?? []);
         });
 
-        if (!$config->get('app.debug')) {
-            $repository = $this->app->make(Repository::class);
-            $factory->setSerializerCache(new CacheItemPool($repository));
-        }
+        $this->app->singleton(ServiceLibraryFactory::class, function () {
+            $config = $this->app->get('apie.config');
+            $result = new ServiceLibraryFactory(
+                $config['resources'],
+                (bool) config('app.debug'),
+                storage_path('api-resource-cache')
+            );
+            $result->setContainer($this->app);
+            $result->runBeforeInstantiation(function () use (&$result) {
+                $normalizers = [
+                    new UuidNormalizer(),
+                    new UuidDenormalizer()
+                ];
+                $taggedNormalizers = $this->app->tagged(NormalizerInterface::class);
+                // app->tagged return type is hazy....
+                foreach ($taggedNormalizers as $taggedNormalizer) {
+                    $normalizers[] = $taggedNormalizer;
+                }
+                if (!config('app.debug')) {
+                    $repository = $this->app->make(Repository::class);
+                    $result->setSerializerCache(new CacheItemPool($repository));
+                }
+                $result->setAdditionalNormalizers($normalizers);
+            });
+
+            if ($config['mock']) {
+                $cachePool = new CacheItemPool($this->app->make(CacheRepository::class));
+
+                $result->setApiResourceFactory(
+                    new MockApiResourceFactory(
+                        new MockApiResourceRetriever(
+                            $cachePool,
+                            $result->getPropertyAccessor()
+                        ),
+                        new ApiResourceFactory($this->app),
+                        $config['mock-skipped-resources']
+                    )
+                );
+            }
+
+            return $result;
+        });
+
+        $this->app->singleton(ApiResourcesInterface::class, function () {
+            return $this->app->get(ServiceLibraryFactory::class)->getApiResources();
+        });
 
         // MainScheduler: service that does all the background processes of api resources.
         //$this->app->singleton(MainScheduler::class, function () {
@@ -102,8 +145,10 @@ class ApiResourceServiceProvider extends ServiceProvider
 
         // OpenApiSpecGenerator: generated an OpenAPI 3.0 spec file from a list of resources.
         $this->addOpenApiServices();
-        $this->app->singleton(OpenApiSpecGenerator::class, function () use (&$factory, &$config) {
-            $baseUrl = $config->get('api-resource.base-url') . $config->get('api-resource.api-url');
+        $this->app->singleton(OpenApiSpecGenerator::class, function () {
+            $config = $this->app->get('apie.config');
+            $factory = $this->app->get(ServiceLibraryFactory::class);
+            $baseUrl = $config['base-url'] . $config['api-url'];
             if ($this->app->has(Request::class)) {
                 $baseUrl = $this->app->get(Request::class)->getSchemeAndHttpHost() . $baseUrl;
             }
@@ -113,37 +158,16 @@ class ApiResourceServiceProvider extends ServiceProvider
         });
 
         // SchemaGenerator: generates a OpenAPI Schema from a api resource class.
-        $this->app->singleton(SchemaGenerator::class, function () use (&$factory) {
+        $this->app->singleton(SchemaGenerator::class, function () {
+            $factory = $this->app->get(ServiceLibraryFactory::class);
             $service = $factory->getSchemaGenerator();
             $service->defineSchemaForResource(Uuid::class, new Schema(['type' => 'string', 'format' => 'uuid']));
             $service->defineSchemaForResource(DateTimeInterface::class, new Schema(['type' => 'string', 'format' => 'date-time']));
             return $service;
         });
 
-        if ($config->get('api-resource.mock', false)) {
-            $this->app->singleton('api-resource-mock-cache', function (Container $app) use (&$factory) {
-                $repository = $app->make(CacheRepository::class);
-
-                return new CacheItemPool($repository);
-            });
-            $factory->setApiResourceFactory(
-                new MockApiResourceFactory(
-                    new MockApiResourceRetriever(
-                        $this->app->get('api-resource-mock-cache'),
-                        $factory->getPropertyAccessor()
-                    ),
-                    new ApiResourceFactory($this->app),
-                    config('api-resource.mock-skipped-resources')
-                )
-            );
-        }
-
-        $this->app->singleton(ApiResources::class, function () use (&$factory) {
-            return $factory->getApiResources();
-        });
-
-        $this->app->singleton(Serializer::class, function () use (&$factory) {
-            return $factory->getSerializer();
+        $this->app->singleton(Serializer::class, function () {
+            return $this->app->get(ServiceLibraryFactory::class)->getSerializer();
         });
         $this->app->bind(SerializerInterface::class, Serializer::class);
         $this->app->bind(NormalizerInterface::class, Serializer::class);
@@ -151,23 +175,27 @@ class ApiResourceServiceProvider extends ServiceProvider
         $this->app->singleton(CamelCaseToSnakeCaseNameConverter::class);
         $this->app->bind(NameConverterInterface::class, CamelCaseToSnakeCaseNameConverter::class);
 
-        $this->app->singleton(AppRetriever::class, function (Container $app) use (&$config) {
+        $this->app->singleton(AppRetriever::class, function () {
+            $config = $this->app->get('apie.config');
             return new AppRetriever(
-                $config->get('app.name'),
-                $config->get('app.env'),
-                $config->get('api-resource.metadata.hash'),
-                $config->get('app.debug')
+                config('app.name'),
+                config('app.env'),
+                $config['metadata']['hash'],
+                config('app.debug')
             );
         });
         $this->app->singleton(EloquentModelRetriever::class);
         $this->app->singleton(DatabaseQueryRetriever::class);
-        $this->app->singleton(FileStorageRetriever::class, function () use ($factory) {
-            return new FileStorageRetriever(storage_path('api-file-storage'), $factory->getPropertyAccessor());
+        $this->app->singleton(FileStorageRetriever::class, function () {
+            return new FileStorageRetriever(
+                storage_path('api-file-storage'),
+                $this->app->get(ServiceLibraryFactory::class)->getPropertyAccessor()
+            );
         });
 
         // ApiResourceFacade: class that calls all the right services with a simple interface.
-        $this->app->singleton(ApiResourceFacade::class, function () use ($factory) {
-            return $factory->getApiResourceFacade();
+        $this->app->singleton(ApiResourceFacade::class, function () {
+            return $this->app->get(ServiceLibraryFactory::class)->getApiResourceFacade();
         });
 
         $this->app->bind(SwaggerUiController::class, function () {
@@ -180,48 +208,36 @@ class ApiResourceServiceProvider extends ServiceProvider
         });
 
         $this->addStatusResourceServices();
-
-        if ($config->get('api-resource.disable-routes')) {
-            return;
-        }
-        if (strpos($this->app->version(), 'Lumen') === false) {
-            if ($config->get('api-resource.swagger-ui-test-page')) {
-                $this->loadRoutesFrom(__DIR__ . '/../../config/routes-openapi.php');
-            }
-            $this->loadRoutesFrom(__DIR__ . '/../../config/routes.php');
-            return;
-        }
-        if ($config->get('api-resource.swagger-ui-test-page')) {
-            require __DIR__ . '/../../config/routes-lumen-openapi.php';
-        }
-        require __DIR__ . '/../../config/routes-lumen.php';
     }
 
     private function addOpenApiServices()
     {
         // Provides contact information to the OpenAPI spec.
         $this->app->singleton(Contact::class, function () {
+            $config = $this->app->get('apie.config');
             return new Contact([
-                'name'  => config('api-resource.metadata.contact-name'),
-                'url'   => config('api-resource.metadata.contact-url'),
-                'email' => config('api-resource.metadata.contact-email'),
+                'name'  => $config['metadata']['contact-name'],
+                'url'   => $config['metadata']['contact-url'],
+                'email' => $config['metadata']['contact-email'],
             ]);
         });
 
         // Provides license information to the OpenAPI spec.
         $this->app->singleton(License::class, function () {
+            $config = $this->app->get('apie.config');
             return new License(
-                config('api-resource.metadata.license'),
-                config('api-resource.metadata.license-url')
+                $config['metadata']['license'],
+                $config['metadata']['license-url']
             );
         });
 
         // Provides OpenAPI info to the OpenAPI spec.
         $this->app->singleton(Info::class, function () {
+            $config = $this->app->get('apie.config');
             return new Info(
-                config('api-resource.metadata.title'),
-                config('api-resource.metadata.version'),
-                config('api-resource.metadata.description'),
+                $config['metadata']['title'],
+                $config['metadata']['version'],
+                $config['metadata']['description'],
                 [
                     'contact' => $this->app->get(Contact::class),
                     'license' => $this->app->get(License::class),
