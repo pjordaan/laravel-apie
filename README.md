@@ -1,10 +1,13 @@
 # laravel-apie
 Laravel wrapper for the apie library
+[![CircleCI](https://circleci.com/gh/pjordaan/laravel-apie.svg?style=svg)](https://circleci.com/gh/pjordaan/laravel-apie)
+[![codecov](https://codecov.io/gh/pjordaan/laravel-apie/branch/master/graph/badge.svg)](https://codecov.io/gh/pjordaan/laravel-apie/)
+
 
 ## What does it do
 This is a small wrapper around the library w2w/apie for Laravel. This library maps simple POPO's (Plain Old PHP Objects) to REST api calls. It is very similar to the excellent api platform library.
 
-It also adds a class EloquentModelRetriever to persist and retrieve api resources as Eloquent models and adds a status check to see if it can connect with the database. See the documentation of apie at https://github.com/pieterw2w/apie
+It also adds a class EloquentModelRetriever to persist and retrieve api resources as Eloquent models and adds a status check to see if it can connect with the database. See the documentation of apie at https://github.com/pjordaan/apie
 
 ## Installation
 In your Laravel package you should do the usual steps to install a Laravel package.
@@ -165,4 +168,4 @@ const ui = SwaggerUIBundle({
 ```
     
 Now if you refresh you will see your REST API right away.
-![screenshot](https://github.com/pieterw2w/laravel-apie/blob/master/docs/l5swagger-screenshot.png?raw=true)
+![screenshot](https://github.com/pjordaan/laravel-apie/blob/master/docs/l5swagger-screenshot.png?raw=true)
