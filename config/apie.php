@@ -9,6 +9,11 @@ return [
      * A list of classes to be used as Api resources.
      */
     'resources'              => [App::class, Status::class],
+
+    /**
+     * Indicate the list of classes to be used as Api resources comes from a service in the service container instead.
+     */
+    'resources-service'      => null,
     /**
      * If true, all persisting and retrieving will be mocked, so you will effectively get a mock api server.
      */

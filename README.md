@@ -16,7 +16,7 @@ composer require w2w/laravel-apie
 ```
 In case you have no autodiscovery on or your Laravel version is too low, you require to add W2w\Laravel\Apie\Providers\ApiResourceServiceProvider::class to your list of service providers manually.
 
-Publish the api resource config with artisan publish to get a config/api-resource.php file and run migrations to get the database.
+Publish the api resource config with artisan publish to get a config/apie.php file and run migrations to get the database.
 ```bash
 artisan publish
 artisan migrate
@@ -83,14 +83,14 @@ class SumExample
     }
 }
 ```
-Now in config/api-resources.php we should add the class to add it to the api resources:
+Now in config/apie.php we should add the class to add it to the api resources:
 ```php
 <?php
+//config/apie.php
 use App\ApiResources\SumExample;
 use W2w\Lib\Apie\ApiResources\App;
 use W2w\Lib\Apie\ApiResources\Status;
 
-//config/api-resources.php
 return [
 'resources' => [App::class, Status::class, SumExample::class]
 ];
@@ -117,10 +117,10 @@ You would get:
 ## Display a swagger UI testpage.
 In case you want to have more functionality I advise you to look at the laravel package darkaonline/l5-swagger, but this
 Laravel package contains a simple Swagger UI page to test/view your REST api calls in the browser.
-All you have to do is open config/api-resource.php and fill in the url of the page:
+All you have to do is open config/apie.php and fill in the url of the page:
 ```php
 <?php
-//config/api-resource.php
+//config/apie.php
 return [
     'swagger-ui-test-page'      => '/swagger-ui',
 ];
@@ -129,18 +129,18 @@ return [
 By default the test page is found on /swagger-ui. 
 
 ## Automate registering api resources.
-It is possible to automate registering api resources without having to manually update the resources list in config/api-resource.php
+It is possible to automate registering api resources without having to manually update the resources list in config/apie.php
 We can auto-register all classes in a specific namespace with this:
 
 - In a terminal run:
 ```bash
 composer require haydenpierce/class-finder
 ```
-- Open config/api-resource.php
+- Open config/apie.php
 - Edit the file like this:
 ```php
 <?php
-//config/api-resource.php
+//config/apie.php
 use W2w\Lib\Apie\Resources\ApiResourcesFromNamespace;
 
 return [

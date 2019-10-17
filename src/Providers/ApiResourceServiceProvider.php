@@ -32,6 +32,7 @@ use W2w\Lib\Apie\Mocks\MockApiResourceFactory;
 use W2w\Lib\Apie\Mocks\MockApiResourceRetriever;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
 use W2w\Lib\Apie\OpenApiSchema\SchemaGenerator;
+use W2w\Lib\Apie\Resources\ApiResources;
 use W2w\Lib\Apie\Resources\ApiResourcesInterface;
 use W2w\Lib\Apie\Retrievers\AppRetriever;
 use W2w\Lib\Apie\Retrievers\FileStorageRetriever;
@@ -54,7 +55,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         if (function_exists('config_path')) {
             $this->publishes(
                 [
-                    __DIR__ . '/../../config/api-resource.php' => config_path('api-resource.php'),
+                    __DIR__ . '/../../config/apie.php' => config_path('apie.php'),
                 ]
             );
         }
@@ -86,17 +87,28 @@ class ApiResourceServiceProvider extends ServiceProvider
             $config = $this->app->get('config');
 
             $resolver = new OptionsResolver();
-            $defaults = require __DIR__ . '/../../config/api-resource.php';
+            $defaults = require __DIR__ . '/../../config/apie.php';
             $resolver->setDefaults($defaults);
-            return $resolver->resolve($config->get('api-resource') ?? []);
+            return $resolver->resolve($config->get('apie') ?? []);
+        });
+
+        $this->app->singleton(ApiResourcesInterface::class, function () {
+            $config = $this->app->get('apie.config');
+            if (! empty($config['resources-service'])) {
+                return $this->app->get($config['resources-service']);
+            }
+            if ($config['resources'] instanceof ApiResourcesInterface) {
+                return $config['resources'];
+            }
+            return new ApiResources($config['resources']);
         });
 
         $this->app->singleton(ServiceLibraryFactory::class, function () {
             $config = $this->app->get('apie.config');
             $result = new ServiceLibraryFactory(
-                $config['resources'],
+                $this->app->get(ApiResourcesInterface::class),
                 (bool) config('app.debug'),
-                storage_path('api-resource-cache')
+                storage_path('apie-cache')
             );
             $result->setContainer($this->app);
             $result->runBeforeInstantiation(function () use (&$result) {
@@ -132,10 +144,6 @@ class ApiResourceServiceProvider extends ServiceProvider
             }
 
             return $result;
-        });
-
-        $this->app->singleton(ApiResourcesInterface::class, function () {
-            return $this->app->get(ServiceLibraryFactory::class)->getApiResources();
         });
 
         // MainScheduler: service that does all the background processes of api resources.

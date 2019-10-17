@@ -17,7 +17,7 @@ class ApiResourceServiceProviderNoConfigTest extends AbstractLaravelTestCase
         $appResponse = $class->get(App::class, 'name', null);
         /** @var App $resource */
         $resource = $appResponse->getResource();
-        $hash = require __DIR__ . '/../../config/api-resource.php';
+        $hash = require __DIR__ . '/../../config/apie.php';
         $expected = new App(
             'Laravel',
             'testing',
