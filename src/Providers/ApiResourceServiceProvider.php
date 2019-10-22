@@ -30,6 +30,7 @@ use W2w\Lib\Apie\ApiResourceFacade;
 use W2w\Lib\Apie\ApiResourceFactory;
 use W2w\Lib\Apie\Mocks\MockApiResourceFactory;
 use W2w\Lib\Apie\Mocks\MockApiResourceRetriever;
+use W2w\Lib\Apie\Normalizers\ValueObjectNormalizer;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
 use W2w\Lib\Apie\OpenApiSchema\SchemaGenerator;
 use W2w\Lib\Apie\Resources\ApiResources;
@@ -114,7 +115,8 @@ class ApiResourceServiceProvider extends ServiceProvider
             $result->runBeforeInstantiation(function () use (&$result) {
                 $normalizers = [
                     new UuidNormalizer(),
-                    new UuidDenormalizer()
+                    new UuidDenormalizer(),
+                    new ValueObjectNormalizer(),
                 ];
                 $taggedNormalizers = $this->app->tagged(NormalizerInterface::class);
                 // app->tagged return type is hazy....
