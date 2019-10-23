@@ -8,7 +8,7 @@
     "authors": [
         {
             "name": "Pieter Jordaan",
-            "email": "pieter.jordaan@way2web.nl"
+            "email": "pieter_jordaan@hotmail.com"
         }
     ],
     "require": {
@@ -48,7 +48,7 @@
                 "W2w\\Laravel\\Apie\\Providers\\ApiResourceServiceProvider"
             ],
             "aliases": {
-                "ApiResource": "W2w\\Lib\\Apie\\ApiResourceFacade"
+                "Apie": "W2w\\Laravel\\Apie\\Facades\\Apie"
             }
         }
     },

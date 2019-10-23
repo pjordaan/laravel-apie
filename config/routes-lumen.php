@@ -8,7 +8,9 @@ use W2w\Lib\Apie\Controllers\DeleteController;
 
 $router = app('router');
 
-$router->group(['prefix' => app('apie.config')['api-url']], function () use ($router) {
+$apieConfig = app('apie.config');
+
+$router->group(['prefix' => $apieConfig['api-url'], 'middleware' => $apieConfig['apie-middleware']], function () use ($router) {
     $router->get('/doc.json', ['as' => 'apie.docs', 'uses' => DocsController::class]);
     $router->post('/{resource}/', ['as' => 'apie.post', 'uses' => PostController::class]);
     $router->put('/{resource}/{id}', ['as' => 'apie.put', 'uses' => PutController::class]);

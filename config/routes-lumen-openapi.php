@@ -3,4 +3,13 @@ use W2w\Laravel\Apie\Controllers\SwaggerUiController;
 
 $router = app('router');
 
-$router->get(app('apie.config')['swagger-ui-test-page'], ['as' => 'apie.swagger-ui', 'uses' => SwaggerUiController::class]);
+$apieConfig = app('apie.config');
+
+$router->get(
+    $apieConfig['swagger-ui-test-page'],
+    [
+        'as' => 'apie.swagger-ui',
+        'uses' => SwaggerUiController::class,
+        'middleware' => $apieConfig['swagger-ui-test-page-middleware']
+    ]
+);

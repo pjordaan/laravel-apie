@@ -39,6 +39,15 @@ return [
      * Enable openapi test page with swagger ui if set. If falsy value this route is not being loaded.
      */
     'swagger-ui-test-page'      => '/swagger-ui',
+
+    /**
+     * Set route middleware for resource calls.
+     */
+    'apie-middleware'      => [],
+    /**
+     * Set route middleware for swagger ui test page.
+     */
+    'swagger-ui-test-page-middleware' => [],
     /**
      * Specific metadata used in the output of the open api specs.
      */

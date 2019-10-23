@@ -1,4 +1,8 @@
 <?php
 use W2w\Laravel\Apie\Controllers\SwaggerUiController;
 
-Route::get(resolve('apie.config')['swagger-ui-test-page'], SwaggerUiController::class)->name('apie.swagger-ui');
+$apieConfig = resolve('apie.config');
+
+Route::group(['middleware' => $apieConfig['swagger-ui-test-page-middleware']], function() use (&$apieConfig) {
+    Route::get($apieConfig['swagger-ui-test-page'], SwaggerUiController::class)->name('apie.swagger-ui');
+});
