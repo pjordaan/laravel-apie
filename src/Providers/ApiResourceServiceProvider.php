@@ -15,6 +15,7 @@ use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
+use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
@@ -84,6 +85,17 @@ class ApiResourceServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // fix for https://github.com/laravel/framework/issues/30415
+        $this->app->extend(ServerRequestInterface::class, function (ServerRequestInterface $psrRequest) {
+            $route = $this->app->make('request')->route();
+            if ($route) {
+                $parameters = $route->parameters();
+                foreach ($parameters as $key => $value) {
+                    $psrRequest = $psrRequest->withAttribute($key, $value);
+                }
+            }
+            return $psrRequest;
+        });
         $this->app->singleton('apie.config', function () {
             $config = $this->app->get('config');
 
