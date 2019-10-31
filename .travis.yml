@@ -15,5 +15,5 @@ install:
 jobs:
   allow_failures:
     - php: nightly
-      env: "VERSION=4.0"
+    - env: "VERSION=4.0"
     
