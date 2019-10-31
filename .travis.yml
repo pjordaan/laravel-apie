@@ -12,3 +12,7 @@ env:
 install:
   - "composer require orchestra/testbench:${VERSION} --no-update --ignore-platform-reqs"
   - "composer install --ignore-platform-reqs"
+jobs:
+  allow_failures:
+    - php: nightly
+    - env: "VERSION=4.0"
