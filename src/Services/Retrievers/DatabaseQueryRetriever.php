@@ -54,7 +54,7 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
             throw new ResourceNotFoundException($id);
         }
 
-        return $this->denormalizer->denormalize($result[0], $resourceClass);
+        return $this->denormalizer->denormalize($result[0], $resourceClass, null, ['disable_type_enforcement' => true]);
     }
 
     /**
@@ -76,7 +76,7 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
 
         $result = $this->db->select($this->db->raw($query . ' LIMIT :offset, :limit'), ['offset' => $pageIndex, 'limit' => $numberOfItems]);
 
-        return $this->denormalizer->denormalize($result, $resourceClass . '[]');
+        return $this->denormalizer->denormalize($result, $resourceClass . '[]', null, ['disable_type_enforcement' => true]);
     }
 
     /**
@@ -86,7 +86,7 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
      * @param array $context
      * @return string
      */
-    private function getAllQuery(string $resourceClass, array $context): string
+    private function getAllQuery(string $resourceClass, array $context): ?string
     {
         if (!empty($context['query_file'])) {
             $filename = dirname((new ReflectionClass($resourceClass))->getFileName()) . DIRECTORY_SEPARATOR . $context['query_file'];
@@ -106,7 +106,7 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
      * @param array $context
      * @return string
      */
-    private function getFindQuery(string $resourceClass, array $context): string
+    private function getFindQuery(string $resourceClass, array $context): ?string
     {
         if (!empty($context['query_single_file'])) {
             $filename = dirname((new ReflectionClass($resourceClass))->getFileName()) . DIRECTORY_SEPARATOR . $context['query_single_file'];

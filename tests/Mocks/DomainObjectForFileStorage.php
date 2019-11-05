@@ -1,6 +1,4 @@
 <?php
-
-
 namespace W2w\Laravel\Apie\Tests\Mocks;
 
 use Ramsey\Uuid\Uuid;
