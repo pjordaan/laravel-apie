@@ -126,9 +126,6 @@ class ApiResourceServiceProvider extends ServiceProvider
             $result->setContainer($this->app);
             $result->runBeforeInstantiation(function () use (&$result) {
                 $normalizers = [
-                    new UuidNormalizer(),
-                    new UuidDenormalizer(),
-                    new ValueObjectNormalizer(),
                 ];
                 $taggedNormalizers = $this->app->tagged(NormalizerInterface::class);
                 // app->tagged return type is hazy....
