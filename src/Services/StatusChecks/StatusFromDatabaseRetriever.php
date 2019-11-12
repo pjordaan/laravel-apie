@@ -73,7 +73,7 @@ class StatusFromDatabaseRetriever implements StatusCheckListInterface
         $statusResource = new ResourceStatus(
             $statusModel->id,
             $statusModel->status,
-            $statusModel->optionalReference,
+            $statusModel->optional_reference,
             $context
         );
 

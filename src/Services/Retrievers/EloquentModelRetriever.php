@@ -2,6 +2,7 @@
 
 namespace W2w\Laravel\Apie\Services\Retrievers;
 
+use RuntimeException;
 use UnexpectedValueException;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Model;
@@ -166,7 +167,7 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
      *
      * @param array $array
      * @param string $resourceClass
-     * @return array|object
+     * @return Model
      */
     private function denormalize(array $array, string $resourceClass)
     {
