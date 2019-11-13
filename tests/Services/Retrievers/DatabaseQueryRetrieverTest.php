@@ -1,12 +1,14 @@
 <?php
 
 
-namespace W2w\Laravel\Apie\Tests\Services;
+namespace W2w\Laravel\Apie\Tests\Services\Retrievers;
 
 use W2w\Laravel\Apie\Exceptions\ApiResourceContextException;
+use W2w\Laravel\Apie\Exceptions\FileNotFoundException;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
 use W2w\Laravel\Apie\Tests\Services\Mock\ClassForDatabaseQueryRetriever;
 use W2w\Laravel\Apie\Tests\Services\Mock\MissingConfigClassForDatabaseQueryRetriever;
+use W2w\Laravel\Apie\Tests\Services\Mock\MissingFileClassForDatabaseQueryRetriever;
 use W2w\Lib\Apie\ApiResourceFacade;
 use W2w\Lib\Apie\Exceptions\ResourceNotFoundException;
 
@@ -19,7 +21,11 @@ class DatabaseQueryRetrieverTest extends AbstractLaravelTestCase
         $config->set(
             'apie',
             [
-                'resources' => [ClassForDatabaseQueryRetriever::class, MissingConfigClassForDatabaseQueryRetriever::class],
+                'resources' => [
+                    ClassForDatabaseQueryRetriever::class,
+                    MissingConfigClassForDatabaseQueryRetriever::class,
+                    MissingFileClassForDatabaseQueryRetriever::class,
+                ],
                 'metadata'               => [
                     'title'            => 'Laravel REST api',
                     'version'          => '1.0',
@@ -70,6 +76,13 @@ class DatabaseQueryRetrieverTest extends AbstractLaravelTestCase
         $facade->get(MissingConfigClassForDatabaseQueryRetriever::class, 'a', null);
     }
 
+    public function testRetrieve_missing_file()
+    {
+        /** @var ApiResourceFacade $facade */
+        $facade = $this->app->get(ApiResourceFacade::class);
+        $this->expectException(FileNotFoundException::class);
+        $facade->get(MissingFileClassForDatabaseQueryRetriever::class, 'a', null);
+    }
 
     public function testRetrieveAll()
     {

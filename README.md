@@ -3,6 +3,7 @@ Laravel wrapper for the apie library
 [![CircleCI](https://circleci.com/gh/pjordaan/laravel-apie.svg?style=svg)](https://circleci.com/gh/pjordaan/laravel-apie)
 [![codecov](https://codecov.io/gh/pjordaan/laravel-apie/branch/master/graph/badge.svg)](https://codecov.io/gh/pjordaan/laravel-apie/)
 [![Travis](https://api.travis-ci.org/pjordaan/laravel-apie.svg?branch=master)](https://travis-ci.org/pjordaan/laravel-apie)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/pjordaan/laravel-apie/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/pjordaan/laravel-apie/?branch=master)
 
 ## What does it do
 This is a small wrapper around the library w2w/apie for Laravel. This library maps simple POPO's (Plain Old PHP Objects) to REST api calls. It is very similar to the excellent api platform library.

@@ -2,12 +2,14 @@
 
 namespace W2w\Laravel\Apie\Services\Retrievers;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RuntimeException;
 use UnexpectedValueException;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use W2w\Lib\Apie\Exceptions\ResourceNotFoundException;
 use W2w\Lib\Apie\Normalizers\ContextualNormalizer;
 use W2w\Lib\Apie\Normalizers\EvilReflectionPropertyNormalizer;
 use W2w\Lib\Apie\Persisters\ApiResourcePersisterInterface;
@@ -46,12 +48,16 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
      * @param string $resourceClass
      * @param $id
      * @param array $context
-     * @return Model
+     * @return mixed
      */
     public function retrieve(string $resourceClass, $id, array $context)
     {
         $modelClass = $this->getModelClass($resourceClass, $context);
-        $modelInstance = $modelClass::where($context[1] ?? $context['id'] ?? 'id', $id)->firstOrFail();
+        try {
+            $modelInstance = $modelClass::where($context[1] ?? $context['id'] ?? 'id', $id)->firstOrFail();
+        } catch (ModelNotFoundException $notFoundException) {
+            throw new ResourceNotFoundException($id);
+        }
         $result = $this->denormalize($modelInstance->toArray(), $resourceClass);
         $this->gate->authorize('get', $result);
 
@@ -66,7 +72,7 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
      * @param array $context
      * @param int $pageIndex
      * @param int $numberOfItems
-     * @return Model[]
+     * @return array
      */
     public function retrieveAll(string $resourceClass, array $context, int $pageIndex, int $numberOfItems): iterable
     {
@@ -91,7 +97,7 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
      *
      * @param mixed $resource
      * @param array $context
-     * @return Model
+     * @return mixed
      */
     public function persistNew($resource, array $context = [])
     {
@@ -118,7 +124,7 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
      * @param $resource
      * @param $id
      * @param array $context
-     * @return array|mixed|object
+     * @return mixed
      */
     public function persistExisting($resource, $id, array $context = [])
     {
@@ -167,13 +173,18 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
      *
      * @param array $array
      * @param string $resourceClass
-     * @return Model
+     * @return mixed
      */
     private function denormalize(array $array, string $resourceClass)
     {
         ContextualNormalizer::enableDenormalizer(EvilReflectionPropertyNormalizer::class);
         try {
-            $res = $this->denormalizer->denormalize($array, $resourceClass, null, []);
+            $res = $this->denormalizer->denormalize(
+                $array,
+                $resourceClass,
+                null,
+                ['disable_type_enforcement' => true]
+            );
         } finally {
             ContextualNormalizer::disableDenormalizer(EvilReflectionPropertyNormalizer::class);
         }

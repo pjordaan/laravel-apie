@@ -1,1 +1,1 @@
-SELECT identifier AS `id`, MAX(value) AS `size`, count(status.id) AS `count` FROM `status` GROUP BY identifier
+SELECT enum_column AS `id`, MAX(value) AS `size`, count(status.id) AS `count` FROM `status` GROUP BY enum_column

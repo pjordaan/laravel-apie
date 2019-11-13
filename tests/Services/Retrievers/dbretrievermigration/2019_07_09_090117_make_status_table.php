@@ -13,17 +13,18 @@ class MakeStatusTable extends Migration
     public function up()
     {
         Schema::create('status', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->unsignedInteger('id')->primary();
             $table->unsignedInteger('value');
-            $table->enum('identifier', ['a', 'b']);
+            $table->enum('enum_column', ['a', 'b']);
+            $table->timestamps();
         });
         srand(0);
         $table = DB::table('status');
         for ($i = 0; $i < 100; $i++) {
-            $table->insert(['id' => \Ramsey\Uuid\Uuid::uuid4(), 'value' => rand(), 'identifier' => 'a']);
+            $table->insert(['id' => (string) $i, 'value' => rand(), 'enum_column' => 'a']);
         }
         for ($i = 0; $i < 100; $i++) {
-            $table->insert(['id' => \Ramsey\Uuid\Uuid::uuid4(), 'value' => rand(), 'identifier' => 'b']);
+            $table->insert(['id' => (string) (100 + $i), 'value' => rand(), 'enum_column' => 'b']);
         }
     }
 
