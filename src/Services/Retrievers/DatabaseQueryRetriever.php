@@ -39,7 +39,7 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
      * Retrieves a single resource.
      *
      * @param string $resourceClass
-     * @param $id
+     * @param mixed $id
      * @param array $context
      * @return array|object
      */
@@ -89,7 +89,11 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
     private function getAllQuery(string $resourceClass, array $context): ?string
     {
         if (!empty($context['query_file'])) {
-            $filename = dirname((new ReflectionClass($resourceClass))->getFileName()) . DIRECTORY_SEPARATOR . $context['query_file'];
+            $classNameFile = (new ReflectionClass($resourceClass))->getFileName();
+            if (!$classNameFile) {
+                throw new FileNotFoundException($resourceClass);
+            }
+            $filename = dirname($classNameFile) . DIRECTORY_SEPARATOR . $context['query_file'];
             if (!file_exists($filename)) {
                 throw new FileNotFoundException($filename);
             }
@@ -109,7 +113,11 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
     private function getFindQuery(string $resourceClass, array $context): ?string
     {
         if (!empty($context['query_single_file'])) {
-            $filename = dirname((new ReflectionClass($resourceClass))->getFileName()) . DIRECTORY_SEPARATOR . $context['query_single_file'];
+            $classNameFile = (new ReflectionClass($resourceClass))->getFileName();
+            if (!$classNameFile) {
+                throw new FileNotFoundException($resourceClass);
+            }
+            $filename = dirname($classNameFile) . DIRECTORY_SEPARATOR . $context['query_single_file'];
             if (!file_exists($filename)) {
                 throw new FileNotFoundException($filename);
             }

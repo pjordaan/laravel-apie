@@ -27,6 +27,7 @@ use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
 use W2w\Laravel\Apie\Services\Retrievers\EloquentModelRetriever;
 use W2w\Lib\Apie\ApiResourceFacade;
 use W2w\Lib\Apie\ApiResourceFactory;
+use W2w\Lib\Apie\IdentifierExtractor;
 use W2w\Lib\Apie\Mocks\MockApiResourceFactory;
 use W2w\Lib\Apie\Mocks\MockApiResourceRetriever;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
@@ -143,7 +144,7 @@ class ApiResourceServiceProvider extends ServiceProvider
                     new MockApiResourceFactory(
                         new MockApiResourceRetriever(
                             $cachePool,
-                            $result->getPropertyAccessor()
+                            new IdentifierExtractor($result->getPropertyAccessor())
                         ),
                         new ApiResourceFactory($this->app),
                         $config['mock-skipped-resources']
@@ -267,7 +268,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         $this->app->singleton(StatusFromDatabaseRetriever::class, function () {
             return new StatusFromDatabaseRetriever(config('app.debug'));
         });
-        $this->app->tag([StatusFromDatabaseRetriever::class], 'status-check');
+        $this->app->tag([StatusFromDatabaseRetriever::class], ['status-check']);
         $this->app->singleton(StatusCheckRetriever::class, function () {
             return new StatusCheckRetriever($this->app->tagged('status-check'));
         });

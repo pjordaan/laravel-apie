@@ -46,7 +46,7 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
      * Retrieves a single instance.
      *
      * @param string $resourceClass
-     * @param $id
+     * @param mixed $id
      * @param array $context
      * @return mixed
      */
@@ -121,8 +121,8 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
     /**
      * Stores an api resource to an existing Eloquent model instance.
      *
-     * @param $resource
-     * @param $id
+     * @param mixed $resource
+     * @param mixed $id
      * @param array $context
      * @return mixed
      */
@@ -152,7 +152,7 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
      * Removes a resource from the database.
      *
      * @param string $resourceClass
-     * @param $id
+     * @param mixed $id
      * @param array $context
      */
     public function remove(string $resourceClass, $id, array $context)

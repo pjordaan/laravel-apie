@@ -3,6 +3,7 @@ namespace W2w\Laravel\Apie\Controllers;
 
 use Illuminate\Contracts\Routing\UrlGenerator as LaravelUrlGenerator;
 use Laravel\Lumen\Routing\UrlGenerator as LumenUrlGenerator;
+use W2w\Laravel\Apie\Exceptions\FileNotFoundException;
 use Zend\Diactoros\Response\TextResponse;
 
 /**
@@ -26,8 +27,13 @@ class SwaggerUiController
 
     public function __invoke()
     {
+        $contents = @file_get_contents($this->htmlLocation);
+        if (false === $contents) {
+            throw new FileNotFoundException($this->htmlLocation);
+        }
+
         return new TextResponse(
-            str_replace('{{ url }}', $this->urlGenerator->route('apie.docs'), file_get_contents($this->htmlLocation)),
+            str_replace('{{ url }}', $this->urlGenerator->route('apie.docs'), $contents),
             200,
             [
                 'content-type' => 'text/html'

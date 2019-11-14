@@ -54,6 +54,7 @@
     },
     "require-dev": {
         "orchestra/testbench": "3.6.*",
-        "mockery/mockery": "^1.2"
+        "mockery/mockery": "^1.2",
+        "nunomaduro/larastan": "^0.4.3"
     }
 }
