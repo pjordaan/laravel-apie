@@ -86,7 +86,11 @@ class ApiResourceServiceProvider extends ServiceProvider
         // fix for https://github.com/laravel/framework/issues/30415
         $this->app->extend(ServerRequestInterface::class, function (ServerRequestInterface $psrRequest) {
             $route = $this->app->make('request')->route();
-            if ($route) {
+            if (is_array($route) && is_array($route[2])) {
+                foreach ($route[2] as $key => $value) {
+                    $psrRequest = $psrRequest->withAttribute($key, $value);
+                }
+            } elseif ($route) {
                 $parameters = $route->parameters();
                 foreach ($parameters as $key => $value) {
                     $psrRequest = $psrRequest->withAttribute($key, $value);
