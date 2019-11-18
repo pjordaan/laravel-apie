@@ -12,9 +12,11 @@ class ApieTest extends AbstractLaravelTestCase
     public function testFacadeWorksAsIntended()
     {
         $appResponse = Apie::get(App::class, 'name', null);
-        /** @var App $resource */
+        /**
+ * @var App $resource 
+*/
         $resource = $appResponse->getResource();
-        $hash = require __DIR__ . '/../../config/apie.php';
+        $hash = include __DIR__ . '/../../config/apie.php';
         $expected = new App(
             'Laravel',
             'testing',

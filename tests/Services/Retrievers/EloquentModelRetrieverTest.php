@@ -55,7 +55,9 @@ class EloquentModelRetrieverTest extends AbstractLaravelTestCase
 
     public function testRetrieve()
     {
-        /** @var ApiResourceFacade $facade */
+        /**
+ * @var ApiResourceFacade $facade 
+*/
         $facade = $this->app->get(ApiResourceFacade::class);
         $actual = $facade->get(ClassForEloquentModelRetriever::class, '42', null)->getResource();
         $this->assertEquals(new ClassForEloquentModelRetriever(1716179948, new EnumValueObject('a'), '42'), $actual);
@@ -63,7 +65,9 @@ class EloquentModelRetrieverTest extends AbstractLaravelTestCase
 
     public function testRetrieve_not_found()
     {
-        /** @var ApiResourceFacade $facade */
+        /**
+ * @var ApiResourceFacade $facade 
+*/
         $facade = $this->app->get(ApiResourceFacade::class);
         $this->expectException(ResourceNotFoundException::class);
         $facade->get(ClassForEloquentModelRetriever::class, '666', null);
@@ -71,7 +75,9 @@ class EloquentModelRetrieverTest extends AbstractLaravelTestCase
 
     public function testRetrieveAll()
     {
-        /** @var ApiResourceFacade $facade */
+        /**
+ * @var ApiResourceFacade $facade 
+*/
         $facade = $this->app->get(ApiResourceFacade::class);
         $actual = $facade->getAll(ClassForEloquentModelRetriever::class, 0, 2, null)->getResource();
         $expected = [
@@ -83,7 +89,9 @@ class EloquentModelRetrieverTest extends AbstractLaravelTestCase
 
     public function testPersistNew()
     {
-        /** @var ApiResourceFacade $facade */
+        /**
+ * @var ApiResourceFacade $facade 
+*/
         $facade = $this->app->get(ApiResourceFacade::class);
         $request = (new ServerRequest())->withBody(new Stream('data://text/plain,{"enum_column":"b","value":42}'));
         $this->assertFalse(ModelForEloquentModelRetriever::where('id', 201)->exists());
@@ -102,7 +110,9 @@ class EloquentModelRetrieverTest extends AbstractLaravelTestCase
 
     public function testPersistExisting()
     {
-        /** @var ApiResourceFacade $facade */
+        /**
+ * @var ApiResourceFacade $facade 
+*/
         $facade = $this->app->get(ApiResourceFacade::class);
         $request = (new ServerRequest())->withBody(new Stream('data://text/plain,{"enum_column":"b","value":42}'));
         $actual = $facade->put(ClassForEloquentModelRetriever::class, 1, $request)->getResource();
@@ -122,7 +132,9 @@ class EloquentModelRetrieverTest extends AbstractLaravelTestCase
 
     public function testRemove()
     {
-        /** @var ApiResourceFacade $facade */
+        /**
+ * @var ApiResourceFacade $facade 
+*/
         $facade = $this->app->get(ApiResourceFacade::class);
         $this->assertTrue(ModelForEloquentModelRetriever::where('id', 1)->exists());
 

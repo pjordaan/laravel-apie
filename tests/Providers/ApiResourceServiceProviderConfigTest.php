@@ -14,7 +14,7 @@ class ApiResourceServiceProviderConfigTest extends AbstractLaravelTestCase
     /**
      * Define environment setup.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  \Illuminate\Foundation\Application $app
      * @return void
      */
     protected function getEnvironmentSetUp($app)
@@ -22,11 +22,13 @@ class ApiResourceServiceProviderConfigTest extends AbstractLaravelTestCase
         $config = $app->make('config');
         // Setup default database to use sqlite :memory:
         $config->set('database.default', 'testbench');
-        $config->set('database.connections.testbench', [
+        $config->set(
+            'database.connections.testbench', [
             'driver'   => 'sqlite',
             'database' => ':memory:',
             'prefix'   => '',
-        ]);
+            ]
+        );
         $config->set(
             'apie',
             [
@@ -49,11 +51,15 @@ class ApiResourceServiceProviderConfigTest extends AbstractLaravelTestCase
 
     public function testApiResourceFacade()
     {
-        /** @var ApiResourceFacade $class */
+        /**
+ * @var ApiResourceFacade $class 
+*/
         $class = $this->app->get(ApiResourceFacade::class);
         $this->assertInstanceOf(ApiResourceFacade::class, $class);
         $appResponse = $class->get(App::class, 'name', null);
-        /** @var App $resource */
+        /**
+ * @var App $resource 
+*/
         $resource = $appResponse->getResource();
         $expected = new App(
             'Laravel',
@@ -66,7 +72,9 @@ class ApiResourceServiceProviderConfigTest extends AbstractLaravelTestCase
 
     public function testOpenApiSchema()
     {
-        /** @var OpenApiSpecGenerator $class */
+        /**
+ * @var OpenApiSpecGenerator $class 
+*/
         $class = $this->app->get(OpenApiSpecGenerator::class);
         $this->assertInstanceOf(OpenApiSpecGenerator::class, $class);
         $spec = $class->getOpenApiSpec();

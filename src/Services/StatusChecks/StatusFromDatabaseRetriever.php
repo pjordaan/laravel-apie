@@ -33,7 +33,8 @@ class StatusFromDatabaseRetriever implements StatusCheckListInterface
         try {
             $statuses = Status::where([])->get();
         } catch (Throwable $t) {
-            return new ArrayIterator([
+            return new ArrayIterator(
+                [
                 new StaticStatusCheck(
                     new ResourceStatus(
                         'database-test',
@@ -45,15 +46,20 @@ class StatusFromDatabaseRetriever implements StatusCheckListInterface
                         ]
                     )
                 ),
-            ]);
+                ]
+            );
         }
-        $list = array_map(function (Status $statusModel) {
-            return $this->convert($statusModel);
-        }, iterator_to_array($statuses));
-        $list[] = new StaticStatusCheck(new ResourceStatus(
-            'database-test',
-            'OK'
-        ));
+        $list = array_map(
+            function (Status $statusModel) {
+                return $this->convert($statusModel);
+            }, iterator_to_array($statuses)
+        );
+        $list[] = new StaticStatusCheck(
+            new ResourceStatus(
+                'database-test',
+                'OK'
+            )
+        );
 
         return new ArrayIterator($list);
     }
@@ -61,7 +67,7 @@ class StatusFromDatabaseRetriever implements StatusCheckListInterface
     /**
      * Converts a Eloquent Status into a StaticStatusCheck.
      *
-     * @param Status $statusModel
+     * @param  Status $statusModel
      * @return StaticStatusCheck
      */
     private function convert(Status $statusModel): StaticStatusCheck

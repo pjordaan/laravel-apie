@@ -14,8 +14,10 @@ class PolicyServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Gate::before(function () {
-            return new Response();
-        });
+        Gate::before(
+            function () {
+                return new Response();
+            }
+        );
     }
 }

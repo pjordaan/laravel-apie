@@ -9,11 +9,9 @@ use erasys\OpenApi\Spec\v3\License;
 use erasys\OpenApi\Spec\v3\Schema;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Cache\Repository;
-use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
-use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
@@ -22,7 +20,6 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
-use W2w\Laravel\Apie\Controllers\SwaggerUiController;
 use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
 use W2w\Laravel\Apie\Services\Retrievers\EloquentModelRetriever;
 use W2w\Lib\Apie\ApiResourceFacade;
@@ -61,21 +58,6 @@ class ApiResourceServiceProvider extends ServiceProvider
         }
 
         $this->loadMigrationsFrom(__DIR__ . '/../../migrations');
-        $config = $this->app->get('apie.config');
-        if ($config['disable-routes']) {
-            return;
-        }
-        if (strpos($this->app->version(), 'Lumen') === false) {
-            if ($config['swagger-ui-test-page']) {
-                $this->loadRoutesFrom(__DIR__ . '/../../config/routes-openapi.php');
-            }
-            $this->loadRoutesFrom(__DIR__ . '/../../config/routes.php');
-            return;
-        }
-        if ($config['swagger-ui-test-page']) {
-            require __DIR__ . '/../../config/routes-lumen-openapi.php';
-        }
-        require __DIR__ . '/../../config/routes-lumen.php';
     }
 
     /**
@@ -83,21 +65,6 @@ class ApiResourceServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // fix for https://github.com/laravel/framework/issues/30415
-        $this->app->extend(ServerRequestInterface::class, function (ServerRequestInterface $psrRequest) {
-            $route = $this->app->make('request')->route();
-            if (is_array($route) && is_array($route[2])) {
-                foreach ($route[2] as $key => $value) {
-                    $psrRequest = $psrRequest->withAttribute($key, $value);
-                }
-            } elseif ($route) {
-                $parameters = $route->parameters();
-                foreach ($parameters as $key => $value) {
-                    $psrRequest = $psrRequest->withAttribute($key, $value);
-                }
-            }
-            return $psrRequest;
-        });
         $this->app->singleton('apie.config', function () {
             $config = $this->app->get('config');
 
@@ -219,16 +186,13 @@ class ApiResourceServiceProvider extends ServiceProvider
             return $this->app->get(ServiceLibraryFactory::class)->getApiResourceFacade();
         });
 
-        $this->app->bind(SwaggerUiController::class, function () {
-            if ($this->app->has(UrlGenerator::class)) {
-                $urlGenerator = $this->app->get(UrlGenerator::class);
-            } else {
-                $urlGenerator = new \Laravel\Lumen\Routing\UrlGenerator($this->app);
-            }
-            return new SwaggerUiController($urlGenerator, __DIR__ . '/../../resources/open-api.html');
-        });
-
         $this->addStatusResourceServices();
+
+        if (strpos($this->app->version(), 'Lumen') === false) {
+            $this->app->register(ApieLaravelServiceProvider::class);
+        } else {
+            $this->app->register(ApieLumenServiceProvider::class);
+        }
     }
 
     private function addOpenApiServices()

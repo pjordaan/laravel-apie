@@ -8,7 +8,8 @@ use W2w\Lib\Apie\Exceptions\ApieException;
  */
 class ApiResourceContextException extends ApieException
 {
-    public function __construct(string $resourceClass, string $options) {
+    public function __construct(string $resourceClass, string $options) 
+    {
         parent::__construct(
             500,
             'Resource ' . $resourceClass . ' misses ' . $options .' option in the ApiResource annotation'

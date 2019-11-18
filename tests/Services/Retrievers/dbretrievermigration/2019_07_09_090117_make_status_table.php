@@ -12,12 +12,14 @@ class MakeStatusTable extends Migration
      */
     public function up()
     {
-        Schema::create('status', function (Blueprint $table) {
-            $table->unsignedInteger('id')->primary();
-            $table->unsignedInteger('value');
-            $table->enum('enum_column', ['a', 'b']);
-            $table->timestamps();
-        });
+        Schema::create(
+            'status', function (Blueprint $table) {
+                $table->unsignedInteger('id')->primary();
+                $table->unsignedInteger('value');
+                $table->enum('enum_column', ['a', 'b']);
+                $table->timestamps();
+            }
+        );
         srand(0);
         $table = DB::table('status');
         for ($i = 0; $i < 100; $i++) {

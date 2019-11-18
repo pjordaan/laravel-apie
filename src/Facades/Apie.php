@@ -6,7 +6,8 @@ use W2w\Lib\Apie\ApiResourceFacade;
 
 class Apie extends Facade
 {
-    protected static function getFacadeAccessor() {
+    protected static function getFacadeAccessor() 
+    {
         return ApiResourceFacade::class;
     }
 }

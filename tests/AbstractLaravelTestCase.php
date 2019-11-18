@@ -13,17 +13,19 @@ abstract class AbstractLaravelTestCase extends TestCase
      * @see TestCase::getEnvironmentSetUp()
      *
      * @param Application $application
-     * @param string $db
+     * @param string      $db
      */
     protected function setUpDatabase(Application $application, string $db = ':memory:'): void
     {
         $config = $application['config'];
         $config->set('database.default', 'testbench');
-        $config->set('database.connections.testbench', [
+        $config->set(
+            'database.connections.testbench', [
             'driver'   => 'sqlite',
             'database' => $db,
             'prefix'   => '',
-        ]);
+            ]
+        );
     }
 
     protected function setUp(): void

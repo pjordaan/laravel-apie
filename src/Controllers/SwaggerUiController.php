@@ -17,7 +17,7 @@ class SwaggerUiController
 
     /**
      * @param LaravelUrlGenerator|LumenUrlGenerator $urlGenerator
-     * @param string $htmlLocation
+     * @param string                                $htmlLocation
      */
     public function __construct($urlGenerator, string $htmlLocation)
     {

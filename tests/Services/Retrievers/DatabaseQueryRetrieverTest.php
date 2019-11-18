@@ -54,7 +54,9 @@ class DatabaseQueryRetrieverTest extends AbstractLaravelTestCase
 
     public function testRetrieve()
     {
-        /** @var ApiResourceFacade $facade */
+        /**
+ * @var ApiResourceFacade $facade 
+*/
         $facade = $this->app->get(ApiResourceFacade::class);
         $actual = $facade->get(ClassForDatabaseQueryRetriever::class, 'a', null)->getResource();
         $this->assertEquals(new ClassForDatabaseQueryRetriever('a', 2101566889, 100), $actual);
@@ -62,7 +64,9 @@ class DatabaseQueryRetrieverTest extends AbstractLaravelTestCase
 
     public function testRetrieve_not_found()
     {
-        /** @var ApiResourceFacade $facade */
+        /**
+ * @var ApiResourceFacade $facade 
+*/
         $facade = $this->app->get(ApiResourceFacade::class);
         $this->expectException(ResourceNotFoundException::class);
         $facade->get(ClassForDatabaseQueryRetriever::class, 'c', null)->getResource();
@@ -70,7 +74,9 @@ class DatabaseQueryRetrieverTest extends AbstractLaravelTestCase
 
     public function testRetrieve_missing_configuration()
     {
-        /** @var ApiResourceFacade $facade */
+        /**
+ * @var ApiResourceFacade $facade 
+*/
         $facade = $this->app->get(ApiResourceFacade::class);
         $this->expectException(ApiResourceContextException::class);
         $facade->get(MissingConfigClassForDatabaseQueryRetriever::class, 'a', null);
@@ -78,7 +84,9 @@ class DatabaseQueryRetrieverTest extends AbstractLaravelTestCase
 
     public function testRetrieve_missing_file()
     {
-        /** @var ApiResourceFacade $facade */
+        /**
+ * @var ApiResourceFacade $facade 
+*/
         $facade = $this->app->get(ApiResourceFacade::class);
         $this->expectException(FileNotFoundException::class);
         $facade->get(MissingFileClassForDatabaseQueryRetriever::class, 'a', null);
@@ -86,7 +94,9 @@ class DatabaseQueryRetrieverTest extends AbstractLaravelTestCase
 
     public function testRetrieveAll()
     {
-        /** @var ApiResourceFacade $facade */
+        /**
+ * @var ApiResourceFacade $facade 
+*/
         $facade = $this->app->get(ApiResourceFacade::class);
         $actual = $facade->getAll(ClassForDatabaseQueryRetriever::class, 0, 100, null)->getResource();
         $expected = [
@@ -98,7 +108,9 @@ class DatabaseQueryRetrieverTest extends AbstractLaravelTestCase
 
     public function testRetrieveALl_missing_configuration()
     {
-        /** @var ApiResourceFacade $facade */
+        /**
+ * @var ApiResourceFacade $facade 
+*/
         $facade = $this->app->get(ApiResourceFacade::class);
         $this->expectException(ApiResourceContextException::class);
         $facade->getAll(MissingConfigClassForDatabaseQueryRetriever::class, 0, 100, null);

@@ -11,13 +11,17 @@ class ApiResourceServiceProviderNoConfigTest extends AbstractLaravelTestCase
 {
     public function testApiResourceFacade_works_without_config()
     {
-        /** @var ApiResourceFacade $class */
+        /**
+ * @var ApiResourceFacade $class 
+*/
         $class = $this->app->get(ApiResourceFacade::class);
         $this->assertInstanceOf(ApiResourceFacade::class, $class);
         $appResponse = $class->get(App::class, 'name', null);
-        /** @var App $resource */
+        /**
+ * @var App $resource 
+*/
         $resource = $appResponse->getResource();
-        $hash = require __DIR__ . '/../../config/apie.php';
+        $hash = include __DIR__ . '/../../config/apie.php';
         $expected = new App(
             'Laravel',
             'testing',
@@ -29,7 +33,9 @@ class ApiResourceServiceProviderNoConfigTest extends AbstractLaravelTestCase
 
     public function testOpenApiSchema_works_without_config()
     {
-        /** @var OpenApiSpecGenerator $class */
+        /**
+ * @var OpenApiSpecGenerator $class 
+*/
         $class = $this->app->get(OpenApiSpecGenerator::class);
         $this->assertInstanceOf(OpenApiSpecGenerator::class, $class);
         $spec = $class->getOpenApiSpec();

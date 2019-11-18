@@ -24,8 +24,8 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
     private $denormalizer;
 
     /**
-     * @param DatabaseManager $db
-     * @param NormalizerInterface $normalizer
+     * @param DatabaseManager       $db
+     * @param NormalizerInterface   $normalizer
      * @param DenormalizerInterface $denormalizer
      */
     public function __construct(DatabaseManager $db, NormalizerInterface $normalizer, DenormalizerInterface $denormalizer)
@@ -38,9 +38,9 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
     /**
      * Retrieves a single resource.
      *
-     * @param string $resourceClass
-     * @param mixed $id
-     * @param array $context
+     * @param  string $resourceClass
+     * @param  mixed  $id
+     * @param  array  $context
      * @return array|object
      */
     public function retrieve(string $resourceClass, $id, array $context)
@@ -60,10 +60,10 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
     /**
      * Retrieves all results.
      *
-     * @param string $resourceClass
-     * @param array $context
-     * @param int $pageIndex
-     * @param int $numberOfItems
+     * @param  string $resourceClass
+     * @param  array  $context
+     * @param  int    $pageIndex
+     * @param  int    $numberOfItems
      * @return iterable
      */
     public function retrieveAll(string $resourceClass, array $context, int $pageIndex, int $numberOfItems): iterable
@@ -82,8 +82,8 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
     /**
      * Returns the query to retrieve all rows.
      *
-     * @param string $resourceClass
-     * @param array $context
+     * @param  string $resourceClass
+     * @param  array  $context
      * @return string
      */
     private function getAllQuery(string $resourceClass, array $context): ?string
@@ -106,8 +106,8 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
     /**
      * Returns the query to retrieve a single resource.
      *
-     * @param string $resourceClass
-     * @param array $context
+     * @param  string $resourceClass
+     * @param  array  $context
      * @return string
      */
     private function getFindQuery(string $resourceClass, array $context): ?string

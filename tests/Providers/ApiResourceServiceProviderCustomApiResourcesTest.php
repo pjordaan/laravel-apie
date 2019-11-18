@@ -39,7 +39,7 @@ class ApiResourceServiceProviderCustomApiResourcesTest extends AbstractLaravelTe
     /**
      * Define environment setup.
      *
-     * @param \Illuminate\Foundation\Application $app
+     * @param  \Illuminate\Foundation\Application $app
      * @return void
      */
     protected function getEnvironmentSetUp($app)
@@ -52,7 +52,7 @@ class ApiResourceServiceProviderCustomApiResourcesTest extends AbstractLaravelTe
             'driver'   => 'sqlite',
             'database' => ':memory:',
             'prefix'   => '',
-        ]
+            ]
         );
         $config->set(
             'apie',
@@ -77,11 +77,15 @@ class ApiResourceServiceProviderCustomApiResourcesTest extends AbstractLaravelTe
 
     public function testApiResourceFacade()
     {
-        /** @var ApiResourceFacade $class */
+        /**
+ * @var ApiResourceFacade $class 
+*/
         $class = $this->app->get(ApiResourceFacade::class);
         $this->assertInstanceOf(ApiResourceFacade::class, $class);
         $appResponse = $class->get(App::class, 'name', null);
-        /** @var App $resource */
+        /**
+ * @var App $resource 
+*/
         $resource = $appResponse->getResource();
         $expected = new App(
             'Laravel',
