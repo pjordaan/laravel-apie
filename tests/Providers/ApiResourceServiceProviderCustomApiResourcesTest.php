@@ -5,7 +5,7 @@ use Illuminate\Support\ServiceProvider;
 use W2w\Laravel\Apie\Providers\ApiResourceServiceProvider;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
 use W2w\Lib\Apie\ApiResourceFacade;
-use W2w\Lib\Apie\ApiResources\App;
+use W2w\Lib\Apie\ApiResources\ApplicationInfo;
 use W2w\Lib\Apie\ApiResources\Status;
 use W2w\Lib\Apie\Resources\ApiResources;
 use W2w\Lib\Apie\Resources\ApiResourcesInterface;
@@ -25,7 +25,7 @@ class ApiResourceServiceProviderCustomApiResourcesTest extends AbstractLaravelTe
                         {
                             public function getApiResources(): array
                             {
-                                return [App::class];
+                                return [ApplicationInfo::class];
                             }
                         };
                     }
@@ -57,7 +57,7 @@ class ApiResourceServiceProviderCustomApiResourcesTest extends AbstractLaravelTe
         $config->set(
             'apie',
             [
-                'resources'         => [App::class, Status::class],
+                'resources'         => [ApplicationInfo::class, Status::class],
                 'resources-service' => 'service-name',
                 'metadata'          => [
                     'title'            => 'Laravel REST api',
@@ -77,17 +77,13 @@ class ApiResourceServiceProviderCustomApiResourcesTest extends AbstractLaravelTe
 
     public function testApiResourceFacade()
     {
-        /**
- * @var ApiResourceFacade $class 
-*/
+        /** @var ApiResourceFacade $class */
         $class = $this->app->get(ApiResourceFacade::class);
         $this->assertInstanceOf(ApiResourceFacade::class, $class);
-        $appResponse = $class->get(App::class, 'name', null);
-        /**
- * @var App $resource 
-*/
+        $appResponse = $class->get(ApplicationInfo::class, 'name', null);
+        /** @var App $resource */
         $resource = $appResponse->getResource();
-        $expected = new App(
+        $expected = new ApplicationInfo(
             'Laravel',
             'testing',
             '12345',
@@ -98,6 +94,6 @@ class ApiResourceServiceProviderCustomApiResourcesTest extends AbstractLaravelTe
         $apiResources = $this->app->get(ApiResourcesInterface::class);
         $this->assertNotInstanceOf(ApiResources::class, $apiResources);
 
-        $this->assertEquals([App::class], $apiResources->getApiResources());
+        $this->assertEquals([ApplicationInfo::class], $apiResources->getApiResources());
     }
 }

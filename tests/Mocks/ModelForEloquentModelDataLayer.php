@@ -3,7 +3,7 @@ namespace W2w\Laravel\Apie\Tests\Mocks;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ModelForEloquentModelRetriever extends Model
+class ModelForEloquentModelDataLayer extends Model
 {
     protected $table = 'status';
 

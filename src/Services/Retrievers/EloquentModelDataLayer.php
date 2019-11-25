@@ -14,6 +14,9 @@ use W2w\Lib\Apie\Normalizers\ContextualNormalizer;
 use W2w\Lib\Apie\Normalizers\EvilReflectionPropertyNormalizer;
 use W2w\Lib\Apie\Persisters\ApiResourcePersisterInterface;
 use W2w\Lib\Apie\Retrievers\ApiResourceRetrieverInterface;
+use W2w\Lib\Apie\Retrievers\SearchFilterFromMetadataTrait;
+use W2w\Lib\Apie\Retrievers\SearchFilterProviderInterface;
+use W2w\Lib\Apie\SearchFilters\SearchFilterRequest;
 
 /**
  * Maps a domain object to an eloquent model. Remember that foreign key constraints can be confusing, so it might be
@@ -22,8 +25,10 @@ use W2w\Lib\Apie\Retrievers\ApiResourceRetrieverInterface;
  * It uses the fill and toArray method of the Eloquent model. Mass alignment is disabled to map the fields as we
  * assume the domain object does the protection.
  */
-class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResourcePersisterInterface
+class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResourcePersisterInterface, SearchFilterProviderInterface
 {
+    use SearchFilterFromMetadataTrait;
+
     private $normalizer;
 
     private $denormalizer;
@@ -40,6 +45,38 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
         $this->normalizer = $normalizer;
         $this->denormalizer = $denormalizer;
         $this->gate = $gate;
+    }
+
+    /**
+     * Retrieves all resources. Since the filtering whether you are allowed to see a model instance is done afterwards,
+     * the pagination could show a less amount of records than indicated. This is only for performance reasons.
+     *
+     * @param  string              $resourceClass
+     * @param  array               $context
+     * @param  SearchFilterRequest $searchFilterRequest
+     * @return array
+     */
+    public function retrieveAll(string $resourceClass, array $context, SearchFilterRequest $searchFilterRequest): iterable
+    {
+        $modelClass = $this->getModelClass($resourceClass, $context);
+
+        $queryBuilder = $modelClass::where($searchFilterRequest->getSearches());
+
+        $modelInstances = $queryBuilder->orderBy('id', 'ASC')
+                                     ->skip($searchFilterRequest->getOffset())
+                                     ->take($searchFilterRequest->getNumberOfItems())
+                                     ->get();
+
+        return array_filter(
+            array_map(
+                function ($modelInstance) use (&$resourceClass) {
+                    return $this->denormalize($modelInstance->toArray(), $resourceClass);
+                }, iterator_to_array($modelInstances)
+            ),
+            function ($resource) {
+                return $this->gate->allows('get', $resource);
+            }
+        );
     }
 
     /**
@@ -62,36 +99,6 @@ class EloquentModelRetriever implements ApiResourceRetrieverInterface, ApiResour
         $this->gate->authorize('get', $result);
 
         return $result;
-    }
-
-    /**
-     * Retrieves all resources. Since the filtering whether you are allowed to see a model instance is done afterwards,
-     * the pagination could show a less amount of records than indicated. This is only for performance reasons.
-     *
-     * @param  string $resourceClass
-     * @param  array  $context
-     * @param  int    $pageIndex
-     * @param  int    $numberOfItems
-     * @return array
-     */
-    public function retrieveAll(string $resourceClass, array $context, int $pageIndex, int $numberOfItems): iterable
-    {
-        $modelClass = $this->getModelClass($resourceClass, $context);
-        $modelInstances = $modelClass::where([])->orderBy('id', 'ASC')
-            ->skip($pageIndex * $numberOfItems)
-            ->take($numberOfItems)
-            ->get();
-
-        return array_filter(
-            array_map(
-                function ($modelInstance) use (&$resourceClass) {
-                    return $this->denormalize($modelInstance->toArray(), $resourceClass);
-                }, iterator_to_array($modelInstances)
-            ),
-            function ($resource) {
-                return $this->gate->allows('get', $resource);
-            }
-        );
     }
 
     /**

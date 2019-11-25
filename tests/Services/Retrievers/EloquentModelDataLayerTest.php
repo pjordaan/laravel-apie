@@ -5,16 +5,16 @@ namespace W2w\Laravel\Apie\Tests\Services\Retrievers;
 
 use Illuminate\Auth\GenericUser;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
-use W2w\Laravel\Apie\Tests\Mocks\ModelForEloquentModelRetriever;
+use W2w\Laravel\Apie\Tests\Mocks\ModelForEloquentModelDataLayer;
 use W2w\Laravel\Apie\Tests\Mocks\PolicyServiceProvider;
-use W2w\Laravel\Apie\Tests\Services\Mock\ClassForEloquentModelRetriever;
+use W2w\Laravel\Apie\Tests\Services\Mock\ClassForEloquentModelDataLayer;
 use W2w\Laravel\Apie\Tests\Services\Mock\EnumValueObject;
 use W2w\Lib\Apie\ApiResourceFacade;
 use W2w\Lib\Apie\Exceptions\ResourceNotFoundException;
 use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\Stream;
 
-class EloquentModelRetrieverTest extends AbstractLaravelTestCase
+class EloquentModelDataLayerTest extends AbstractLaravelTestCase
 {
     protected function getEnvironmentSetUp($application)
     {
@@ -24,7 +24,7 @@ class EloquentModelRetrieverTest extends AbstractLaravelTestCase
             'apie',
             [
                 'resources' => [
-                    ClassForEloquentModelRetriever::class,
+                    ClassForEloquentModelDataLayer::class,
                 ],
                 'metadata'               => [
                     'title'            => 'Laravel REST api',
@@ -55,50 +55,43 @@ class EloquentModelRetrieverTest extends AbstractLaravelTestCase
 
     public function testRetrieve()
     {
-        /**
- * @var ApiResourceFacade $facade 
-*/
+        /** @var ApiResourceFacade $facade */
         $facade = $this->app->get(ApiResourceFacade::class);
-        $actual = $facade->get(ClassForEloquentModelRetriever::class, '42', null)->getResource();
-        $this->assertEquals(new ClassForEloquentModelRetriever(1716179948, new EnumValueObject('a'), '42'), $actual);
+        $actual = $facade->get(ClassForEloquentModelDataLayer::class, '42', null)->getResource();
+        $this->assertEquals(new ClassForEloquentModelDataLayer(1716179948, new EnumValueObject('a'), '42'), $actual);
     }
 
     public function testRetrieve_not_found()
     {
-        /**
- * @var ApiResourceFacade $facade 
-*/
+        /** @var ApiResourceFacade $facade */
         $facade = $this->app->get(ApiResourceFacade::class);
         $this->expectException(ResourceNotFoundException::class);
-        $facade->get(ClassForEloquentModelRetriever::class, '666', null);
+        $facade->get(ClassForEloquentModelDataLayer::class, '666', null);
     }
 
     public function testRetrieveAll()
     {
-        /**
- * @var ApiResourceFacade $facade 
-*/
+        /** @var ApiResourceFacade $facade */
         $facade = $this->app->get(ApiResourceFacade::class);
-        $actual = $facade->getAll(ClassForEloquentModelRetriever::class, 0, 2, null)->getResource();
+        $request = (new ServerRequest())->withQueryParams(['page' => 0, 'limit' => 2]);
+        $actual = $facade->getAll(ClassForEloquentModelDataLayer::class, $request)->getResource();
         $expected = [
-            new ClassForEloquentModelRetriever(1178568022, new EnumValueObject('a'), '0'),
-            new ClassForEloquentModelRetriever(1273124119, new EnumValueObject('a'), '1'),
+            new ClassForEloquentModelDataLayer(1178568022, new EnumValueObject('a'), '0'),
+            new ClassForEloquentModelDataLayer(1273124119, new EnumValueObject('a'), '1'),
         ];
         $this->assertEquals($expected, $actual);
     }
 
     public function testPersistNew()
     {
-        /**
- * @var ApiResourceFacade $facade 
-*/
+        /** @var ApiResourceFacade $facade */
         $facade = $this->app->get(ApiResourceFacade::class);
         $request = (new ServerRequest())->withBody(new Stream('data://text/plain,{"enum_column":"b","value":42}'));
-        $this->assertFalse(ModelForEloquentModelRetriever::where('id', 201)->exists());
-        $actual = $facade->post(ClassForEloquentModelRetriever::class, $request)->getResource();
-        $expected = new ClassForEloquentModelRetriever(42, new EnumValueObject('b'), 200);
+        $this->assertFalse(ModelForEloquentModelDataLayer::where('id', 201)->exists());
+        $actual = $facade->post(ClassForEloquentModelDataLayer::class, $request)->getResource();
+        $expected = new ClassForEloquentModelDataLayer(42, new EnumValueObject('b'), 200);
         $this->assertEquals($expected, $actual);
-        $model = ModelForEloquentModelRetriever::find(200);
+        $model = ModelForEloquentModelDataLayer::find(200);
         $this->assertNotNull($model);
 
         if ($model) {
@@ -110,16 +103,14 @@ class EloquentModelRetrieverTest extends AbstractLaravelTestCase
 
     public function testPersistExisting()
     {
-        /**
- * @var ApiResourceFacade $facade 
-*/
+        /** @var ApiResourceFacade $facade */
         $facade = $this->app->get(ApiResourceFacade::class);
         $request = (new ServerRequest())->withBody(new Stream('data://text/plain,{"enum_column":"b","value":42}'));
-        $actual = $facade->put(ClassForEloquentModelRetriever::class, 1, $request)->getResource();
-        $expected = new ClassForEloquentModelRetriever(42, new EnumValueObject('a'), '1');
+        $actual = $facade->put(ClassForEloquentModelDataLayer::class, 1, $request)->getResource();
+        $expected = new ClassForEloquentModelDataLayer(42, new EnumValueObject('a'), '1');
         $this->assertEquals($expected, $actual);
 
-        $model = ModelForEloquentModelRetriever::find('1');
+        $model = ModelForEloquentModelDataLayer::find('1');
         $this->assertNotNull($model);
 
         if ($model) {
@@ -132,15 +123,13 @@ class EloquentModelRetrieverTest extends AbstractLaravelTestCase
 
     public function testRemove()
     {
-        /**
- * @var ApiResourceFacade $facade 
-*/
+        /** @var ApiResourceFacade $facade */
         $facade = $this->app->get(ApiResourceFacade::class);
-        $this->assertTrue(ModelForEloquentModelRetriever::where('id', 1)->exists());
+        $this->assertTrue(ModelForEloquentModelDataLayer::where('id', 1)->exists());
 
-        $this->assertNull($facade->delete(ClassForEloquentModelRetriever::class, 1)->getResource());
+        $this->assertNull($facade->delete(ClassForEloquentModelDataLayer::class, 1)->getResource());
 
-        $this->assertFalse(ModelForEloquentModelRetriever::where('id', 1)->exists());
+        $this->assertFalse(ModelForEloquentModelDataLayer::where('id', 1)->exists());
     }
 
 

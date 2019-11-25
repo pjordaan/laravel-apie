@@ -3,12 +3,12 @@ namespace W2w\Laravel\Apie\Tests\Mocks;
 
 use Ramsey\Uuid\Uuid;
 use W2w\Lib\Apie\Annotations\ApiResource;
-use W2w\Lib\Apie\Retrievers\FileStorageRetriever;
+use W2w\Lib\Apie\Retrievers\FileStorageDataLayer;
 
 /**
  * @ApiResource(
- *     persistClass=FileStorageRetriever::class,
- *     retrieveClass=FileStorageRetriever::class
+ *     persistClass=FileStorageDataLayer::class,
+ *     retrieveClass=FileStorageDataLayer::class
  * )
  */
 class DomainObjectForFileStorage

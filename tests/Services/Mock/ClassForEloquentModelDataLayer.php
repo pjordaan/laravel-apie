@@ -3,21 +3,20 @@
 
 namespace W2w\Laravel\Apie\Tests\Services\Mock;
 
-use Ramsey\Uuid\Uuid;
-use W2w\Laravel\Apie\Services\Retrievers\EloquentModelRetriever;
-use W2w\Laravel\Apie\Tests\Mocks\ModelForEloquentModelRetriever;
+use W2w\Laravel\Apie\Services\Retrievers\EloquentModelDataLayer;
+use W2w\Laravel\Apie\Tests\Mocks\ModelForEloquentModelDataLayer;
 use W2w\Lib\Apie\Annotations\ApiResource;
 
 /**
  * @ApiResource(
- *     retrieveClass=EloquentModelRetriever::class,
- *     persistClass=EloquentModelRetriever::class,
+ *     retrieveClass=EloquentModelDataLayer::class,
+ *     persistClass=EloquentModelDataLayer::class,
  *     context={
- *         "model": ModelForEloquentModelRetriever::class
+ *         "model": ModelForEloquentModelDataLayer::class
  *     }
  * )
  */
-class ClassForEloquentModelRetriever
+class ClassForEloquentModelDataLayer
 {
     /**
      * @var int|null

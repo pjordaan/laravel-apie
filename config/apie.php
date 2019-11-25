@@ -1,14 +1,14 @@
 <?php
-use W2w\Lib\Apie\ApiResources\App;
+use W2w\Lib\Apie\ApiResources\ApplicationInfo;
 use W2w\Lib\Apie\ApiResources\Status;
-use W2w\Lib\Apie\Retrievers\AppRetriever;
+use W2w\Lib\Apie\Retrievers\ApplicationInfoRetriever;
 use W2w\Lib\Apie\Retrievers\StatusCheckRetriever;
 
 return [
     /**
      * A list of classes to be used as Api resources.
      */
-    'resources'              => [App::class, Status::class],
+    'resources'              => [ApplicationInfo::class, Status::class],
 
     /**
      * Indicate the list of classes to be used as Api resources comes from a service in the service container instead.
@@ -21,7 +21,7 @@ return [
     /**
      * If mock is true, some retrievers can be skipped and will keep working.
      */
-    'mock-skipped-resources' => [AppRetriever::class, StatusCheckRetriever::class],
+    'mock-skipped-resources' => [ApplicationInfoRetriever::class, StatusCheckRetriever::class],
     /**
      * In case your application is not in the root of the website you require to configure the base url to get the correct
      * paths in the open api spec.

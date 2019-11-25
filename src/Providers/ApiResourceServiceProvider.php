@@ -21,18 +21,18 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
-use W2w\Laravel\Apie\Services\Retrievers\EloquentModelRetriever;
+use W2w\Laravel\Apie\Services\Retrievers\EloquentModelDataLayer;
 use W2w\Lib\Apie\ApiResourceFacade;
 use W2w\Lib\Apie\ApiResourceFactory;
 use W2w\Lib\Apie\IdentifierExtractor;
+use W2w\Lib\Apie\Mocks\MockApiResourceDataLayer;
 use W2w\Lib\Apie\Mocks\MockApiResourceFactory;
-use W2w\Lib\Apie\Mocks\MockApiResourceRetriever;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
 use W2w\Lib\Apie\OpenApiSchema\SchemaGenerator;
 use W2w\Lib\Apie\Resources\ApiResources;
 use W2w\Lib\Apie\Resources\ApiResourcesInterface;
-use W2w\Lib\Apie\Retrievers\AppRetriever;
-use W2w\Lib\Apie\Retrievers\FileStorageRetriever;
+use W2w\Lib\Apie\Retrievers\ApplicationInfoRetriever;
+use W2w\Lib\Apie\Retrievers\FileStorageDataLayer;
 use W2w\Lib\Apie\Retrievers\StatusCheckRetriever;
 use W2w\Laravel\Apie\Services\StatusChecks\StatusFromDatabaseRetriever;
 use W2w\Lib\Apie\ServiceLibraryFactory;
@@ -113,9 +113,10 @@ class ApiResourceServiceProvider extends ServiceProvider
 
                 $result->setApiResourceFactory(
                     new MockApiResourceFactory(
-                        new MockApiResourceRetriever(
+                        new MockApiResourceDataLayer(
                             $cachePool,
-                            new IdentifierExtractor($result->getPropertyAccessor())
+                            new IdentifierExtractor($result->getPropertyAccessor()),
+                            $result->getPropertyAccessor()
                         ),
                         new ApiResourceFactory($this->app),
                         $config['mock-skipped-resources']
@@ -163,19 +164,19 @@ class ApiResourceServiceProvider extends ServiceProvider
         $this->app->singleton(CamelCaseToSnakeCaseNameConverter::class);
         $this->app->bind(NameConverterInterface::class, CamelCaseToSnakeCaseNameConverter::class);
 
-        $this->app->singleton(AppRetriever::class, function () {
+        $this->app->singleton(ApplicationInfoRetriever::class, function () {
             $config = $this->app->get('apie.config');
-            return new AppRetriever(
+            return new ApplicationInfoRetriever(
                 config('app.name'),
                 config('app.env'),
                 $config['metadata']['hash'],
                 config('app.debug')
             );
         });
-        $this->app->singleton(EloquentModelRetriever::class);
+        $this->app->singleton(EloquentModelDataLayer::class);
         $this->app->singleton(DatabaseQueryRetriever::class);
-        $this->app->singleton(FileStorageRetriever::class, function () {
-            return new FileStorageRetriever(
+        $this->app->singleton(FileStorageDataLayer::class, function () {
+            return new FileStorageDataLayer(
                 storage_path('api-file-storage'),
                 $this->app->get(ServiceLibraryFactory::class)->getPropertyAccessor()
             );

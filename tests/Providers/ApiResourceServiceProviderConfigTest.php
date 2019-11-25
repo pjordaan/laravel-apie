@@ -5,7 +5,7 @@ use erasys\OpenApi\Spec\v3\Server;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
 use W2w\Laravel\Apie\Tests\Mocks\DomainObjectForFileStorage;
 use W2w\Lib\Apie\ApiResourceFacade;
-use W2w\Lib\Apie\ApiResources\App;
+use W2w\Lib\Apie\ApiResources\ApplicationInfo;
 use W2w\Lib\Apie\ApiResources\Status;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
 
@@ -32,7 +32,7 @@ class ApiResourceServiceProviderConfigTest extends AbstractLaravelTestCase
         $config->set(
             'apie',
             [
-                'resources' => [App::class, Status::class, DomainObjectForFileStorage::class],
+                'resources' => [ApplicationInfo::Class, Status::class, DomainObjectForFileStorage::class],
                 'metadata'               => [
                     'title'            => 'Laravel REST api',
                     'version'          => '1.0',
@@ -51,17 +51,13 @@ class ApiResourceServiceProviderConfigTest extends AbstractLaravelTestCase
 
     public function testApiResourceFacade()
     {
-        /**
- * @var ApiResourceFacade $class 
-*/
+        /** @var ApiResourceFacade $class */
         $class = $this->app->get(ApiResourceFacade::class);
         $this->assertInstanceOf(ApiResourceFacade::class, $class);
-        $appResponse = $class->get(App::class, 'name', null);
-        /**
- * @var App $resource 
-*/
+        $appResponse = $class->get(ApplicationInfo::class, 'name', null);
+        /** @var App $resource */
         $resource = $appResponse->getResource();
-        $expected = new App(
+        $expected = new ApplicationInfo(
             'Laravel',
             'testing',
             '12345',
@@ -72,9 +68,7 @@ class ApiResourceServiceProviderConfigTest extends AbstractLaravelTestCase
 
     public function testOpenApiSchema()
     {
-        /**
- * @var OpenApiSpecGenerator $class 
-*/
+        /** @var OpenApiSpecGenerator $class */
         $class = $this->app->get(OpenApiSpecGenerator::class);
         $this->assertInstanceOf(OpenApiSpecGenerator::class, $class);
         $spec = $class->getOpenApiSpec();

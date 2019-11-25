@@ -8,7 +8,7 @@ Laravel wrapper for the apie library
 ## What does it do
 This is a small wrapper around the library w2w/apie for Laravel. This library maps simple POPO's (Plain Old PHP Objects) to REST api calls. It is very similar to the excellent api platform library.
 
-It also adds a class EloquentModelRetriever to persist and retrieve api resources as Eloquent models and adds a status check to see if it can connect with the database. See the documentation of apie at https://github.com/pjordaan/apie
+It also adds a class EloquentModelDataLayer to persist and retrieve api resources as Eloquent models and adds a status check to see if it can connect with the database. See the documentation of apie at https://github.com/pjordaan/apie
 
 ## Installation
 In your Laravel package you should do the usual steps to install a Laravel package.
@@ -89,11 +89,11 @@ Now in config/apie.php we should add the class to add it to the api resources:
 <?php
 //config/apie.php
 use App\ApiResources\SumExample;
-use W2w\Lib\Apie\ApiResources\App;
+use W2w\Lib\Apie\ApiResources\ApplicationInfo;
 use W2w\Lib\Apie\ApiResources\Status;
 
 return [
-'resources' => [App::class, Status::class, SumExample::class]
+'resources' => [ApplicationInfo::class, Status::class, SumExample::class]
 ];
 ```
 

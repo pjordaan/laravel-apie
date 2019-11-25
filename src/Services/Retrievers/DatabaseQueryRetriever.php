@@ -10,13 +10,18 @@ use W2w\Laravel\Apie\Exceptions\ApiResourceContextException;
 use W2w\Laravel\Apie\Exceptions\FileNotFoundException;
 use W2w\Lib\Apie\Exceptions\ResourceNotFoundException;
 use W2w\Lib\Apie\Retrievers\ApiResourceRetrieverInterface;
+use W2w\Lib\Apie\Retrievers\SearchFilterFromMetadataTrait;
+use W2w\Lib\Apie\Retrievers\SearchFilterProviderInterface;
+use W2w\Lib\Apie\SearchFilters\SearchFilterRequest;
 
 /**
  * Does a SQL query and maps the output to a domain object. The result set should have an id returned to retrieve
  * single records.
  */
-class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
+class DatabaseQueryRetriever implements ApiResourceRetrieverInterface, SearchFilterProviderInterface
 {
+    use SearchFilterFromMetadataTrait;
+
     private $db;
 
     private $normalizer;
@@ -60,21 +65,36 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface
     /**
      * Retrieves all results.
      *
-     * @param  string $resourceClass
-     * @param  array  $context
-     * @param  int    $pageIndex
-     * @param  int    $numberOfItems
+     * @param  string               $resourceClass
+     * @param  array                $context
+     * @param   SearchFilterRequest $searchFilterRequest
      * @return iterable
      */
-    public function retrieveAll(string $resourceClass, array $context, int $pageIndex, int $numberOfItems): iterable
+    public function retrieveAll(string $resourceClass, array $context, SearchFilterRequest $searchFilterRequest): iterable
     {
         $query = $this->getAllQuery($resourceClass, $context);
 
         if (empty($query)) {
             throw new ApiResourceContextException($resourceClass, 'a query or query_file');
         }
+        $parameters = [
+            'offset' => $searchFilterRequest->getOffset(),
+            'limit' => $searchFilterRequest->getNumberOfItems()
+        ];
+        $count = 0;
+        $query = 'SELECT * FROM (' . $query . ')  AS subquery WHERE 1 = 1';
+        foreach ($searchFilterRequest->getSearches() as $name => $value) {
+            $query .= ' AND `' . $name . '` = :var' . $count;
+            $parameters['var' . $count] = $value;
+            $count++;
+        }
 
-        $result = $this->db->select($this->db->raw($query . ' LIMIT :offset, :limit'), ['offset' => $pageIndex, 'limit' => $numberOfItems]);
+        $result = $this->db->select(
+            $this->db->raw(
+                $query . ' LIMIT :offset, :limit'
+            ),
+            $parameters
+        );
 
         return $this->denormalizer->denormalize($result, $resourceClass . '[]', null, ['disable_type_enforcement' => true]);
     }
