@@ -19,13 +19,12 @@
         "symfony/options-resolver": "^4.0",
         "symfony/serializer": "^4.0",
         "w2w/apie": "^2.0.0",
-        "madewithlove/illuminate-psr-cache-bridge": "^1.0",
         "ramsey/uuid": "^3.8",
-        "symfony/psr-http-message-bridge": "^1.2",
         "gbprod/uuid-normalizer": "^1.1",
         "doctrine/cache": "^1.8",
         "doctrine/annotations": "^1.7",
-        "symfony/cache": "^4.3"
+        "symfony/cache": "^4.3",
+        "symfony/psr-http-message-bridge": "^1.2"
     },
     "autoload": {
         "psr-4": {
@@ -51,7 +50,7 @@
         }
     },
     "require-dev": {
-        "orchestra/testbench": "3.6.*",
+        "orchestra/testbench": "^3.6|^4.0",
         "mockery/mockery": "^1.2",
         "nunomaduro/larastan": "^0.4.3"
     }

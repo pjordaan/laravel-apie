@@ -11,7 +11,7 @@ use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
+use Psr\Cache\CacheItemPoolInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
@@ -20,6 +20,7 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
+use W2w\Laravel\Apie\Services\Psr6\CacheItemPool;
 use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
 use W2w\Laravel\Apie\Services\Retrievers\EloquentModelDataLayer;
 use W2w\Lib\Apie\ApiResourceFacade;
@@ -85,6 +86,14 @@ class ApiResourceServiceProvider extends ServiceProvider
             return new ApiResources($config['resources']);
         });
 
+        $this->app->singleton(CacheItemPoolInterface::class, function () {
+            if ($this->app->bound('cache.psr6')) {
+                return $this->app->get('cache.psr6');
+            }
+            $repository = $this->app->make(Repository::class);
+            return new CacheItemPool($repository);
+        });
+
         $this->app->singleton(ServiceLibraryFactory::class, function () {
             $config = $this->app->get('apie.config');
             $result = new ServiceLibraryFactory(
@@ -102,8 +111,7 @@ class ApiResourceServiceProvider extends ServiceProvider
                     $normalizers[] = $taggedNormalizer;
                 }
                 if (!config('app.debug')) {
-                    $repository = $this->app->make(Repository::class);
-                    $result->setSerializerCache(new CacheItemPool($repository));
+                    $result->setSerializerCache($this->app->get(CacheItemPoolInterface::class));
                 }
                 $result->setAdditionalNormalizers($normalizers);
             });
