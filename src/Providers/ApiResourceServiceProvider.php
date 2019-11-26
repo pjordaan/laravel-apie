@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
@@ -86,45 +87,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(ServiceLibraryFactory::class, function () {
-            $config = $this->app->get('apie.config');
-            $result = new ServiceLibraryFactory(
-                $this->app->get(ApiResourcesInterface::class),
-                (bool) config('app.debug'),
-                storage_path('apie-cache')
-            );
-            $result->setContainer($this->app);
-            $result->runBeforeInstantiation(function () use (&$result) {
-                $normalizers = [
-                ];
-                $taggedNormalizers = $this->app->tagged(NormalizerInterface::class);
-                // app->tagged return type is hazy....
-                foreach ($taggedNormalizers as $taggedNormalizer) {
-                    $normalizers[] = $taggedNormalizer;
-                }
-                if (!config('app.debug')) {
-                    $repository = $this->app->make(Repository::class);
-                    $result->setSerializerCache(new CacheItemPool($repository));
-                }
-                $result->setAdditionalNormalizers($normalizers);
-            });
-
-            if ($config['mock']) {
-                $cachePool = new CacheItemPool($this->app->make(CacheRepository::class));
-
-                $result->setApiResourceFactory(
-                    new MockApiResourceFactory(
-                        new MockApiResourceDataLayer(
-                            $cachePool,
-                            new IdentifierExtractor($result->getPropertyAccessor()),
-                            $result->getPropertyAccessor()
-                        ),
-                        new ApiResourceFactory($this->app),
-                        $config['mock-skipped-resources']
-                    )
-                );
-            }
-
-            return $result;
+            return $this->createServiceLibraryFactory();
         });
 
         // MainScheduler: service that does all the background processes of api resources.
@@ -230,6 +193,58 @@ class ApiResourceServiceProvider extends ServiceProvider
                 ]
             );
         });
+    }
+
+    private function createServiceLibraryFactory(): ServiceLibraryFactory
+    {
+        $config = $this->app->get('apie.config');
+        $result = new ServiceLibraryFactory(
+            $this->app->get(ApiResourcesInterface::class),
+            (bool) config('app.debug'),
+            storage_path('apie-cache')
+        );
+        $result->setContainer($this->app);
+        if (!config('app.debug')) {
+            $this->handleSerializerCache($result);
+        }
+        $result->runBeforeInstantiation(function () use (&$result) {
+            $normalizers = [
+            ];
+            $taggedNormalizers = $this->app->tagged(NormalizerInterface::class);
+            // app->tagged return type is hazy....
+            foreach ($taggedNormalizers as $taggedNormalizer) {
+                $normalizers[] = $taggedNormalizer;
+            }
+            $result->setAdditionalNormalizers($normalizers);
+        });
+
+        if ($config['mock']) {
+            $cachePool = $result->getSerializerCache();
+
+            $result->setApiResourceFactory(
+                new MockApiResourceFactory(
+                    new MockApiResourceDataLayer(
+                        $cachePool,
+                        new IdentifierExtractor($result->getPropertyAccessor()),
+                        $result->getPropertyAccessor()
+                    ),
+                    new ApiResourceFactory($this->app),
+                    $config['mock-skipped-resources']
+                )
+            );
+        }
+
+        return $result;
+    }
+
+    private function handleSerializerCache(ServiceLibraryFactory $result)
+    {
+        if ($this->app->bound('cache.psr6')) {
+            $result->setSerializerCache($this->app->get('cache.psr6'));
+        } elseif (class_exists(CacheItemPool::class)) {
+            $repository = $this->app->make(Repository::class);
+            $result->setSerializerCache(new CacheItemPool($repository));
+        }
     }
 
     private function addStatusResourceServices()
