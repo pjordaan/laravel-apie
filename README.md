@@ -15,11 +15,11 @@ In your Laravel package you should do the usual steps to install a Laravel packa
 ```bash
 composer require w2w/laravel-apie
 ```
-In case you have no autodiscovery on or your Laravel version is too low, you require to add W2w\Laravel\Apie\Providers\ApiResourceServiceProvider::class to your list of service providers manually.
+In case you have no autodiscovery on to add W2w\Laravel\Apie\Providers\ApiResourceServiceProvider::class to your list of service providers manually.
 
-Publish the api resource config with artisan publish to get a config/apie.php file and run migrations to get the database.
+Afterwards run the commands to publish the config and run the migrations.
 ```bash
-artisan publish
+artisan vendor:publish --provider=W2w\Laravel\Apie\Providers\ApiResourceServiceProvider
 artisan migrate
 ```
 
