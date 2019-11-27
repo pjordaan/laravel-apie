@@ -11,6 +11,7 @@
     ],
     "require": {
         "php": "^7.2",
+        "erasys/openapi-php": "dev-tmp-l6 as 2.1.1",
         "illuminate/container": "^5.6|^6.0",
         "illuminate/contracts": "^5.6|^6.0",
         "illuminate/database": "^5.6|^6.0",
@@ -49,6 +50,12 @@
             }
         }
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/pjordaan/openapi-php.git"
+        }
+    ],
     "require-dev": {
         "orchestra/testbench": "3.6.*",
         "mockery/mockery": "^1.2",
