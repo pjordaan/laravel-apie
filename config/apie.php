@@ -48,6 +48,12 @@ return [
      * Set route middleware for swagger ui test page.
      */
     'swagger-ui-test-page-middleware' => [],
+
+    /**
+     * If true any Laravel controller can use ApiResourceFacadeResponse as typehint to use the API parsing in their controller.
+     * Has no effect in Lumen.
+     */
+    'bind-api-resource-facade-response' => true,
     /**
      * Specific metadata used in the output of the open api specs.
      */
