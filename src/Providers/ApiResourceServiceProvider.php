@@ -140,7 +140,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         $this->app->singleton(DatabaseQueryRetriever::class);
         $this->app->singleton(FileStorageDataLayer::class, function () {
             return new FileStorageDataLayer(
-                storage_path('api-file-storage'),
+                storage_path('app/api-file-storage'),
                 $this->app->get(ServiceLibraryFactory::class)->getPropertyAccessor()
             );
         });
@@ -201,7 +201,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         $result = new ServiceLibraryFactory(
             $this->app->get(ApiResourcesInterface::class),
             (bool) config('app.debug'),
-            storage_path('apie-cache')
+            storage_path('app/apie-cache')
         );
         $result->setContainer($this->app);
         if (!config('app.debug')) {
