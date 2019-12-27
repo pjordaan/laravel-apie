@@ -68,11 +68,7 @@ class ApiResourceServiceProvider extends ServiceProvider
     {
         $this->app->singleton('apie.config', function () {
             $config = $this->app->get('config');
-
-            $resolver = new OptionsResolver();
-            $defaults = require __DIR__ . '/../../config/apie.php';
-            $resolver->setDefaults($defaults);
-            return $resolver->resolve($config->get('apie') ?? []);
+            return ApieConfigResolver::resolveConfig($config->get('apie') ?? []);
         });
 
         $this->app->singleton(ApiResourcesInterface::class, function () {

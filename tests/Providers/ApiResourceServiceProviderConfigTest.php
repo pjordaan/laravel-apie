@@ -72,9 +72,9 @@ class ApiResourceServiceProviderConfigTest extends AbstractLaravelTestCase
         $class = $this->app->get(OpenApiSpecGenerator::class);
         $this->assertInstanceOf(OpenApiSpecGenerator::class, $class);
         $spec = $class->getOpenApiSpec();
-        $this->assertEquals($spec->info->description, 'OpenApi description');
-        $this->assertEquals($spec->info->contact->email, 'admin@example.com');
-        $this->assertEquals($spec->info->contact->url, 'example.com');
+        $this->assertEquals('OpenApi description', $spec->info->description);
+        $this->assertEquals('admin@example.com', $spec->info->contact->email);
+        $this->assertEquals('https://example.com', $spec->info->contact->url);
         $this->assertCount(1, $spec->servers);
         $expected = new Server(
             'http://localhost/api',
