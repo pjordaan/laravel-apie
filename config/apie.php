@@ -1,4 +1,6 @@
 <?php
+
+use W2w\Lib\Apie\Annotations\ApiResource;
 use W2w\Lib\Apie\ApiResources\ApplicationInfo;
 use W2w\Lib\Apie\ApiResources\Status;
 use W2w\Lib\Apie\Retrievers\ApplicationInfoRetriever;
@@ -68,5 +70,13 @@ return [
         'contact-name'     => env('APIE_OPENAPI_CONTACT_NAME', 'Way2web Software'),
         'contact-url'      => env('APIE_OPENAPI_CONTACT_URL', ''),
         'contact-email'    => env('APIE_OPENAPI_CONTACT_EMAIL', ''),
+    ],
+    /**
+     * Overrides/configure api resources which class to use. This can be used in case you do not want to use annotations to configure
+     * api resources.
+     * @see ApiResource
+     */
+    'resource-config' => [
+       /*ApplicationInfo::class => new ApiResource(['retrieveClass' => StatusCheckRetriever::class]),*/
     ],
 ];

@@ -4,6 +4,7 @@ namespace W2w\Laravel\Apie\Providers;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use W2w\Lib\Apie\Annotations\ApiResource;
 use W2w\Lib\Apie\Resources\ApiResourcesInterface;
 
 class ApieConfigResolver
@@ -33,16 +34,25 @@ class ApieConfigResolver
                 ->setAllowedTypes('apie-middleware', 'string[]')
                 ->setAllowedTypes('swagger-ui-test-page-middleware', 'string[]')
                 ->setAllowedTypes('bind-api-resource-facade-response', 'bool')
-                ->setAllowedTypes('metadata', 'string[]');
+                ->setAllowedTypes('metadata', 'string[]')
+                ->setAllowedTypes('resource-config', [ApiResource::class . '[]', 'array[]']);
             $resolver->setDefault('metadata', function (OptionsResolver $metadataResolver) use (&$defaults) {
                 $metadataResolver->setDefaults($defaults['metadata']);
 
                 $urlNormalizer = function (Options $options, $value) {
+                    if (empty($value)) {
+                        return '';
+                    }
                     return self::urlNormalize($value);
                 };
                 $metadataResolver->setNormalizer('terms-of-service', $urlNormalizer);
                 $metadataResolver->setNormalizer('license-url', $urlNormalizer);
                 $metadataResolver->setNormalizer('contact-url', $urlNormalizer);
+            });
+            $resolver->setNormalizer('resource-config', function (Options $options, $value) {
+                return array_map(function ($field) {
+                    return $field instanceof ApiResource ? $field : ApiResource::createFromArray($field);
+                }, $value);
             });
             self::$configResolver = $resolver;
         }
@@ -51,9 +61,6 @@ class ApieConfigResolver
 
     private static function urlNormalize($value)
     {
-        if ($value === '') {
-            return '';
-        }
         if ('http://' !== substr($value, 0, 7) && 'https://' !== substr($value, 0, 8)) {
             $value = 'https://'.$value;
         }

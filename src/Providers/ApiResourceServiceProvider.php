@@ -199,6 +199,9 @@ class ApiResourceServiceProvider extends ServiceProvider
             (bool) config('app.debug'),
             storage_path('app/apie-cache')
         );
+        if ($config['resource-config']) {
+            $result->overrideAnnotationConfig($config['resource-config']);
+        }
         $result->setContainer($this->app);
         if (!config('app.debug')) {
             $this->handleSerializerCache($result);
