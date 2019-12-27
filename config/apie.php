@@ -77,6 +77,6 @@ return [
      * @see ApiResource
      */
     'resource-config' => [
-       /*ApplicationInfo::class => new ApiResource(['retrieveClass' => StatusCheckRetriever::class]),*/
+       /*ApplicationInfo::class => ['retrieveClass' => StatusCheckRetriever::class],*/
     ],
 ];
