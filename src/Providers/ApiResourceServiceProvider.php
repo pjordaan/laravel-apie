@@ -4,6 +4,7 @@ namespace W2w\Laravel\Apie\Providers;
 
 use DateTimeInterface;
 use erasys\OpenApi\Spec\v3\Contact;
+use erasys\OpenApi\Spec\v3\Document;
 use erasys\OpenApi\Spec\v3\Info;
 use erasys\OpenApi\Spec\v3\License;
 use erasys\OpenApi\Spec\v3\Schema;
@@ -21,6 +22,7 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
+use W2w\Laravel\Apie\Services\DispatchOpenApiSpecGeneratedEvent;
 use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
 use W2w\Laravel\Apie\Services\Retrievers\EloquentModelDataLayer;
 use W2w\Lib\Apie\ApiResourceFacade;
@@ -232,6 +234,7 @@ class ApiResourceServiceProvider extends ServiceProvider
                 )
             );
         }
+        $result->setOpenApiSpecsHook([DispatchOpenApiSpecGeneratedEvent::class, 'onApiGenerated']);
 
         return $result;
     }
