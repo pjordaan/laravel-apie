@@ -11,10 +11,19 @@ $apieConfig = resolve('apie.config');
 Route::group(
     [
         'prefix' => $apieConfig['api-url'],
-        'middleware' => $apieConfig['apie-middleware']
+        'middleware' => $apieConfig['swagger-ui-test-page-middleware']
     ],
     function () {
         Route::get('/doc.json', DocsController::class)->name('apie.docs');
+    }
+);
+
+Route::group(
+    [
+        'prefix' => $apieConfig['api-url'],
+        'middleware' => $apieConfig['apie-middleware']
+    ],
+    function () {
         Route::post('/{resource}/', PostController::class)->name('apie.post');
         Route::put('/{resource}/{id}', PutController::class)->name('apie.put');
         Route::get('/{resource}/', GetAllController::class)->name('apie.all');
@@ -22,3 +31,4 @@ Route::group(
         Route::delete('/{resource}/{id}', DeleteController::class)->name('apie.delete');
     }
 );
+

@@ -4,14 +4,9 @@ namespace W2w\Laravel\Apie\Services\Retrievers;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RuntimeException;
-use UnexpectedValueException;
-use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Model;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use W2w\Laravel\Apie\Services\Eloquent\EloquentModelSerializer;
 use W2w\Lib\Apie\Exceptions\ResourceNotFoundException;
-use W2w\Lib\Apie\Normalizers\ContextualNormalizer;
-use W2w\Lib\Apie\Normalizers\EvilReflectionPropertyNormalizer;
 use W2w\Lib\Apie\Persisters\ApiResourcePersisterInterface;
 use W2w\Lib\Apie\Retrievers\ApiResourceRetrieverInterface;
 use W2w\Lib\Apie\Retrievers\SearchFilterFromMetadataTrait;
@@ -29,22 +24,14 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
 {
     use SearchFilterFromMetadataTrait;
 
-    private $normalizer;
-
-    private $denormalizer;
-
-    private $gate;
+    private $serializer;
 
     /**
-     * @param NormalizerInterface   $normalizer
-     * @param DenormalizerInterface $denormalizer
-     * @param Gate                  $gate
+     * @param EloquentModelSerializer $serializer
      */
-    public function __construct(NormalizerInterface $normalizer, DenormalizerInterface $denormalizer, Gate $gate)
+    public function __construct(EloquentModelSerializer $serializer)
     {
-        $this->normalizer = $normalizer;
-        $this->denormalizer = $denormalizer;
-        $this->gate = $gate;
+        $this->serializer = $serializer;
     }
 
     /**
@@ -60,23 +47,8 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
     {
         $modelClass = $this->getModelClass($resourceClass, $context);
 
-        $queryBuilder = $modelClass::where($searchFilterRequest->getSearches());
-
-        $modelInstances = $queryBuilder->orderBy('id', 'ASC')
-                                     ->skip($searchFilterRequest->getOffset())
-                                     ->take($searchFilterRequest->getNumberOfItems())
-                                     ->get();
-
-        return array_filter(
-            array_map(
-                function ($modelInstance) use (&$resourceClass) {
-                    return $this->denormalize($modelInstance->toArray(), $resourceClass);
-                }, iterator_to_array($modelInstances)
-            ),
-            function ($resource) {
-                return $this->gate->allows('get', $resource);
-            }
-        );
+        $queryBuilder = $modelClass::query();
+        return $this->serializer->toList($queryBuilder, $resourceClass, $searchFilterRequest);
     }
 
     /**
@@ -95,8 +67,7 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
         } catch (ModelNotFoundException $notFoundException) {
             throw new ResourceNotFoundException($id);
         }
-        $result = $this->denormalize($modelInstance->toArray(), $resourceClass);
-        $this->gate->authorize('get', $result);
+        $result = $this->serializer->toResource($modelInstance, $resourceClass);
 
         return $result;
     }
@@ -110,21 +81,10 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
      */
     public function persistNew($resource, array $context = [])
     {
-        $this->gate->authorize('post', $resource);
         $resourceClass = get_class($resource);
-        $array = $this->normalizer->normalize($resource);
-        if (!is_array($array)) {
-            throw new UnexpectedValueException('Resource ' . get_class($resource) . ' was normalized to a non array field');
-        }
-        $modelClass = $this->getModelClass($resourceClass, $context);
-        $modelClass::unguard();
-        try {
-            $modelInstance = $modelClass::create($array);
-        } finally {
-            $modelClass::reguard();
-        }
+        $modelInstance = $this->serializer->toModel($resource, $this->getModelClass($resourceClass, $context));
 
-        return $this->denormalize($modelInstance->toArray(), $resourceClass);
+        return $this->serializer->toResource($modelInstance, $resourceClass);
     }
 
     /**
@@ -137,24 +97,11 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
      */
     public function persistExisting($resource, $id, array $context = [])
     {
-        $this->gate->authorize('put', $resource);
         $resourceClass = get_class($resource);
         $modelClass = $this->getModelClass($resourceClass, $context);
-        $modelInstance = $modelClass::where(['id' => $id])->firstOrFail();
-        $array = $this->normalizer->normalize($resource);
-        if (!is_array($array)) {
-            throw new UnexpectedValueException('Resource ' . get_class($resource) . ' was normalized to a non array field');
-        }
-        unset($array['id']);
-        $modelInstance->unguard();
-        try {
-            $modelInstance->fill($array);
-        } finally {
-            $modelInstance->reguard();
-        }
-        $modelInstance->save();
+        $modelInstance = $this->serializer->toExistingModel($resource, $id, $modelClass);
 
-        return $this->denormalize($modelInstance->toArray(), $resourceClass);
+        return $this->serializer->toResource($modelInstance, $resourceClass);
     }
 
     /**
@@ -171,34 +118,7 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
         if (!$modelInstance) {
             return;
         }
-        $result = $this->denormalize($modelInstance->toArray(), $resourceClass);
-        $this->gate->authorize('delete', $result);
         $modelClass::destroy($id);
-    }
-
-    /**
-     * Denormalizes from an array to an api resource with the EvilReflectionPropertyNormalizer active, so a domain
-     * with only a getter will be hydrated correctly.
-     *
-     * @param  array  $array
-     * @param  string $resourceClass
-     * @return mixed
-     */
-    private function denormalize(array $array, string $resourceClass)
-    {
-        ContextualNormalizer::enableDenormalizer(EvilReflectionPropertyNormalizer::class);
-        try {
-            $res = $this->denormalizer->denormalize(
-                $array,
-                $resourceClass,
-                null,
-                ['disable_type_enforcement' => true]
-            );
-        } finally {
-            ContextualNormalizer::disableDenormalizer(EvilReflectionPropertyNormalizer::class);
-        }
-
-        return $res;
     }
 
     /**
