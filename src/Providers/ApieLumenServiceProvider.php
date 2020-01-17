@@ -4,6 +4,8 @@ namespace W2w\Laravel\Apie\Providers;
 use Illuminate\Support\ServiceProvider;
 use Psr\Http\Message\ServerRequestInterface;
 use W2w\Laravel\Apie\Controllers\SwaggerUiController;
+use W2w\Laravel\Apie\Services\LumenRouteLoader;
+use W2w\Laravel\Apie\Services\RouteLoaderInterface;
 
 /**
  * Service provider for Apie to link to Laravel (and that do not work in Laravel)
@@ -16,10 +18,11 @@ class ApieLumenServiceProvider extends ServiceProvider
         if ($config['disable-routes']) {
             return;
         }
+        $this->app->bind(RouteLoaderInterface::class, LumenRouteLoader::class);
         if ($config['swagger-ui-test-page']) {
-            include __DIR__ . '/../../config/routes-lumen-openapi.php';
+            LumenRouteLoader::loadOpenApiRoutes();
         }
-        include __DIR__ . '/../../config/routes-lumen.php';
+        LumenRouteLoader::loadRestApiRoutes();
     }
 
     public function register()

@@ -5,7 +5,9 @@ use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
 use Psr\Http\Message\ServerRequestInterface;
 use W2w\Laravel\Apie\Controllers\SwaggerUiController;
+use W2w\Laravel\Apie\Services\LaravelRouteLoader;
 use W2w\Laravel\Apie\Services\RequestToFacadeResponseConverter;
+use W2w\Laravel\Apie\Services\RouteLoaderInterface;
 use W2w\Lib\Apie\Models\ApiResourceFacadeResponse;
 
 /**
@@ -26,10 +28,11 @@ class ApieLaravelServiceProvider extends ServiceProvider
         if ($config['disable-routes']) {
             return;
         }
+        $this->app->bind(RouteLoaderInterface::class, LaravelRouteLoader::class);
         if ($config['swagger-ui-test-page']) {
-            $this->loadRoutesFrom(__DIR__ . '/../../config/routes-openapi.php');
+            LaravelRouteLoader::loadOpenApiRoutes();
         }
-        $this->loadRoutesFrom(__DIR__ . '/../../config/routes.php');
+        LaravelRouteLoader::loadRestApiRoutes();
     }
 
     public function register()
