@@ -4,18 +4,14 @@ namespace W2w\Laravel\Apie\Providers;
 
 use DateTimeInterface;
 use erasys\OpenApi\Spec\v3\Contact;
-use erasys\OpenApi\Spec\v3\Document;
 use erasys\OpenApi\Spec\v3\Info;
 use erasys\OpenApi\Spec\v3\License;
 use erasys\OpenApi\Spec\v3\Schema;
-use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
-use Ramsey\Uuid\Uuid;
-use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -25,6 +21,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use W2w\Laravel\Apie\Services\DispatchOpenApiSpecGeneratedEvent;
 use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
 use W2w\Laravel\Apie\Services\Retrievers\EloquentModelDataLayer;
+use W2w\Laravel\Apie\Services\StatusChecks\StatusFromDatabaseRetriever;
 use W2w\Lib\Apie\ApiResourceFacade;
 use W2w\Lib\Apie\ApiResourceFactory;
 use W2w\Lib\Apie\IdentifierExtractor;
@@ -37,7 +34,6 @@ use W2w\Lib\Apie\Resources\ApiResourcesInterface;
 use W2w\Lib\Apie\Retrievers\ApplicationInfoRetriever;
 use W2w\Lib\Apie\Retrievers\FileStorageDataLayer;
 use W2w\Lib\Apie\Retrievers\StatusCheckRetriever;
-use W2w\Laravel\Apie\Services\StatusChecks\StatusFromDatabaseRetriever;
 use W2w\Lib\Apie\ServiceLibraryFactory;
 
 /**
