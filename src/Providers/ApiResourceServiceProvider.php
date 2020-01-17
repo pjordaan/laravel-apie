@@ -111,7 +111,7 @@ class ApiResourceServiceProvider extends ServiceProvider
         $this->app->singleton(SchemaGenerator::class, function () {
             $factory = $this->app->get(ServiceLibraryFactory::class);
             $service = $factory->getSchemaGenerator();
-            $service->defineSchemaForResource(Uuid::class, new Schema(['type' => 'string', 'format' => 'uuid']));
+            $service->defineSchemaForResource(UuidInterface::class, new Schema(['type' => 'string', 'format' => 'uuid']));
             $service->defineSchemaForResource(DateTimeInterface::class, new Schema(['type' => 'string', 'format' => 'date-time']));
             return $service;
         });
