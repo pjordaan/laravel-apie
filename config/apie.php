@@ -72,6 +72,12 @@ return [
         'contact-email'    => env('APIE_OPENAPI_CONTACT_EMAIL', ''),
     ],
     /**
+     * This option is only useful if ApieExceptionToResponse is used in the error handler and is about mapping exception
+     * classes to a status code. A few of them are predefined.
+     */
+    'exception-mapping' => [
+    ],
+    /**
      * Overrides/configure api resources which class to use. This can be used in case you do not want to use annotations to configure
      * api resources.
      * @see ApiResource

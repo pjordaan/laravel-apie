@@ -1,9 +1,17 @@
 <?php
 namespace W2w\Laravel\Apie\Providers;
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Contracts\Cache\LockTimeoutException;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Contracts\Redis\LimiterTimeoutException;
+use PDOException;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Serializer\Exception\RuntimeException;
+use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use W2w\Lib\Apie\Annotations\ApiResource;
 use W2w\Lib\Apie\Resources\ApiResourcesInterface;
 
@@ -35,7 +43,8 @@ class ApieConfigResolver
                 ->setAllowedTypes('swagger-ui-test-page-middleware', 'string[]')
                 ->setAllowedTypes('bind-api-resource-facade-response', 'bool')
                 ->setAllowedTypes('metadata', 'string[]')
-                ->setAllowedTypes('resource-config', [ApiResource::class . '[]', 'array[]']);
+                ->setAllowedTypes('resource-config', [ApiResource::class . '[]', 'array[]'])
+                ->setAllowedTypes('exception-mapping', 'int[]');
             $resolver->setDefault('metadata', function (OptionsResolver $metadataResolver) use (&$defaults) {
                 $metadataResolver->setDefaults($defaults['metadata']);
 
@@ -54,9 +63,26 @@ class ApieConfigResolver
                     return $field instanceof ApiResource ? $field : ApiResource::createFromArray($field);
                 }, $value);
             });
+            $resolver->setNormalizer('exception-mapping', function (Options $options, $value) {
+                ApieConfigResolver::addExceptionsForExceptionMapping($value);
+                return $value;
+            });
             self::$configResolver = $resolver;
         }
         return self::$configResolver;
+    }
+
+    public static function addExceptionsForExceptionMapping(array& $array)
+    {
+        $array[AuthorizationException::class] = 403;
+        $array[AuthenticationException::class] = 401;
+        $array[UnexpectedValueException::class] = 415;
+        $array[RuntimeException::class] = 415;
+        $array[LockTimeoutException::class] = 502;
+        $array[LimiterTimeoutException::class] = 502;
+        $array[FileNotFoundException::class] = 502;
+        $array[PDOException::class] = 502;
+        return $array;
     }
 
     private static function urlNormalize($value)

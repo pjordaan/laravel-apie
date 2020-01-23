@@ -12,12 +12,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Ramsey\Uuid\UuidInterface;
+use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
+use W2w\Laravel\Apie\Services\ApieExceptionToResponse;
 use W2w\Laravel\Apie\Services\DispatchOpenApiSpecGeneratedEvent;
 use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
 use W2w\Laravel\Apie\Services\Retrievers\EloquentModelDataLayer;
@@ -142,6 +144,10 @@ class ApiResourceServiceProvider extends ServiceProvider
         // ApiResourceFacade: class that calls all the right services with a simple interface.
         $this->app->singleton(ApiResourceFacade::class, function () {
             return $this->app->get(ServiceLibraryFactory::class)->getApiResourceFacade();
+        });
+        $this->app->singleton(ApieExceptionToResponse::class, function () {
+            $mapping = $this->app->get('apie.config')['exception-mapping'];
+            return new ApieExceptionToResponse(resolve(HttpFoundationFactory::class), $mapping);
         });
 
         $this->addStatusResourceServices();

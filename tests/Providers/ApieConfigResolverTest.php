@@ -23,6 +23,7 @@ class ApieConfigResolverTest extends TestCase
     public function resolveConfigProvider()
     {
         $expected = require __DIR__ . '/../../config/apie.php';
+        ApieConfigResolver::addExceptionsForExceptionMapping($expected['exception-mapping']);
 
         yield [$expected, []];
 
