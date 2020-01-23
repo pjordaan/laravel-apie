@@ -4,6 +4,7 @@ namespace W2w\Laravel\Apie\Providers;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
 use Psr\Http\Message\ServerRequestInterface;
+use W2w\Laravel\Apie\Console\DumpOpenApiSpecCommand;
 use W2w\Laravel\Apie\Controllers\SwaggerUiController;
 use W2w\Laravel\Apie\Services\LaravelRouteLoader;
 use W2w\Laravel\Apie\Services\RequestToFacadeResponseConverter;
@@ -71,6 +72,10 @@ class ApieLaravelServiceProvider extends ServiceProvider
 
             return $converter->convertUnknownResourceClassToResponse($request);
         });
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([DumpOpenApiSpecCommand::class]);
+        }
     }
 
     public function registerResourceClass(string $resourceClass)
