@@ -34,14 +34,14 @@ class FeatureTest extends AbstractLaravelTestCase
     {
         $this->withoutExceptionHandling();
         $response = $this->get('/test-facade-response/application_info');
-        $this->assertEquals('1 ' . ApplicationInfo::class . ' 116', $response->getContent());
+        $this->assertEquals('1 ' . ApplicationInfo::class . ' 104', $response->getContent());
     }
 
     public function testApiResourceFacadeResponse_works_with_id()
     {
         $this->withoutExceptionHandling();
         $response = $this->get('/test-facade-response/application_info/name');
-        $this->assertEquals(ApplicationInfo::class . ' 114', $response->getContent());
+        $this->assertEquals(ApplicationInfo::class . ' 102', $response->getContent());
     }
 
     public function testResource_typehint_works_with_id()
