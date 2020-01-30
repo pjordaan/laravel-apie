@@ -50,7 +50,7 @@
     },
     "require-dev": {
         "mockery/mockery": "^1.2",
-        "nunomaduro/larastan": "^0.4.3",
+        "nunomaduro/larastan": "^0.4.3|^0.5",
         "orchestra/testbench": "3.6.*"
     },
     "suggest": {
