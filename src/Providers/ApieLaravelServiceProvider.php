@@ -6,10 +6,12 @@ use Illuminate\Support\ServiceProvider;
 use Psr\Http\Message\ServerRequestInterface;
 use W2w\Laravel\Apie\Console\DumpOpenApiSpecCommand;
 use W2w\Laravel\Apie\Controllers\SwaggerUiController;
+use W2w\Laravel\Apie\Services\ApieContext;
+use W2w\Laravel\Apie\Services\ApieRouteLoader;
 use W2w\Laravel\Apie\Services\LaravelRouteLoader;
 use W2w\Laravel\Apie\Services\RequestToFacadeResponseConverter;
 use W2w\Laravel\Apie\Services\RouteLoaderInterface;
-use W2w\Lib\Apie\Models\ApiResourceFacadeResponse;
+use W2w\Lib\Apie\Core\Models\ApiResourceFacadeResponse;
 
 /**
  * Service provider for Apie to link to Laravel (and that do not work in Lumen)
@@ -26,14 +28,8 @@ class ApieLaravelServiceProvider extends ServiceProvider
             }
         }
 
-        if ($config['disable-routes']) {
-            return;
-        }
         $this->app->bind(RouteLoaderInterface::class, LaravelRouteLoader::class);
-        if ($config['swagger-ui-test-page']) {
-            LaravelRouteLoader::loadOpenApiRoutes();
-        }
-        LaravelRouteLoader::loadRestApiRoutes();
+        resolve(ApieRouteLoader::class)->renderRoutes();
     }
 
     public function register()
@@ -59,7 +55,11 @@ class ApieLaravelServiceProvider extends ServiceProvider
             SwaggerUiController::class,
             function () {
                 $urlGenerator = $this->app->get(UrlGenerator::class);
-                return new SwaggerUiController($urlGenerator, __DIR__ . '/../../resources/open-api.html');
+                return new SwaggerUiController(
+                    $this->app->get(ApieContext::class),
+                    $urlGenerator,
+                    __DIR__ . '/../../resources/open-api.html'
+                );
             }
         );
 

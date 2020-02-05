@@ -1,6 +1,6 @@
 <?php
 
-namespace W2w\Laravel\Apie\Services\Retrievers;
+namespace W2w\Laravel\Apie\Plugins\Illuminate\DataLayers;
 
 use Illuminate\Database\DatabaseManager;
 use ReflectionClass;
@@ -8,11 +8,12 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use W2w\Laravel\Apie\Exceptions\ApiResourceContextException;
 use W2w\Laravel\Apie\Exceptions\FileNotFoundException;
+use W2w\Lib\Apie\Core\SearchFilters\SearchFilterFromMetadataTrait;
+use W2w\Lib\Apie\Core\SearchFilters\SearchFilterRequest;
 use W2w\Lib\Apie\Exceptions\ResourceNotFoundException;
-use W2w\Lib\Apie\Retrievers\ApiResourceRetrieverInterface;
-use W2w\Lib\Apie\Retrievers\SearchFilterFromMetadataTrait;
-use W2w\Lib\Apie\Retrievers\SearchFilterProviderInterface;
-use W2w\Lib\Apie\SearchFilters\SearchFilterRequest;
+use W2w\Lib\Apie\Interfaces\ApiResourceRetrieverInterface;
+use W2w\Lib\Apie\Interfaces\ResourceSerializerInterface;
+use W2w\Lib\Apie\Interfaces\SearchFilterProviderInterface;
 
 /**
  * Does a SQL query and maps the output to a domain object. The result set should have an id returned to retrieve
@@ -24,20 +25,17 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface, SearchFil
 
     private $db;
 
-    private $normalizer;
-
-    private $denormalizer;
+    private $serializer;
 
     /**
      * @param DatabaseManager       $db
      * @param NormalizerInterface   $normalizer
      * @param DenormalizerInterface $denormalizer
      */
-    public function __construct(DatabaseManager $db, NormalizerInterface $normalizer, DenormalizerInterface $denormalizer)
+    public function __construct(DatabaseManager $db, ResourceSerializerInterface $serializer)
     {
         $this->db = $db;
-        $this->normalizer = $normalizer;
-        $this->denormalizer = $denormalizer;
+        $this->serializer = $serializer;
     }
 
     /**
@@ -59,7 +57,7 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface, SearchFil
             throw new ResourceNotFoundException($id);
         }
 
-        return $this->denormalizer->denormalize($result[0], $resourceClass, null, ['disable_type_enforcement' => true]);
+        return $this->serializer->hydrateWithReflection((array) $result[0], $resourceClass);
     }
 
     /**
@@ -95,8 +93,7 @@ class DatabaseQueryRetriever implements ApiResourceRetrieverInterface, SearchFil
             ),
             $parameters
         );
-
-        return $this->denormalizer->denormalize($result, $resourceClass . '[]', null, ['disable_type_enforcement' => true]);
+        return $this->serializer->hydrateWithReflection((array) $result, $resourceClass . '[]');
     }
 
     /**

@@ -2,11 +2,11 @@
 namespace W2w\Laravel\Apie\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use W2w\Lib\Apie\ApiResourceFacade;
+use W2w\Lib\Apie\Core\ApiResourceFacade;
 
 class Apie extends Facade
 {
-    protected static function getFacadeAccessor() 
+    protected static function getFacadeAccessor()
     {
         return ApiResourceFacade::class;
     }

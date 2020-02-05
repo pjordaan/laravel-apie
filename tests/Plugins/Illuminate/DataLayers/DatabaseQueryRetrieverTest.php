@@ -1,7 +1,6 @@
 <?php
 
-
-namespace W2w\Laravel\Apie\Tests\Services\Retrievers;
+namespace W2w\Laravel\Apie\Tests\Plugins\Illuminate\DataLayers;
 
 use W2w\Laravel\Apie\Exceptions\ApiResourceContextException;
 use W2w\Laravel\Apie\Exceptions\FileNotFoundException;
@@ -9,7 +8,7 @@ use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
 use W2w\Laravel\Apie\Tests\Services\Mock\ClassForDatabaseQueryRetriever;
 use W2w\Laravel\Apie\Tests\Services\Mock\MissingConfigClassForDatabaseQueryRetriever;
 use W2w\Laravel\Apie\Tests\Services\Mock\MissingFileClassForDatabaseQueryRetriever;
-use W2w\Lib\Apie\ApiResourceFacade;
+use W2w\Lib\Apie\Core\ApiResourceFacade;
 use W2w\Lib\Apie\Exceptions\ResourceNotFoundException;
 
 class DatabaseQueryRetrieverTest extends AbstractLaravelTestCase

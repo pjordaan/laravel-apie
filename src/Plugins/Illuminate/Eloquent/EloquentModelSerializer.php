@@ -1,32 +1,22 @@
 <?php
-namespace W2w\Laravel\Apie\Services\Eloquent;
+namespace W2w\Laravel\Apie\Plugins\Illuminate\Eloquent;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use UnexpectedValueException;
-use W2w\Lib\Apie\Normalizers\ContextualNormalizer;
-use W2w\Lib\Apie\Normalizers\EvilReflectionPropertyNormalizer;
-use W2w\Lib\Apie\SearchFilters\SearchFilterRequest;
+use W2w\Lib\Apie\Core\SearchFilters\SearchFilterRequest;
+use W2w\Lib\Apie\Interfaces\ResourceSerializerInterface;
 
 /**
  * Contains logic to serialize from/to Eloquent models. This is placed in a different class for reusability.
  */
 class EloquentModelSerializer
 {
-    private $normalizer;
+    private $serializer;
 
-    private $denormalizer;
-
-    /**
-     * @param NormalizerInterface   $normalizer
-     * @param DenormalizerInterface $denormalizer
-     */
-    public function __construct(NormalizerInterface $normalizer, DenormalizerInterface $denormalizer)
+    public function __construct(ResourceSerializerInterface $serializer)
     {
-        $this->normalizer = $normalizer;
-        $this->denormalizer = $denormalizer;
+        $this->serializer = $serializer;
     }
 
     /**
@@ -68,7 +58,7 @@ class EloquentModelSerializer
      */
     public function toModel($resource, string $modelClass): Model
     {
-        $array = $this->normalizer->normalize($resource);
+        $array = $this->serializer->normalize($resource, 'application/json');
         if (!is_array($array)) {
             throw new UnexpectedValueException('Resource ' . get_class($resource) . ' was normalized to a non array field');
         }
@@ -90,19 +80,7 @@ class EloquentModelSerializer
      */
     public function toResource(Model $eloquentModel, string $resourceClass)
     {
-        ContextualNormalizer::enableDenormalizer(EvilReflectionPropertyNormalizer::class);
-        try {
-            $resource = $this->denormalizer->denormalize(
-                $eloquentModel->toArray(),
-                $resourceClass,
-                null,
-                ['disable_type_enforcement' => true]
-            );
-        } finally {
-            ContextualNormalizer::disableDenormalizer(EvilReflectionPropertyNormalizer::class);
-        }
-
-        return $resource;
+        return $this->serializer->hydrateWithReflection($eloquentModel->toArray(), $resourceClass);
     }
 
     /**
@@ -117,7 +95,7 @@ class EloquentModelSerializer
     {
         $resourceClass = get_class($resource);
         $modelInstance = $modelClass::where(['id' => $id])->firstOrFail();
-        $array = $this->normalizer->normalize($resource);
+        $array = $this->serializer->normalize($resource, 'application/json');
         if (!is_array($array)) {
             throw new UnexpectedValueException('Resource ' . $resourceClass . ' was normalized to a non array field');
         }

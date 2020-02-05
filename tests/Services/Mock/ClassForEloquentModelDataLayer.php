@@ -3,7 +3,7 @@
 
 namespace W2w\Laravel\Apie\Tests\Services\Mock;
 
-use W2w\Laravel\Apie\Services\Retrievers\EloquentModelDataLayer;
+use W2w\Laravel\Apie\Plugins\Illuminate\DataLayers\EloquentModelDataLayer;
 use W2w\Laravel\Apie\Tests\Mocks\ModelForEloquentModelDataLayer;
 use W2w\Lib\Apie\Annotations\ApiResource;
 

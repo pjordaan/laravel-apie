@@ -5,10 +5,11 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
 use W2w\Laravel\Apie\Providers\ApieConfigResolver;
+use W2w\Laravel\Apie\Tests\Mocks\DomainObjectForFileStorage;
 use W2w\Lib\Apie\Annotations\ApiResource;
-use W2w\Lib\Apie\ApiResources\ApplicationInfo;
-use W2w\Lib\Apie\Persisters\NullPersister;
-use W2w\Lib\Apie\Retrievers\ApplicationInfoRetriever;
+use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
+use W2w\Lib\Apie\Plugins\ApplicationInfo\DataLayers\ApplicationInfoRetriever;
+use W2w\Lib\Apie\Plugins\Core\DataLayers\NullDataLayer;
 
 class ApieConfigResolverTest extends TestCase
 {
@@ -36,7 +37,7 @@ class ApieConfigResolverTest extends TestCase
         $expected['resource-config'] = $actual['resource-config'] = [
             ApplicationInfo::class => ApiResource::createFromArray(
                 [
-                    'persistClass' => NullPersister::class,
+                    'persistClass' => NullDataLayer::class,
                     'retrieveClass' => ApplicationInfoRetriever::class
                 ]
             )
@@ -44,11 +45,33 @@ class ApieConfigResolverTest extends TestCase
         yield [$expected, $actual];
         $actual['resource-config'] = [
             ApplicationInfo::class => [
-                'persistClass' => NullPersister::class,
+                'persistClass' => NullDataLayer::class,
                 'retrieveClass' => ApplicationInfoRetriever::class
             ]
         ];
         yield [$expected, $actual];
+
+        $actual['contexts'] = [
+            'v1' => ['resources' => [DomainObjectForFileStorage::class], 'api-url' => '/v1'],
+            'v2' => ['resources' => [], 'api-url' => '/v2'],
+        ];
+
+        $context = require __DIR__ . '/../../config/apie.php';
+        ApieConfigResolver::addExceptionsForExceptionMapping($context['exception-mapping']);
+
+        $expected['contexts'] = [
+            'v1' => $context,
+            'v2' => $context,
+        ];
+
+        $expected['contexts']['v1']['resources'] = [DomainObjectForFileStorage::class];
+        $expected['contexts']['v1']['api-url'] = '/v1';
+
+        $expected['contexts']['v2']['resources'] = [];
+        $expected['contexts']['v2']['api-url'] = '/v2';
+
+        yield [$expected, $actual];
+
     }
 
     /**
@@ -78,5 +101,10 @@ class ApieConfigResolverTest extends TestCase
         $test5 = $defaults;
         $test5['resource-config'] = ['pizza'];
         yield [InvalidOptionsException::class, $test5];
+        $test6 = $defaults;
+        $test6['contexts'] = [
+            'v1' => ['does-not-exist' => true],
+        ];
+        yield [UndefinedOptionsException::class, $test6];
     }
 }

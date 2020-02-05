@@ -3,8 +3,8 @@ namespace W2w\Laravel\Apie\Tests\Providers;
 
 use erasys\OpenApi\Spec\v3\Server;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
-use W2w\Lib\Apie\ApiResourceFacade;
-use W2w\Lib\Apie\ApiResources\ApplicationInfo;
+use W2w\Lib\Apie\Core\ApiResourceFacade;
+use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
 
 class ApiResourceServiceProviderNoConfigTest extends AbstractLaravelTestCase

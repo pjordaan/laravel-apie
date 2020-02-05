@@ -1,16 +1,26 @@
 <?php
 
 use W2w\Lib\Apie\Annotations\ApiResource;
-use W2w\Lib\Apie\ApiResources\ApplicationInfo;
-use W2w\Lib\Apie\ApiResources\Status;
-use W2w\Lib\Apie\Retrievers\ApplicationInfoRetriever;
-use W2w\Lib\Apie\Retrievers\StatusCheckRetriever;
+use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
+use W2w\Lib\Apie\Plugins\ApplicationInfo\DataLayers\ApplicationInfoRetriever;
+use W2w\Lib\Apie\Plugins\StatusCheck\ApiResources\Status;
+use W2w\Lib\Apie\Plugins\StatusCheck\DataLayers\StatusCheckRetriever;
 
 return [
     /**
      * A list of classes to be used as Api resources.
      */
     'resources'              => [ApplicationInfo::class, Status::class],
+
+    /**
+     * If caching is enabled and available (psr6-illuminate bridge or laravel 6+) results are being cached.
+     */
+    'caching'                => env('APIE_CACHING', !env('APP_DEBUG', false)),
+
+    /**
+     * Load additional apie plugins.
+     */
+    'plugins'                => [],
 
     /**
      * Indicate the list of classes to be used as Api resources comes from a service in the service container instead.
@@ -77,6 +87,7 @@ return [
      */
     'exception-mapping' => [
     ],
+
     /**
      * Overrides/configure api resources which class to use. This can be used in case you do not want to use annotations to configure
      * api resources.
@@ -85,4 +96,15 @@ return [
     'resource-config' => [
        /*ApplicationInfo::class => ['retrieveClass' => StatusCheckRetriever::class],*/
     ],
+
+    /**
+     * Creates a child REST api inheriting all settings of the parent configuration. Technically it is possible to make
+     * a child REST api inside a child REST api but we do not support any of this functionality yet.
+     */
+    'contexts' => [
+        /*
+        'v1' => ['resources' => ['ClassV1']],
+        'v2' => ['resources' => ['ClassV2']],
+         */
+    ]
 ];

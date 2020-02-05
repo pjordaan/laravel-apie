@@ -1,17 +1,17 @@
 <?php
 
-namespace W2w\Laravel\Apie\Services\Retrievers;
+namespace W2w\Laravel\Apie\Plugins\Illuminate\DataLayers;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RuntimeException;
 use Illuminate\Database\Eloquent\Model;
-use W2w\Laravel\Apie\Services\Eloquent\EloquentModelSerializer;
+use W2w\Laravel\Apie\Plugins\Illuminate\Eloquent\EloquentModelSerializer;
+use W2w\Lib\Apie\Core\SearchFilters\SearchFilterFromMetadataTrait;
+use W2w\Lib\Apie\Core\SearchFilters\SearchFilterRequest;
 use W2w\Lib\Apie\Exceptions\ResourceNotFoundException;
-use W2w\Lib\Apie\Persisters\ApiResourcePersisterInterface;
-use W2w\Lib\Apie\Retrievers\ApiResourceRetrieverInterface;
-use W2w\Lib\Apie\Retrievers\SearchFilterFromMetadataTrait;
-use W2w\Lib\Apie\Retrievers\SearchFilterProviderInterface;
-use W2w\Lib\Apie\SearchFilters\SearchFilterRequest;
+use W2w\Lib\Apie\Interfaces\ApiResourcePersisterInterface;
+use W2w\Lib\Apie\Interfaces\ApiResourceRetrieverInterface;
+use W2w\Lib\Apie\Interfaces\SearchFilterProviderInterface;
 
 /**
  * Maps a domain object to an eloquent model. Remember that foreign key constraints can be confusing, so it might be
@@ -129,7 +129,11 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
      */
     private function determineModel(string $resourceClass): string
     {
-        return str_replace('\\ApiResources\\', '\\Models\\', $resourceClass);
+        $class = str_replace('\\ApiResources\\', '\\Models\\', $resourceClass);
+        if (class_exists($class)) {
+            return $class;
+        }
+        return str_replace('\\ApiResources\\', '\\Entities\\', $resourceClass);
     }
 
     /**

@@ -4,10 +4,10 @@ namespace W2w\Laravel\Apie\Tests\Providers;
 use erasys\OpenApi\Spec\v3\Server;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
 use W2w\Laravel\Apie\Tests\Mocks\DomainObjectForFileStorage;
-use W2w\Lib\Apie\ApiResourceFacade;
-use W2w\Lib\Apie\ApiResources\ApplicationInfo;
-use W2w\Lib\Apie\ApiResources\Status;
+use W2w\Lib\Apie\Core\ApiResourceFacade;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
+use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
+use W2w\Lib\Apie\Plugins\StatusCheck\ApiResources\Status;
 
 class ApiResourceServiceProviderConfigTest extends AbstractLaravelTestCase
 {
@@ -44,9 +44,47 @@ class ApiResourceServiceProviderConfigTest extends AbstractLaravelTestCase
                     'contact-name'     => 'contact name',
                     'contact-url'      => 'example.com',
                     'contact-email'    => 'admin@example.com',
+                ],
+                'contexts' => [
+                    'v2' => [
+                        'api-url' => '/v2',
+                        'metadata' => [
+                            'title' => 'Laravel REST api 2.0',
+                            'version' => '2.0',
+                            'hash' => 'Overwritten',
+                        ]
+                    ]
                 ]
             ]
         );
+    }
+
+    public function testSubcontextUrlWorks()
+    {
+        $this->withoutExceptionHandling();
+
+        $url = route('apie.v2.all', ['resource' => 'application_info'], false);
+        $this->assertEquals('/v2/application_info', $url);
+
+        $response = $this->get($url, ['accept' => 'application/json']);
+        $response->assertStatus(200);
+        $response->assertJson(
+            [
+                [
+                    "app_name" => "Laravel",
+                    "environment" => "testing",
+                    "hash" => "Overwritten",
+                    "debug" => false
+                ],
+            ]
+        );
+
+        $url = route('apie.v2.docs', [], false);
+        $this->assertEquals('/v2/doc.json', $url);
+        $response = $this->get($url, ['accept' => 'application/json']);
+        $response->assertSee('2.0');
+        $response->assertSee('Laravel REST api 2.0');
+        $response->assertDontSee('12345');
     }
 
     public function testApiResourceFacade()

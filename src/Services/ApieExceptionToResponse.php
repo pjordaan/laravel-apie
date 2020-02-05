@@ -9,10 +9,9 @@ use Illuminate\Validation\ValidationException;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Serializer\Serializer;
-use W2w\Lib\Apie\Encodings\FormatRetriever;
+use W2w\Lib\Apie\Core\Models\ApiResourceFacadeResponse;
 use W2w\Lib\Apie\Exceptions\ValidationException as ApieValidationException;
-use W2w\Lib\Apie\Models\ApiResourceFacadeResponse;
+use W2w\Lib\Apie\Interfaces\ResourceSerializerInterface;
 
 class ApieExceptionToResponse
 {
@@ -39,10 +38,8 @@ class ApieExceptionToResponse
             $exception = new ApieValidationException($exception->errors());
         }
         $apiRes = new ApiResourceFacadeResponse(
-            resolve(Serializer::class),
-            [],
+            app(ResourceSerializerInterface::class),
             $exception,
-            resolve(FormatRetriever::class),
             $request->header('accept')
         );
         return $this->httpFoundationFactory->createResponse($apiRes->getResponse()->withStatus($statusCode));
@@ -53,6 +50,11 @@ class ApieExceptionToResponse
         $route = $request->route();
         if (!$route) {
             return false;
+        }
+        // needed for Lumen
+        if (is_array($route)) {
+            $name = $route['1']['as'] ?? '';
+            return Str::startsWith($name, 'apie.');
         }
         return Str::startsWith($route->getName(), 'apie.');
     }

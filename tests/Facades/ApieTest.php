@@ -5,7 +5,7 @@ namespace W2w\Laravel\Apie\Tests\Facades;
 
 use W2w\Laravel\Apie\Facades\Apie;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
-use W2w\Lib\Apie\ApiResources\ApplicationInfo;
+use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
 
 class ApieTest extends AbstractLaravelTestCase
 {

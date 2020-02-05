@@ -1,14 +1,19 @@
 <?php
 
-
 namespace W2w\Laravel\Apie\Services;
+
+use Closure;
 
 /**
  * Interface that will load the routes.
  */
 interface RouteLoaderInterface
 {
-    public static function loadRestApiRoutes(): void;
+    public function addDocUrl(array $context);
 
-    public static function loadOpenApiRoutes(): void;
+    public function addResourceUrl(array $context);
+
+    public function addSwaggerUiUrl(array $context);
+
+    public function context(array $context, string $prefix, array $middleware, Closure $closure);
 }

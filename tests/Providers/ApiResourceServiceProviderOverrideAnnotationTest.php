@@ -3,14 +3,12 @@ namespace W2w\Laravel\Apie\Tests\Providers;
 
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
 use W2w\Laravel\Apie\Tests\Mocks\DomainObjectForFileStorage;
-use W2w\Lib\Apie\Annotations\ApiResource;
-use W2w\Lib\Apie\ApiResourceFacade;
-use W2w\Lib\Apie\ApiResources\ApplicationInfo;
-use W2w\Lib\Apie\ApiResources\Status;
+use W2w\Lib\Apie\Core\ApiResourceFacade;
 use W2w\Lib\Apie\Exceptions\ResourceNotFoundException;
-use W2w\Lib\Apie\Persisters\NullPersister;
-use W2w\Lib\Apie\Retrievers\FileStorageDataLayer;
-use W2w\Lib\Apie\Retrievers\StatusCheckRetriever;
+use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
+use W2w\Lib\Apie\Plugins\Core\DataLayers\NullDataLayer;
+use W2w\Lib\Apie\Plugins\FileStorage\DataLayers\FileStorageDataLayer;
+use W2w\Lib\Apie\Plugins\StatusCheck\ApiResources\Status;
 
 class ApiResourceServiceProviderOverrideAnnotationTest extends AbstractLaravelTestCase
 {
@@ -54,7 +52,7 @@ class ApiResourceServiceProviderOverrideAnnotationTest extends AbstractLaravelTe
                         'retrieveClass' => FileStorageDataLayer::class
                     ],
                     Status::class => [
-                        'persistClass' => NullPersister::class,
+                        'persistClass' => NullDataLayer::class,
                         'retrieveClass' => StatusCheckRetriever::class
                     ],
                 ]

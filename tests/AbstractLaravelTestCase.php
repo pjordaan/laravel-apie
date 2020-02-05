@@ -2,6 +2,7 @@
 namespace W2w\Laravel\Apie\Tests;
 
 use Illuminate\Foundation\Application;
+use Illuminate\Http\File;
 use Orchestra\Testbench\TestCase;
 use W2w\Laravel\Apie\Providers\ApiResourceServiceProvider;
 
@@ -30,6 +31,16 @@ abstract class AbstractLaravelTestCase extends TestCase
 
     protected function setUp(): void
     {
+        $this->beforeApplicationDestroyedCallbacks[] = function () {
+            $folder = storage_path('app/api-file-storage');
+            if (strlen($folder) > 5) {
+                system('rm -rf ' . escapeshellarg($folder));
+            }
+            $folder = storage_path('app/apie-cache');
+            if (strlen($folder) > 5) {
+                system('rm -rf ' . escapeshellarg($folder));
+            }
+        };
         parent::setUp();
     }
 

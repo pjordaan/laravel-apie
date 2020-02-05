@@ -1,7 +1,7 @@
 <?php
 namespace W2w\Laravel\Apie\Tests\Services\Mock;
 
-use W2w\Laravel\Apie\Services\Retrievers\DatabaseQueryRetriever;
+use W2w\Laravel\Apie\Plugins\Illuminate\DataLayers\DatabaseQueryRetriever;
 use W2w\Lib\Apie\Annotations\ApiResource;
 
 /**

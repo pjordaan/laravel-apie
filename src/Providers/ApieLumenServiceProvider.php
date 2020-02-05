@@ -2,8 +2,11 @@
 namespace W2w\Laravel\Apie\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Laravel\Lumen\Routing\UrlGenerator;
 use Psr\Http\Message\ServerRequestInterface;
 use W2w\Laravel\Apie\Controllers\SwaggerUiController;
+use W2w\Laravel\Apie\Services\ApieContext;
+use W2w\Laravel\Apie\Services\ApieRouteLoader;
 use W2w\Laravel\Apie\Services\LumenRouteLoader;
 use W2w\Laravel\Apie\Services\RouteLoaderInterface;
 
@@ -14,15 +17,8 @@ class ApieLumenServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        $config = $this->app->get('apie.config');
-        if ($config['disable-routes']) {
-            return;
-        }
         $this->app->bind(RouteLoaderInterface::class, LumenRouteLoader::class);
-        if ($config['swagger-ui-test-page']) {
-            LumenRouteLoader::loadOpenApiRoutes();
-        }
-        LumenRouteLoader::loadRestApiRoutes();
+        $this->app->make(ApieRouteLoader::class)->renderRoutes();
     }
 
     public function register()
@@ -41,9 +37,14 @@ class ApieLumenServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
-            SwaggerUiController::class, function () {
-                $urlGenerator = new \Laravel\Lumen\Routing\UrlGenerator($this->app);
-                return new SwaggerUiController($urlGenerator, __DIR__ . '/../../resources/open-api.html');
+            SwaggerUiController::class,
+            function () {
+                $urlGenerator = new UrlGenerator($this->app);
+                return new SwaggerUiController(
+                    $this->app->make(ApieContext::class),
+                    $urlGenerator,
+                    __DIR__ . '/../../resources/open-api.html'
+                );
             }
         );
     }

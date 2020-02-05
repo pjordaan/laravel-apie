@@ -28,48 +28,59 @@ class ApieConfigResolver
     private static function getResolver(): OptionsResolver
     {
         if (!self::$configResolver) {
-            $resolver = new OptionsResolver();
-            $defaults = require __DIR__ . '/../../config/apie.php';
-            $resolver->setDefaults($defaults)
-                ->setAllowedTypes('resources', ['string[]', ApiResourcesInterface::class])
-                ->setAllowedTypes('resources-service', ['null', 'string'])
-                ->setAllowedTypes('mock', ['null', 'bool'])
-                ->setAllowedTypes('mock-skipped-resources', ['string[]'])
-                ->setAllowedTypes('base-url', 'string')
-                ->setAllowedTypes('api-url', 'string')
-                ->setAllowedTypes('disable-routes', ['null', 'bool'])
-                ->setAllowedTypes('swagger-ui-test-page', ['null', 'string'])
-                ->setAllowedTypes('apie-middleware', 'string[]')
-                ->setAllowedTypes('swagger-ui-test-page-middleware', 'string[]')
-                ->setAllowedTypes('bind-api-resource-facade-response', 'bool')
-                ->setAllowedTypes('metadata', 'string[]')
-                ->setAllowedTypes('resource-config', [ApiResource::class . '[]', 'array[]'])
-                ->setAllowedTypes('exception-mapping', 'int[]');
-            $resolver->setDefault('metadata', function (OptionsResolver $metadataResolver) use (&$defaults) {
-                $metadataResolver->setDefaults($defaults['metadata']);
-
-                $urlNormalizer = function (Options $options, $value) {
-                    if (empty($value)) {
-                        return '';
-                    }
-                    return self::urlNormalize($value);
-                };
-                $metadataResolver->setNormalizer('terms-of-service', $urlNormalizer);
-                $metadataResolver->setNormalizer('license-url', $urlNormalizer);
-                $metadataResolver->setNormalizer('contact-url', $urlNormalizer);
-            });
-            $resolver->setNormalizer('resource-config', function (Options $options, $value) {
-                return array_map(function ($field) {
-                    return $field instanceof ApiResource ? $field : ApiResource::createFromArray($field);
-                }, $value);
-            });
-            $resolver->setNormalizer('exception-mapping', function (Options $options, $value) {
-                ApieConfigResolver::addExceptionsForExceptionMapping($value);
-                return $value;
-            });
-            self::$configResolver = $resolver;
+            self::$configResolver = self::createResolver(require __DIR__ . '/../../config/apie.php');
         }
         return self::$configResolver;
+    }
+
+    private static function createResolver(array $defaults): OptionsResolver
+    {
+        $resolver = new OptionsResolver();
+
+        $resolver->setDefaults($defaults)
+                 ->setAllowedTypes('resources', ['string[]', ApiResourcesInterface::class])
+                 ->setAllowedTypes('plugins', ['string[]'])
+                 ->setAllowedTypes('resources-service', ['null', 'string'])
+                 ->setAllowedTypes('mock', ['null', 'bool'])
+                 ->setAllowedTypes('mock-skipped-resources', ['string[]'])
+                 ->setAllowedTypes('base-url', 'string')
+                 ->setAllowedTypes('api-url', 'string')
+                 ->setAllowedTypes('disable-routes', ['null', 'bool'])
+                 ->setAllowedTypes('swagger-ui-test-page', ['null', 'string'])
+                 ->setAllowedTypes('apie-middleware', 'string[]')
+                 ->setAllowedTypes('swagger-ui-test-page-middleware', 'string[]')
+                 ->setAllowedTypes('bind-api-resource-facade-response', 'bool')
+                 ->setAllowedTypes('metadata', 'string[]')
+                 ->setAllowedTypes('resource-config', [ApiResource::class . '[]', 'array[]'])
+                 ->setAllowedTypes('exception-mapping', 'int[]');
+        $resolver->setDefault('metadata', function (OptionsResolver $metadataResolver) use (&$defaults) {
+            $metadataResolver->setDefaults($defaults['metadata']);
+
+            $urlNormalizer = function (Options $options, $value) {
+                if (empty($value)) {
+                    return '';
+                }
+                return self::urlNormalize($value);
+            };
+            $metadataResolver->setNormalizer('terms-of-service', $urlNormalizer);
+            $metadataResolver->setNormalizer('license-url', $urlNormalizer);
+            $metadataResolver->setNormalizer('contact-url', $urlNormalizer);
+        });
+        $resolver->setNormalizer('resource-config', function (Options $options, $value) {
+            return array_map(function ($field) {
+                return $field instanceof ApiResource ? $field : ApiResource::createFromArray($field);
+            }, $value);
+        });
+        $resolver->setNormalizer('contexts', function (Options $options, $value) use (&$defaults) {
+            return array_map(function ($field) use ($defaults) {
+                return self::createResolver($defaults)->resolve($field);
+            }, $value);
+        });
+        $resolver->setNormalizer('exception-mapping', function (Options $options, $value) {
+            ApieConfigResolver::addExceptionsForExceptionMapping($value);
+            return $value;
+        });
+        return $resolver;
     }
 
     public static function addExceptionsForExceptionMapping(array& $array)
@@ -88,7 +99,7 @@ class ApieConfigResolver
     private static function urlNormalize($value)
     {
         if ('http://' !== substr($value, 0, 7) && 'https://' !== substr($value, 0, 8)) {
-            $value = 'https://'.$value;
+            $value = 'https://' . $value;
         }
         $parsedUrl = parse_url($value);
         if (empty($parsedUrl) || !in_array($parsedUrl['scheme'], ['http', 'https']) || !filter_var($value, FILTER_VALIDATE_URL)) {

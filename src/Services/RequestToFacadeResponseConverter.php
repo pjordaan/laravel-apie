@@ -7,9 +7,9 @@ namespace W2w\Laravel\Apie\Services;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use W2w\Lib\Apie\ApiResourceFacade;
-use W2w\Lib\Apie\ClassResourceConverter;
-use W2w\Lib\Apie\Models\ApiResourceFacadeResponse;
+use W2w\Lib\Apie\Core\ApiResourceFacade;
+use W2w\Lib\Apie\Core\ClassResourceConverter;
+use W2w\Lib\Apie\Core\Models\ApiResourceFacadeResponse;
 
 class RequestToFacadeResponseConverter
 {

@@ -2,8 +2,8 @@
 namespace W2w\Laravel\Apie\Tests\MockControllers;
 
 use Illuminate\Routing\Controller;
-use W2w\Lib\Apie\ApiResources\ApplicationInfo;
-use W2w\Lib\Apie\Models\ApiResourceFacadeResponse;
+use W2w\Lib\Apie\Core\Models\ApiResourceFacadeResponse;
+use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
 
 class MockController extends Controller
 {

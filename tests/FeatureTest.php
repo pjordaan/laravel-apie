@@ -3,7 +3,7 @@ namespace W2w\Laravel\Apie\Tests;
 
 use Illuminate\Support\ServiceProvider;
 use W2w\Laravel\Apie\Providers\ApiResourceServiceProvider;
-use W2w\Lib\Apie\ApiResources\ApplicationInfo;
+use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
 
 class FeatureTest extends AbstractLaravelTestCase
 {

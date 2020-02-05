@@ -2,13 +2,12 @@
 namespace W2w\Laravel\Apie\Tests\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use W2w\Laravel\Apie\Models\Status;
 use W2w\Laravel\Apie\Providers\ApiResourceServiceProvider;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
-use W2w\Lib\Apie\ApiResourceFacade;
-use W2w\Lib\Apie\ApiResources\ApplicationInfo;
-use W2w\Lib\Apie\ApiResources\Status;
-use W2w\Lib\Apie\Resources\ApiResources;
-use W2w\Lib\Apie\Resources\ApiResourcesInterface;
+use W2w\Lib\Apie\Core\ApiResourceFacade;
+use W2w\Lib\Apie\Core\Resources\ApiResourcesInterface;
+use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
 
 class ApiResourceServiceProviderCustomApiResourcesTest extends AbstractLaravelTestCase
 {
@@ -92,7 +91,6 @@ class ApiResourceServiceProviderCustomApiResourcesTest extends AbstractLaravelTe
         $this->assertEquals($expected, $resource);
 
         $apiResources = $this->app->get(ApiResourcesInterface::class);
-        $this->assertNotInstanceOf(ApiResources::class, $apiResources);
 
         $this->assertEquals([ApplicationInfo::class], $apiResources->getApiResources());
     }

@@ -3,7 +3,7 @@ namespace W2w\Laravel\Apie\Tests\Mocks;
 
 use Ramsey\Uuid\Uuid;
 use W2w\Lib\Apie\Annotations\ApiResource;
-use W2w\Lib\Apie\Retrievers\FileStorageDataLayer;
+use W2w\Lib\Apie\Plugins\FileStorage\DataLayers\FileStorageDataLayer;
 
 /**
  * @ApiResource(
