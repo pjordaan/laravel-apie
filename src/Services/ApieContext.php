@@ -61,7 +61,7 @@ final class ApieContext
     public function getContext(string $context): ApieContext
     {
         // done for potential file read exploits
-        if (!preg_match('/^[a-z0-9]+$/i', $context)) {
+        if (!preg_match('/^[a-z0-9-]+$/i', $context)) {
             throw new BadConfigurationException('Context "' . $context . '" is not a valid context name!');
         }
         if (!isset($this->instantiatedContexts[$context])) {
