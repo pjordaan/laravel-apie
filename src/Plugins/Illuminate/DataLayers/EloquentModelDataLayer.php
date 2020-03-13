@@ -2,10 +2,12 @@
 
 namespace W2w\Laravel\Apie\Plugins\Illuminate\DataLayers;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RuntimeException;
-use Illuminate\Database\Eloquent\Model;
 use W2w\Laravel\Apie\Plugins\Illuminate\Eloquent\EloquentModelSerializer;
+use W2w\Laravel\Apie\Plugins\Illuminate\Eloquent\QueryBuilderResolver;
 use W2w\Lib\Apie\Core\SearchFilters\SearchFilterFromMetadataTrait;
 use W2w\Lib\Apie\Core\SearchFilters\SearchFilterRequest;
 use W2w\Lib\Apie\Exceptions\ResourceNotFoundException;
@@ -26,12 +28,16 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
 
     private $serializer;
 
+    private $queryBuilderResolver;
+
     /**
      * @param EloquentModelSerializer $serializer
+     * @param QueryBuilderResolver $queryBuilderResolver
      */
-    public function __construct(EloquentModelSerializer $serializer)
+    public function __construct(EloquentModelSerializer $serializer, QueryBuilderResolver $queryBuilderResolver)
     {
         $this->serializer = $serializer;
+        $this->queryBuilderResolver = $queryBuilderResolver;
     }
 
     /**
@@ -47,7 +53,7 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
     {
         $modelClass = $this->getModelClass($resourceClass, $context);
 
-        $queryBuilder = $modelClass::query();
+        $queryBuilder = $this->getQueryBuilder($modelClass, $context['queryBuilder'] ?? null);
         return $this->serializer->toList($queryBuilder, $resourceClass, $searchFilterRequest);
     }
 
@@ -63,7 +69,7 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
     {
         $modelClass = $this->getModelClass($resourceClass, $context);
         try {
-            $modelInstance = $modelClass::where($context[1] ?? $context['id'] ?? 'id', $id)->firstOrFail();
+            $modelInstance = $this->getQueryBuilder($modelClass, $context['queryBuilder'] ?? null)->where($context[1] ?? $context['id'] ?? 'id', $id)->firstOrFail();
         } catch (ModelNotFoundException $notFoundException) {
             throw new ResourceNotFoundException($id);
         }
@@ -114,11 +120,11 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
     public function remove(string $resourceClass, $id, array $context)
     {
         $modelClass = $this->getModelClass($resourceClass, $context);
-        $modelInstance = $modelClass::where($context[1] ?? $context['id'] ?? 'id', $id)->first();
+        $modelInstance = $modelInstance = $this->getQueryBuilder($modelClass, $context['queryBuilder'] ?? null)->where($context[1] ?? $context['id'] ?? 'id', $id)->first();
         if (!$modelInstance) {
             return;
         }
-        $modelClass::destroy($id);
+        $modelInstance->delete();
     }
 
     /**
@@ -154,5 +160,12 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
         }
 
         return $modelClass;
+    }
+
+    private function getQueryBuilder(string $modelClass, ?string $contextConfig): Builder {
+        if (null === $contextConfig) {
+            return $modelClass::query();
+        }
+        return $this->queryBuilderResolver->resolveFromString($contextConfig);
     }
 }
