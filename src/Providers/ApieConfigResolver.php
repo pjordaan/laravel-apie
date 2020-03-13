@@ -7,6 +7,7 @@ use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Redis\LimiterTimeoutException;
 use PDOException;
+use Ramsey\Uuid\Exception\InvalidUuidStringException;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -89,6 +90,7 @@ class ApieConfigResolver
         $array[AuthenticationException::class] = 401;
         $array[UnexpectedValueException::class] = 415;
         $array[RuntimeException::class] = 415;
+        $array[InvalidUuidStringException::class] = 422;
         $array[LockTimeoutException::class] = 502;
         $array[LimiterTimeoutException::class] = 502;
         $array[FileNotFoundException::class] = 502;

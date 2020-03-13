@@ -5,7 +5,9 @@ use erasys\OpenApi\Spec\v3\Contact;
 use erasys\OpenApi\Spec\v3\Document;
 use erasys\OpenApi\Spec\v3\Info;
 use erasys\OpenApi\Spec\v3\License;
+use erasys\OpenApi\Spec\v3\Schema;
 use Illuminate\Container\Container;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use W2w\Laravel\Apie\Events\OpenApiSpecGenerated;
@@ -23,8 +25,9 @@ use W2w\Lib\Apie\PluginInterfaces\NormalizerProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\OpenApiEventProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\OpenApiInfoProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\ResourceProviderInterface;
+use W2w\Lib\Apie\PluginInterfaces\SchemaProviderInterface;
 
-class IlluminatePlugin implements ResourceProviderInterface, ApieConfigInterface, OpenApiInfoProviderInterface, ApiResourceFactoryProviderInterface, EncoderProviderInterface, NormalizerProviderInterface, OpenApiEventProviderInterface
+class IlluminatePlugin implements ResourceProviderInterface, ApieConfigInterface, OpenApiInfoProviderInterface, ApiResourceFactoryProviderInterface, EncoderProviderInterface, NormalizerProviderInterface, OpenApiEventProviderInterface, SchemaProviderInterface
 {
     private $container;
 
@@ -138,5 +141,25 @@ class IlluminatePlugin implements ResourceProviderInterface, ApieConfigInterface
         $event = new OpenApiSpecGenerated($document);
         $this->container->get('events')->dispatch($event);
         return $event->getDocument();
+    }
+
+    /**
+     * @return Schema[]
+     */
+    public function getDefinedStaticData(): array
+    {
+        return [
+            Model::class => new Schema([
+                'type' => 'object'
+            ]),
+        ];
+    }
+
+    /**
+     * @return callable[]
+     */
+    public function getDynamicSchemaLogic(): array
+    {
+        return [];
     }
 }
