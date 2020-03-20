@@ -29,6 +29,11 @@ class ArrayRemapperTest extends TestCase
         ];
         yield [
             ['a' => 1],
+            ['*' => '*'],
+            ['a' => 1]
+        ];
+        yield [
+            ['a' => 1],
             ['a' => 'a'],
             ['a' => 1]
         ];
@@ -45,6 +50,16 @@ class ArrayRemapperTest extends TestCase
         yield [
             ['a' => 1, 'b' => 12, 'c' => 13],
             ['address.a' => 'a', 'b' => 'b', 'address.c' => 'c'],
+            ['address' => ['a' => 1, 'c' => 13], 'b' => 12],
+        ];
+        yield [
+            ['a' => 1, 'c' => 13],
+            ['address.*' => '*'],
+            ['address' => ['a' => 1, 'c' => 13], 'b' => 12],
+        ];
+        yield [
+            ['a' => 1, 'c' => 13, 'b' => 12],
+            ['address.*' => '*', '*' => '*'],
             ['address' => ['a' => 1, 'c' => 13], 'b' => 12],
         ];
     }
@@ -72,6 +87,11 @@ class ArrayRemapperTest extends TestCase
         ];
         yield [
             ['a' => 1],
+            ['*' => '*'],
+            ['a' => 1]
+        ];
+        yield [
+            ['a' => 1],
             ['a' => 'a'],
             ['a' => 1]
         ];
@@ -89,6 +109,11 @@ class ArrayRemapperTest extends TestCase
             ['address' => ['a' => 1, 'c' => 13], 'b' => 12],
             ['address.a' => 'a', 'b' => 'b', 'address.c' => 'c'],
             ['a' => 1, 'b' => 12, 'c' => 13],
+        ];
+        yield [
+            ['address' => ['a' => 1, 'c' => 13]],
+            ['address.*' => '*'],
+            ['a' => 1, 'c' => 13],
         ];
     }
 }

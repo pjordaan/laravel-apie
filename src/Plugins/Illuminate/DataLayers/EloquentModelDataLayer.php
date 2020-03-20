@@ -54,7 +54,7 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
         $modelClass = $this->getModelClass($resourceClass, $context);
 
         $queryBuilder = $this->getQueryBuilder($modelClass, $context['queryBuilder'] ?? null);
-        return $this->serializer->toList($queryBuilder, $resourceClass, $searchFilterRequest);
+        return $this->serializer->toList($queryBuilder, $resourceClass, $searchFilterRequest, $context['mapping'] ?? null);
     }
 
     /**
@@ -73,7 +73,7 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
         } catch (ModelNotFoundException $notFoundException) {
             throw new ResourceNotFoundException($id);
         }
-        $result = $this->serializer->toResource($modelInstance, $resourceClass);
+        $result = $this->serializer->toResource($modelInstance, $resourceClass, $context['mapping'] ?? null);
 
         return $result;
     }
@@ -88,7 +88,7 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
     public function persistNew($resource, array $context = [])
     {
         $resourceClass = get_class($resource);
-        $modelInstance = $this->serializer->toModel($resource, $this->getModelClass($resourceClass, $context));
+        $modelInstance = $this->serializer->toModel($resource, $this->getModelClass($resourceClass, $context), $context['mapping'] ?? null);
 
         return $this->serializer->toResource($modelInstance, $resourceClass);
     }
@@ -105,7 +105,7 @@ class EloquentModelDataLayer implements ApiResourceRetrieverInterface, ApiResour
     {
         $resourceClass = get_class($resource);
         $modelClass = $this->getModelClass($resourceClass, $context);
-        $modelInstance = $this->serializer->toExistingModel($resource, $id, $modelClass);
+        $modelInstance = $this->serializer->toExistingModel($resource, $id, $modelClass, $context['mapping'] ?? null);
 
         return $this->serializer->toResource($modelInstance, $resourceClass);
     }

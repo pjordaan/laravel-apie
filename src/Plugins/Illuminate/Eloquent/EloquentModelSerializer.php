@@ -25,16 +25,21 @@ class EloquentModelSerializer
      * @param Builder                  $builder
      * @param string                   $resourceClass
      * @param SearchFilterRequest|null $searchFilterRequest
+     * @param array|null               $mapping
      * @return Model[]
      */
-    public function toList(Builder $builder, string $resourceClass, ?SearchFilterRequest $searchFilterRequest): array
+    public function toList(Builder $builder, string $resourceClass, ?SearchFilterRequest $searchFilterRequest, array $mapping = null): array
     {
         if (empty($builder->getQuery()->orders) && empty($builder->getQuery()->unionOrders)) {
             $builder = $builder->orderBy('id', 'ASC');
         }
         if ($searchFilterRequest) {
+            $searches = $searchFilterRequest->getSearches();
+            if ($mapping !== null) {
+                $searches = ArrayRemapper::remap($mapping, $searches);
+            }
             $builder = $builder
-                ->where($searchFilterRequest->getSearches())
+                ->where($searches)
                 ->skip($searchFilterRequest->getOffset())
                 ->take($searchFilterRequest->getNumberOfItems());
         }
@@ -42,8 +47,8 @@ class EloquentModelSerializer
         $modelInstances = $builder->get();
 
         return array_map(
-            function ($modelInstance) use (&$resourceClass) {
-                return $this->toResource($modelInstance, $resourceClass);
+            function ($modelInstance) use (&$resourceClass, &$mapping) {
+                return $this->toResource($modelInstance, $resourceClass, $mapping);
             },
             iterator_to_array($modelInstances)
         );
@@ -52,15 +57,19 @@ class EloquentModelSerializer
     /**
      * Converts resource into a eloquent model. The instance returns is always a new entity.
      *
-     * @param mixed $resource
-     * @param string $modelClass
+     * @param mixed      $resource
+     * @param string     $modelClass
+     * @param array|null $mapping
      * @return Model
      */
-    public function toModel($resource, string $modelClass): Model
+    public function toModel($resource, string $modelClass, array $mapping = null): Model
     {
         $array = $this->serializer->normalize($resource, 'application/json');
         if (!is_array($array)) {
             throw new UnexpectedValueException('Resource ' . get_class($resource) . ' was normalized to a non array field');
+        }
+        if ($mapping !== null) {
+            $array = ArrayRemapper::remap($mapping, $array);
         }
         $modelClass::unguard();
         try {
@@ -74,13 +83,18 @@ class EloquentModelSerializer
     /**
      * Maps Eloquent model to a class of $resoureClass
      *
-     * @param Model $eloquentModel
-     * @param string $resourceClass
+     * @param Model      $eloquentModel
+     * @param string     $resourceClass
+     * @param array|null $mapping
      * @return mixed
      */
-    public function toResource(Model $eloquentModel, string $resourceClass)
+    public function toResource(Model $eloquentModel, string $resourceClass, array $mapping = null)
     {
-        return $this->serializer->hydrateWithReflection($eloquentModel->toArray(), $resourceClass);
+        $array = $eloquentModel->toArray();
+        if ($mapping !== null) {
+            $array = ArrayRemapper::reverseRemap($mapping, $array);
+        }
+        return $this->serializer->hydrateWithReflection($array, $resourceClass);
     }
 
     /**
@@ -91,13 +105,16 @@ class EloquentModelSerializer
      * @param string $modelClass
      * @return Model
      */
-    public function toExistingModel($resource, $id, string $modelClass): Model
+    public function toExistingModel($resource, $id, string $modelClass, array $mapping = null): Model
     {
         $resourceClass = get_class($resource);
         $modelInstance = $modelClass::where(['id' => $id])->firstOrFail();
         $array = $this->serializer->normalize($resource, 'application/json');
         if (!is_array($array)) {
             throw new UnexpectedValueException('Resource ' . $resourceClass . ' was normalized to a non array field');
+        }
+        if ($mapping !== null) {
+            $array = ArrayRemapper::remap($mapping, $array);
         }
         unset($array['id']);
         $modelInstance->unguard();

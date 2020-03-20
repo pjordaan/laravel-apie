@@ -5,6 +5,7 @@ namespace W2w\Laravel\Apie\Plugins\Illuminate\Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Psr\Container\ContainerInterface;
 use W2w\Lib\Apie\Exceptions\BadConfigurationException;
+use W2w\Lib\Apie\Exceptions\InvalidClassTypeException;
 
 class QueryBuilderResolver
 {
@@ -20,6 +21,7 @@ class QueryBuilderResolver
 
     public function resolveFromString(string $input): Builder
     {
+
         if (!preg_match('/^(?<service>[a-z0-9A-Z_\\\\]+)@(?<method>[a-z0-9A-Z_-]+)$/', $input, $matches)) {
             throw new BadConfigurationException('"' . $input . '" is not in the format <service>@<method>');
         }
@@ -29,7 +31,10 @@ class QueryBuilderResolver
             throw new BadConfigurationException('"' . $method . '" is not callable in service "' . $matches['service'] . '"');
         }
 
-        // TODO: typechecking?
-        return $service->$method();
+        $result = $service->$method();
+        if (!($result instanceof Builder)) {
+            throw new InvalidClassTypeException('queryBuilder', Builder::class);
+        }
+        return $result;
     }
 }
