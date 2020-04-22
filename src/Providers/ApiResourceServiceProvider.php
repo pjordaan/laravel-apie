@@ -5,6 +5,7 @@ namespace W2w\Laravel\Apie\Providers;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
+use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
@@ -15,7 +16,6 @@ use W2w\Laravel\Apie\Plugins\Illuminate6Cache\PsrCacheBridgePlugin;
 use W2w\Laravel\Apie\Plugins\Illuminate\IlluminatePlugin;
 use W2w\Laravel\Apie\Services\ApieContext;
 use W2w\Laravel\Apie\Services\ApieExceptionToResponse;
-use W2w\Laravel\Apie\Services\DispatchOpenApiSpecGeneratedEvent;
 use W2w\Laravel\Apie\Services\FileStorageDataLayerContainer;
 use W2w\Lib\Apie\Apie;
 use W2w\Lib\Apie\Core\ApiResourceFacade;
@@ -32,6 +32,7 @@ use W2w\Lib\Apie\Plugins\FakeAnnotations\FakeAnnotationsPlugin;
 use W2w\Lib\Apie\Plugins\FileStorage\DataLayers\FileStorageDataLayer;
 use W2w\Lib\Apie\Plugins\Mock\MockPlugin;
 use W2w\Lib\Apie\Plugins\StatusCheck\DataLayers\StatusCheckRetriever;
+use W2w\Lib\ApieObjectAccessNormalizer\ObjectAccess\ObjectAccessInterface;
 
 /**
  * Install apie classes to Laravel.
@@ -224,7 +225,9 @@ class ApiResourceServiceProvider extends ServiceProvider
             [ApiResourceFacade::class, 'getApiResourceFacade'],
             [ClassResourceConverter::class, 'getClassResourceConverter'],
             [OpenApiSpecGenerator::class, 'getOpenApiSpecGenerator'],
-            [ResourceSerializerInterface::class, 'getResourceSerializer']
+            [ResourceSerializerInterface::class, 'getResourceSerializer'],
+            [NameConverterInterface::class, 'getPropertyConverter'],
+            [ObjectAccessInterface::class, 'getObjectAccess']
         ];
         while ($item = array_pop($todo)) {
             $this->registerApieService($item[0], $item[1]);

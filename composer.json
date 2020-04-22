@@ -23,7 +23,7 @@
         "symfony/options-resolver": "^4.4|^5.0",
         "symfony/psr-http-message-bridge": "^1.2",
         "symfony/serializer": "^4.4|^5.0",
-        "w2w/apie": "^3.0"
+        "w2w/apie": "^3.0|3.3.x-dev"
     },
     "autoload": {
         "psr-4": {
