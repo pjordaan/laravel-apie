@@ -35,7 +35,7 @@ In case you have no autodiscovery on to add W2w\Laravel\Apie\Providers\ApiResour
 
 Afterwards run the commands to publish the config to apie.php and run the migrations for the status checks.
 ```bash
-artisan vendor:publish
+artisan vendor:publish --provider="W2w\Laravel\Apie\Providers\ApiResourceServiceProvider"
 artisan migrate
 ```
 

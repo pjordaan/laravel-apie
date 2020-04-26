@@ -35,6 +35,7 @@ class ApieContextTest extends TestCase
     public function testGetContext()
     {
         $config = require __DIR__ . '/../../config/apie.php';
+        $config['plugins'] = [];
         $config['resources'] = [];
         $config['contexts'] = [
             'v1' => $config,

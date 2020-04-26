@@ -1,5 +1,6 @@
 <?php
 
+use W2w\Laravel\Apie\Plugins\IlluminateDispatcher\IlluminateDispatcherPlugin;
 use W2w\Lib\Apie\Annotations\ApiResource;
 use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
 use W2w\Lib\Apie\Plugins\ApplicationInfo\DataLayers\ApplicationInfoRetriever;
@@ -7,6 +8,12 @@ use W2w\Lib\Apie\Plugins\StatusCheck\ApiResources\Status;
 use W2w\Lib\Apie\Plugins\StatusCheck\DataLayers\StatusCheckRetriever;
 
 return [
+    /**
+     * For BC reasons the ApieObjectNormalizer is still turned on. In Version 4 this one will be replaced
+     * and the serialization will change. Set to false to get the version 4 functionality.
+     * It has effect on the serialization and the schema generation.
+     */
+    'use_deprecated_apie_object_normalizer' => true,
     /**
      * A list of classes to be used as Api resources.
      */
@@ -20,7 +27,7 @@ return [
     /**
      * Load additional apie plugins.
      */
-    'plugins'                => [],
+    'plugins'                => [IlluminateDispatcherPlugin::class],
 
     /**
      * Indicate the list of classes to be used as Api resources comes from a service in the service container instead.

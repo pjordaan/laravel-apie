@@ -2,6 +2,7 @@
 
 namespace W2w\Laravel\Apie\Providers;
 
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
@@ -14,6 +15,7 @@ use W2w\Laravel\Apie\Plugins\Illuminate\DataLayers\StatusFromDatabaseRetriever;
 use W2w\Laravel\Apie\Plugins\Illuminate6Cache\Illuminate6CachePlugin;
 use W2w\Laravel\Apie\Plugins\Illuminate6Cache\PsrCacheBridgePlugin;
 use W2w\Laravel\Apie\Plugins\Illuminate\IlluminatePlugin;
+use W2w\Laravel\Apie\Plugins\IlluminateDispatcher\IlluminateDispatcherPlugin;
 use W2w\Laravel\Apie\Services\ApieContext;
 use W2w\Laravel\Apie\Services\ApieExceptionToResponse;
 use W2w\Laravel\Apie\Services\FileStorageDataLayerContainer;
@@ -87,6 +89,12 @@ class ApiResourceServiceProvider extends ServiceProvider
             $config = $this->app->get('config');
             $res = ApieConfigResolver::resolveConfig($config->get('apie') ?? []);
             $config->set('apie', $res);
+            if (!empty($res['use_deprecated_apie_object_normalizer'])) {
+                @trigger_error(
+                    'You are still using the deprecated apie object normalizer, enable it with use_deprecated_apie_object_normalizer = false in the config to get the 4.0 normalizer active',
+                    E_USER_DEPRECATED
+                );
+            }
             return $res;
         });
 
