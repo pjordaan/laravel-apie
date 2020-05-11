@@ -10,6 +10,7 @@ use W2w\Lib\Apie\Controllers\GetAllController;
 use W2w\Lib\Apie\Controllers\GetController;
 use W2w\Lib\Apie\Controllers\PostController;
 use W2w\Lib\Apie\Controllers\PutController;
+use W2w\Lib\Apie\Controllers\SubActionController;
 
 class LaravelRouteLoader implements RouteLoaderInterface
 {
@@ -42,6 +43,7 @@ class LaravelRouteLoader implements RouteLoaderInterface
             $contextString = implode('.', $context) . '.';
         }
 
+        Route::post('/{resource}/{id}/{subaction}', SubActionController::class)->name('apie.' . $contextString . 'post.subaction')->defaults('context', $context);
         Route::post('/{resource}/', PostController::class)->name('apie.' . $contextString . 'post')->defaults('context', $context);
         Route::put('/{resource}/{id}', PutController::class)->name('apie.' . $contextString . 'put')->defaults('context', $context);
         Route::get('/{resource}/', GetAllController::class)->name('apie.' . $contextString . 'all')->defaults('context', $context);

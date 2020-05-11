@@ -2,7 +2,6 @@
 namespace W2w\Laravel\Apie\Tests;
 
 use Illuminate\Foundation\Application;
-use Illuminate\Http\File;
 use Orchestra\Testbench\TestCase;
 use W2w\Laravel\Apie\Providers\ApiResourceServiceProvider;
 

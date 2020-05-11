@@ -26,8 +26,9 @@ use W2w\Lib\Apie\PluginInterfaces\OpenApiEventProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\OpenApiInfoProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\ResourceProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\SchemaProviderInterface;
+use W2w\Lib\Apie\PluginInterfaces\SubActionsProviderInterface;
 
-class IlluminatePlugin implements ResourceProviderInterface, ApieConfigInterface, OpenApiInfoProviderInterface, ApiResourceFactoryProviderInterface, EncoderProviderInterface, NormalizerProviderInterface, OpenApiEventProviderInterface, SchemaProviderInterface
+class IlluminatePlugin implements ResourceProviderInterface, ApieConfigInterface, OpenApiInfoProviderInterface, ApiResourceFactoryProviderInterface, EncoderProviderInterface, NormalizerProviderInterface, OpenApiEventProviderInterface, SchemaProviderInterface, SubActionsProviderInterface
 {
     private $container;
 
@@ -144,7 +145,7 @@ class IlluminatePlugin implements ResourceProviderInterface, ApieConfigInterface
     }
 
     /**
-     * @return Schema[]
+     * {@inheritDoc}
      */
     public function getDefinedStaticData(): array
     {
@@ -156,10 +157,26 @@ class IlluminatePlugin implements ResourceProviderInterface, ApieConfigInterface
     }
 
     /**
-     * @return callable[]
+     * {@inheritDoc}
      */
     public function getDynamicSchemaLogic(): array
     {
         return [];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getSubActions()
+    {
+        $subActions = $this->resolvedConfig['subactions'];
+        $results = [];
+        foreach ($subActions as $slug => $actions) {
+            $results[$slug] = [];
+            foreach ($actions as $action) {
+                $results[$slug][] = $this->container->make($action);
+            }
+        }
+        return $results;
     }
 }

@@ -20,6 +20,14 @@ return [
     'resources'              => [ApplicationInfo::class, Status::class],
 
     /**
+     * Sub actions adds additional commands as a sub url route and will return the return value back as answer
+     * If properly typehinted this can be auto-wired by Apie and the return value can be used as well.
+     */
+    'subactions'             => [
+        // 'slug' => [Class1::class, Class2::class]
+    ],
+
+    /**
      * If caching is enabled and available (psr6-illuminate bridge or laravel 6+) results are being cached.
      */
     'caching'                => env('APIE_CACHING', !env('APP_DEBUG', false)),

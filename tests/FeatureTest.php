@@ -3,7 +3,9 @@ namespace W2w\Laravel\Apie\Tests;
 
 use Illuminate\Support\ServiceProvider;
 use W2w\Laravel\Apie\Providers\ApiResourceServiceProvider;
+use W2w\Laravel\Apie\Tests\Mocks\MockSubAction;
 use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
+use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\ValidationException;
 
 class FeatureTest extends AbstractLaravelTestCase
 {
@@ -11,6 +13,8 @@ class FeatureTest extends AbstractLaravelTestCase
     {
         $config = $application->make('config');
         $config->set('app.name', __CLASS__);
+        $actions = ['sub' => [MockSubAction::class]];
+        $config->set('apie.subactions', $actions);
     }
 
     protected function getPackageProviders($app)
@@ -49,5 +53,24 @@ class FeatureTest extends AbstractLaravelTestCase
         $this->withoutExceptionHandling();
         $response = $this->get('/test-resource-typehint/name');
         $this->assertEquals(__CLASS__, $response->getContent());
+    }
+
+    public function testResource_sub_action_works_with_arguments()
+    {
+        $this->withoutExceptionHandling();
+        try {
+            $response = $this->postJson(
+                '/api/application_info/name/sub',
+                ['additional_argument' => 42]
+            );
+            $response->assertJson(
+                [
+                    'app_name' => __CLASS__,
+                    'additional_argument' => 42
+                ]
+            );
+        } catch (ValidationException $validationException) {
+            $this->fail('I did not expect a validation error with: ' . json_encode($validationException->getErrors()));
+        }
     }
 }
