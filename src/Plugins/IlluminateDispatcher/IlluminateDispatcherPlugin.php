@@ -7,7 +7,9 @@ use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Validation\Factory;
-use Psr\Container\ContainerInterface;
+use ReflectionClass;
+use W2w\Laravel\Apie\Contracts\HasApieRulesContract;
+use W2w\Lib\Apie\Events\DecodeEvent;
 use W2w\Lib\Apie\Events\DeleteResourceEvent;
 use W2w\Lib\Apie\Events\ModifySingleResourceEvent;
 use W2w\Lib\Apie\Events\NormalizeEvent;
@@ -217,6 +219,30 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPostCreateNormalizedData(NormalizeEvent $event)
     {
+        $this->dispatcher->dispatch($event);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function onPreDecodeRequestBody(DecodeEvent $event)
+    {
+        $this->dispatcher->dispatch($event);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function onPostDecodeRequestBody(DecodeEvent $event)
+    {
+        $refl = new ReflectionClass($event->getResourceClass());
+        if ($refl->implementsInterface(HasApieRulesContract::class)) {
+            // maybe move this to a listener?
+            $rules = $refl->getMethod('getApieRules')->invoke(null);
+            $decodedData = json_decode(json_encode($event->getDecodedData()), true);
+            $validation = $this->validator->make($decodedData, $rules);
+            $event->setDecodedData($validation->validate());
+        }
         $this->dispatcher->dispatch($event);
     }
 }
