@@ -9,6 +9,7 @@ env:
   - VERSION=3.7
   - VERSION=3.8
   - VERSION=4.0
+  - VERSION=5.0
 install:
   - "composer require ocramius/package-versions:1.4 --no-update --ignore-platform-reqs"
   - "composer require orchestra/testbench:${VERSION} --no-update --ignore-platform-reqs"
@@ -16,6 +17,6 @@ install:
 jobs:
   allow_failures:
     - php: nightly
-    - env: "VERSION=4.0"
+    - env: "VERSION=5.0"
 
 

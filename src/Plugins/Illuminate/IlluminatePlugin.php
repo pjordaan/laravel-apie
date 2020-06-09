@@ -9,10 +9,16 @@ use erasys\OpenApi\Spec\v3\Schema;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
+use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use W2w\Laravel\Apie\Events\OpenApiSpecGenerated;
 use W2w\Laravel\Apie\Plugins\Illuminate\Encoders\DefaultContentTypeFormatRetriever;
+use W2w\Laravel\Apie\Plugins\Illuminate\Normalizers\CollectionNormalizer;
+use W2w\Laravel\Apie\Plugins\Illuminate\Normalizers\LazyCollectionNormalizer;
 use W2w\Laravel\Apie\Plugins\Illuminate\ResourceFactories\FromIlluminateContainerFactory;
+use W2w\Laravel\Apie\Plugins\Illuminate\Schema\CollectionSchemaBuilder;
 use W2w\Laravel\Apie\Providers\ApieConfigResolver;
 use W2w\Lib\Apie\Core\Resources\ApiResourcesInterface;
 use W2w\Lib\Apie\Exceptions\InvalidClassTypeException;
@@ -110,7 +116,12 @@ class IlluminatePlugin implements ResourceProviderInterface, ApieConfigInterface
      */
     public function getEncoders(): array
     {
-        return [];
+        $res = [];
+        // container->tagged has hazy return value...
+        foreach ($this->container->tagged(EncoderInterface::class) as $normalizer) {
+            $res[] = $normalizer;
+        };
+        return $res;
     }
 
     /**
@@ -131,6 +142,10 @@ class IlluminatePlugin implements ResourceProviderInterface, ApieConfigInterface
         foreach ($this->container->tagged(NormalizerInterface::class) as $normalizer) {
             $res[] = $normalizer;
         };
+        $res[] = new CollectionNormalizer();
+        if (class_exists(LazyCollection::class)) {
+            $res[] = new LazyCollectionNormalizer();
+        }
         return $res;
     }
 
@@ -161,7 +176,13 @@ class IlluminatePlugin implements ResourceProviderInterface, ApieConfigInterface
      */
     public function getDynamicSchemaLogic(): array
     {
-        return [];
+        $schemas = [
+            Collection::class => new CollectionSchemaBuilder(),
+        ];
+        if (class_exists(LazyCollection::class)) {
+            $schemas[LazyCollection::class] = new LazyCollectionNormalizer();
+        }
+        return $schemas;
     }
 
     /**

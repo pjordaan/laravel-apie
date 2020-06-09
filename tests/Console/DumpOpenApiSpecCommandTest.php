@@ -32,7 +32,7 @@ class DumpOpenApiSpecCommandTest extends AbstractLaravelTestCase
         }
     }
 
-    public function test_happy_flow()
+    public function test_happy_flow_json()
     {
         $actual = $this->artisan('apie:dump-open-api', ['filename' => $this->filename]);
         if ($actual instanceof PendingCommand) {
@@ -41,7 +41,20 @@ class DumpOpenApiSpecCommandTest extends AbstractLaravelTestCase
         $this->assertEquals(0, $actual);
         $this->assertTrue(file_exists($this->filename));
         $expectedFile = __DIR__ . '/data/expected-contents.json';
-        //file_put_contents($expectedFile, file_get_contents($this->filename));
-        $this->assertEquals(file_get_contents($this->filename), file_get_contents($expectedFile));
+        // file_put_contents($expectedFile, file_get_contents($this->filename));
+        $this->assertEquals(file_get_contents($expectedFile), file_get_contents($this->filename));
+    }
+
+    public function test_happy_flow_yaml()
+    {
+        $actual = $this->artisan('apie:dump-open-api', ['filename' => $this->filename . '.yaml']);
+        if ($actual instanceof PendingCommand) {
+            $actual = $actual->execute();
+        }
+        $this->assertEquals(0, $actual);
+        $this->assertTrue(file_exists($this->filename . '.yaml'));
+        $expectedFile = __DIR__ . '/data/expected-contents.yaml';
+        // file_put_contents($expectedFile, file_get_contents($this->filename . '.yaml'));
+        $this->assertEquals(file_get_contents($expectedFile), file_get_contents($this->filename . '.yaml'));
     }
 }
