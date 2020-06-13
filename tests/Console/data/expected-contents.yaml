@@ -80,6 +80,8 @@ paths:
           $ref: '#/components/responses/MaintenanceMode'
       tags:
         - application_info
+      summary: 'get/search all instances of application_info'
+      operationId: resourceGetAllApplicationInfo
       parameters:
         -
           name: page
@@ -190,6 +192,8 @@ paths:
           $ref: '#/components/responses/MaintenanceMode'
       tags:
         - status
+      summary: 'get/search all instances of status'
+      operationId: resourceGetAllStatus
       parameters:
         -
           name: page
@@ -302,6 +306,8 @@ paths:
           $ref: '#/components/responses/MaintenanceMode'
       tags:
         - status
+      summary: 'retrieve a single instance of status'
+      operationId: resourceGetSingleStatus
     parameters:
       -
         name: id

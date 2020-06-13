@@ -206,5 +206,7 @@ class FeatureTest extends AbstractLaravelTestCase
         $response->assertExactJson(
             $validPutEntry
         );
+        $response = $this->delete('/api/domain_object_that_require_authorization/1');
+        $response->assertStatus(204);
     }
 }

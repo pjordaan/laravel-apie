@@ -15,7 +15,6 @@ use W2w\Laravel\Apie\Plugins\Illuminate\DataLayers\StatusFromDatabaseRetriever;
 use W2w\Laravel\Apie\Plugins\Illuminate6Cache\Illuminate6CachePlugin;
 use W2w\Laravel\Apie\Plugins\Illuminate6Cache\PsrCacheBridgePlugin;
 use W2w\Laravel\Apie\Plugins\Illuminate\IlluminatePlugin;
-use W2w\Laravel\Apie\Plugins\IlluminateDispatcher\IlluminateDispatcherPlugin;
 use W2w\Laravel\Apie\Services\ApieContext;
 use W2w\Laravel\Apie\Services\ApieExceptionToResponse;
 use W2w\Laravel\Apie\Services\FileStorageDataLayerContainer;

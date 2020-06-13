@@ -10,6 +10,11 @@ This is a small wrapper around the library [w2w/apie](https://github.com/pjordaa
 
 It also adds a class EloquentModelDataLayer to persist and retrieve api resources as Eloquent models and adds a status check to see if it can connect with the database. See the documentation of apie at https://github.com/pjordaan/apie
 
+## Forwards compatiblity Apie version 4
+By default laravel-apie will still use the old 3.* serialization.
+In Apie version 4 this will change drastically, so a config option
+is added to enable the forwards compatible 4.* release.
+
 ## Contents
 1. [Installation](#Installation)
 2. [Lumen integration](docs/02-lumen-integration.md)
@@ -22,8 +27,10 @@ It also adds a class EloquentModelDataLayer to persist and retrieve api resource
 9. [Custom normalizers/value objects](docs/09-custom-normalizers.md)
 10. [Modifying OpenAPI spec](docs/10-modifying-openapi-spec.md)
 11. [Use your own controllers](docs/11-own-controllers.md)
-12. [PSR6 Cache integration](docs/12-cache-integration.md)
-13. [L5-swagger integration](docs/13-l5swagger-integration.md)
+12. [Resource sub actions](docs/12-sub-actions.md)
+13. [Laravel components integration](docs/13-laravel-component-integrations.md)
+14. [PSR6 Cache integration](docs/14-cache-integration.md)
+15. [L5-swagger integration](docs/15-l5swagger-integration.md)
 
 
 ## Installation

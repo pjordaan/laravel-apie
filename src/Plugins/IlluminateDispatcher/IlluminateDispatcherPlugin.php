@@ -6,6 +6,7 @@ namespace W2w\Laravel\Apie\Plugins\IlluminateDispatcher;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Factory;
 use ReflectionClass;
 use W2w\Laravel\Apie\Contracts\HasApieRulesContract;
@@ -56,11 +57,24 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
     }
 
     /**
+     * @param string $methodName
+     * @param object $event
+     */
+    private function dispatch(string $methodName, object $event)
+    {
+        $eventName = 'apie.' . Str::snake(substr($methodName, 2));
+        $this->dispatcher->dispatch($eventName, $event);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function onPreDeleteResource(DeleteResourceEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        if ($this->gate->getPolicyFor($event->getResourceClass())) {
+            $this->gate->authorize('remove', [$event->getResourceClass(), $event->getId()]);
+        }
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -68,7 +82,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPostDeleteResource(DeleteResourceEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -76,7 +90,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPreRetrieveResource(RetrieveSingleResourceEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -88,7 +102,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
             $this->gate->authorize('view', $event->getResource());
         }
 
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -96,7 +110,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPreRetrieveAllResources(RetrievePaginatedResourcesEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -107,7 +121,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
         $resources = $event->getResources();
 
         $event->setResources($this->iterateList($resources));
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     private function iterateList(iterable $resourceList)
@@ -128,7 +142,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
         if ($this->gate->getPolicyFor($event->getResource())) {
             $this->gate->authorize('update', $event->getResource());
         }
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -136,7 +150,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPostPersistExistingResource(StoreExistingResourceEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -144,7 +158,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPreModifyResource(ModifySingleResourceEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -152,7 +166,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPostModifyResource(ModifySingleResourceEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -160,7 +174,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPreCreateResource(StoreNewResourceEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -168,7 +182,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPostCreateResource(StoreNewResourceEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -179,7 +193,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
         if ($this->gate->getPolicyFor($event->getResource())) {
             $this->gate->authorize('create', $event->getResource());
         }
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -187,7 +201,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPostPersistNewResource(StoreExistingResourceEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -195,7 +209,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPreCreateResponse(ResponseEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -203,7 +217,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPostCreateResponse(ResponseEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -211,7 +225,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPreCreateNormalizedData(NormalizeEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -219,7 +233,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPostCreateNormalizedData(NormalizeEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -227,7 +241,7 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
      */
     public function onPreDecodeRequestBody(DecodeEvent $event)
     {
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 
     /**
@@ -241,8 +255,8 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
             $rules = $refl->getMethod('getApieRules')->invoke(null);
             $decodedData = json_decode(json_encode($event->getDecodedData()), true);
             $validation = $this->validator->make($decodedData, $rules);
-            $event->setDecodedData($validation->validate());
+            $validation->validate();
         }
-        $this->dispatcher->dispatch($event);
+        $this->dispatch(__FUNCTION__, $event);
     }
 }

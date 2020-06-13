@@ -2,8 +2,13 @@
 namespace W2w\Laravel\Apie\Tests\Providers;
 
 use erasys\OpenApi\Spec\v3\Server;
+use Illuminate\Contracts\Auth\Access\Gate;
+use Prophecy\Argument;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
 use W2w\Laravel\Apie\Tests\Mocks\DomainObjectForFileStorage;
+use W2w\Laravel\Apie\Tests\Mocks\RandomPersister;
+use W2w\Laravel\Apie\Tests\Mocks\RandomRetriever;
+use W2w\Lib\Apie\Apie;
 use W2w\Lib\Apie\Core\ApiResourceFacade;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
 use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
@@ -52,11 +57,27 @@ class ApiResourceServiceProviderConfigTest extends AbstractLaravelTestCase
                             'title' => 'Laravel REST api 2.0',
                             'version' => '2.0',
                             'hash' => 'Overwritten',
+                        ],
+                        'resource-config' => [
+                            DomainObjectForFileStorage::class => [
+                                'retrieveClass' => RandomRetriever::class,
+                                'persistClass' => RandomPersister::class,
+                            ],
                         ]
                     ]
-                ]
+                ],
             ]
         );
+    }
+
+    public function testNoNeedToRegisterServiceIfInConfig()
+    {
+        /** @var Apie $apie */
+        $apie = $this->app->get(Apie::class);
+        $actual = $apie->getApiResourceFactory()->getApiResourceRetrieverInstance(RandomRetriever::class);
+        $this->assertInstanceOf(RandomRetriever::class, $actual);
+        $actual = $apie->getApiResourceFactory()->getApiResourcePersisterInstance(RandomPersister::class);
+        $this->assertInstanceOf(RandomPersister::class, $actual);
     }
 
     public function testSubcontextUrlWorks()

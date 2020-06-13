@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use W2w\Laravel\Apie\Controllers\SwaggerUiController;
 use W2w\Lib\Apie\Controllers\DeleteController;
 use W2w\Lib\Apie\Controllers\DocsController;
+use W2w\Lib\Apie\Controllers\DocsYamlController;
 use W2w\Lib\Apie\Controllers\GetAllController;
 use W2w\Lib\Apie\Controllers\GetController;
 use W2w\Lib\Apie\Controllers\PostController;
@@ -33,6 +34,7 @@ class LaravelRouteLoader implements RouteLoaderInterface
         }
 
         Route::get('/doc.json', DocsController::class)->name('apie.' . $contextString . 'docs')->defaults('context', $context);
+        Route::get('/doc.yml', DocsYamlController::class)->name('apie.' . $contextString . 'docsyaml')->defaults('context', $context);
     }
 
     public function addResourceUrl(array $context)

@@ -5,6 +5,7 @@ use Closure;
 use W2w\Laravel\Apie\Controllers\SwaggerUiController;
 use W2w\Lib\Apie\Controllers\DeleteController;
 use W2w\Lib\Apie\Controllers\DocsController;
+use W2w\Lib\Apie\Controllers\DocsYamlController;
 use W2w\Lib\Apie\Controllers\GetAllController;
 use W2w\Lib\Apie\Controllers\GetController;
 use W2w\Lib\Apie\Controllers\PostController;
@@ -21,6 +22,7 @@ class LumenRouteLoader implements RouteLoaderInterface
         }
         $router = app('router');
         $router->get('/doc.json', ['as' => 'apie.' . $contextString . 'docs', 'uses' => DocsController::class]);
+        $router->get('/doc.yml', ['as' => 'apie.' . $contextString . 'docsyaml', 'uses' => DocsYamlController::class]);
     }
 
     public function addResourceUrl(array $context)

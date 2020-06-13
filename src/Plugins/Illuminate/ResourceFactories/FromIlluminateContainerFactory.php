@@ -5,6 +5,8 @@ namespace W2w\Laravel\Apie\Plugins\Illuminate\ResourceFactories;
 
 use Illuminate\Container\Container;
 use Illuminate\Support\Str;
+use W2w\Laravel\Apie\Services\ApieContext;
+use W2w\Lib\Apie\Annotations\ApiResource;
 use W2w\Lib\Apie\Exceptions\InvalidClassTypeException;
 use W2w\Lib\Apie\Interfaces\ApiResourceFactoryInterface;
 use W2w\Lib\Apie\Interfaces\ApiResourcePersisterInterface;
@@ -70,8 +72,26 @@ class FromIlluminateContainerFactory implements ApiResourceFactoryInterface
 
     private function validIdentifier(string $identifier): bool
     {
-        return $this->container->has($identifier)
-            || $this->container->bound($identifier)
-            || Str::startsWith($identifier, 'W2w\Laravel\Apie\Plugins\Illuminate\DataLayers\\');
+        if ($this->container->has($identifier) || $this->container->bound($identifier)) {
+            return true;
+        }
+        if ($this->container->bound(ApieContext::class)) {
+            $context = $this->container->make(ApieContext::class);
+            foreach ($context->allContexts() as $apieContext) {
+                /** @var ApiResource[] $config */
+                $config = $apieContext->getConfig('resource-config');
+                foreach ($config as $resourceConfigEntry) {
+                    if ($identifier === $resourceConfigEntry->retrieveClass) {
+                        $this->container->singleton($identifier);
+                        return true;
+                    }
+                    if ($identifier === $resourceConfigEntry->persistClass) {
+                        $this->container->singleton($identifier);
+                        return true;
+                    }
+                }
+            }
+        }
+        return Str::startsWith($identifier, 'W2w\Laravel\Apie\Plugins\Illuminate\DataLayers\\');
     }
 }

@@ -38,7 +38,7 @@ class SwaggerUiController
         }
         $context = $this->apieContext->getActiveContext()->getContextKey();
         $contextString = empty($context) ? '' : (implode('.', $context) . '.');
-        $url = $this->urlGenerator->route('apie.' . $contextString . 'docs');
+        $url = $this->urlGenerator->route('apie.' . $contextString . 'docsyaml');
 
         return new TextResponse(
             str_replace('{{ url }}', $url, $contents),

@@ -19,7 +19,6 @@ class DomainObjectWithLaravelValidation implements HasApieRulesContract
 
     public $two;
 
-
     /**
      * Returns a list of validation rules just like a laravel form request works.
      *
