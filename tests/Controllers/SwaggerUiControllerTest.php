@@ -8,6 +8,6 @@ class SwaggerUiControllerTest extends AbstractLaravelTestCase
     public function test_works_without_config()
     {
         $response = $this->get('/swagger-ui');
-        $this->assertStringContainsString('http://localhost/api/doc.json', (string) $response->getContent());
+        $this->assertStringContainsString('http://localhost/api/doc.yml', (string) $response->getContent());
     }
 }
