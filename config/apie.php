@@ -28,6 +28,14 @@ return [
     ],
 
     /**
+     * Object access only makes sense if use_deprecated_apie_object_normalizer is false. An Object Access instance
+     * can tell how to access an object. The Object Class will be instantiated with the app container.
+     */
+    'object-access'             => [
+        // ClassName::class => ObjectAccessClass::class,
+    ],
+
+    /**
      * If caching is enabled and available (psr6-illuminate bridge or laravel 6+) results are being cached.
      */
     'caching'                => env('APIE_CACHING', !env('APP_DEBUG', false)),

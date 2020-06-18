@@ -28,13 +28,15 @@ use W2w\Lib\Apie\PluginInterfaces\ApieConfigInterface;
 use W2w\Lib\Apie\PluginInterfaces\ApiResourceFactoryProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\EncoderProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\NormalizerProviderInterface;
+use W2w\Lib\Apie\PluginInterfaces\ObjectAccessProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\OpenApiEventProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\OpenApiInfoProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\ResourceProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\SchemaProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\SubActionsProviderInterface;
+use W2w\Lib\ApieObjectAccessNormalizer\ObjectAccess\ObjectAccessInterface;
 
-class IlluminatePlugin implements ResourceProviderInterface, ApieConfigInterface, OpenApiInfoProviderInterface, ApiResourceFactoryProviderInterface, EncoderProviderInterface, NormalizerProviderInterface, OpenApiEventProviderInterface, SchemaProviderInterface, SubActionsProviderInterface
+class IlluminatePlugin implements ObjectAccessProviderInterface, ResourceProviderInterface, ApieConfigInterface, OpenApiInfoProviderInterface, ApiResourceFactoryProviderInterface, EncoderProviderInterface, NormalizerProviderInterface, OpenApiEventProviderInterface, SchemaProviderInterface, SubActionsProviderInterface
 {
     private $container;
 
@@ -197,6 +199,23 @@ class IlluminatePlugin implements ResourceProviderInterface, ApieConfigInterface
             foreach ($actions as $action) {
                 $results[$slug][] = $this->container->make($action);
             }
+        }
+        return $results;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getObjectAccesses(): array
+    {
+        $objectAccess = $this->resolvedConfig['object-access'];
+        $results = [];
+        foreach ($objectAccess as $key => $objectAccessClass) {
+            $service = $this->container->make($objectAccessClass);
+            if (!($service instanceof ObjectAccessInterface)) {
+                throw new InvalidClassTypeException($objectAccessClass, 'ObjectAccessInterface');
+            }
+            $results[$key] = $service;
         }
         return $results;
     }
