@@ -13,13 +13,15 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use W2w\Laravel\Apie\Plugins\Illuminate\DataLayers\StatusFromDatabaseRetriever;
 use W2w\Laravel\Apie\Plugins\Illuminate6Cache\Illuminate6CachePlugin;
-use W2w\Laravel\Apie\Plugins\Illuminate6Cache\PsrCacheBridgePlugin;
 use W2w\Laravel\Apie\Plugins\Illuminate\IlluminatePlugin;
+use W2w\Laravel\Apie\Plugins\PsrCacheBridge\PsrCacheBridgePlugin;
 use W2w\Laravel\Apie\Services\ApieContext;
 use W2w\Laravel\Apie\Services\ApieExceptionToResponse;
 use W2w\Laravel\Apie\Services\FileStorageDataLayerContainer;
 use W2w\Lib\Apie\Apie;
 use W2w\Lib\Apie\Core\ApiResourceFacade;
+use W2w\Lib\Apie\Core\ApiResourcePersister;
+use W2w\Lib\Apie\Core\ApiResourceRetriever;
 use W2w\Lib\Apie\Core\ClassResourceConverter;
 use W2w\Lib\Apie\Core\Resources\ApiResources;
 use W2w\Lib\Apie\Core\Resources\ApiResourcesInterface;
@@ -166,6 +168,20 @@ class ApiResourceServiceProvider extends ServiceProvider
          */
         $this->app->bind(ApiResourcesInterface::class, function () {
             return new ApiResources($this->app->get(Apie::class)->getResources());
+        });
+
+        /**
+         * ApiResourcePersister: call the correct data layer persist functionality.
+         */
+        $this->app->bind(ApiResourcePersister::class, function () {
+            return new ApiResourcePersister($this->app->get(Apie::class)->getApiResourceMetadataFactory());
+        });
+
+        /**
+         * ApiResourcePersister: call the correct data layer retrieve functionality.
+         */
+        $this->app->bind(ApiResourceRetriever::class, function () {
+            return new ApiResourceRetriever($this->app->get(Apie::class)->getApiResourceMetadataFactory());
         });
 
         /**

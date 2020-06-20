@@ -1,6 +1,6 @@
 <?php
 
-namespace W2w\Laravel\Apie\Plugins\Illuminate6Cache;
+namespace W2w\Laravel\Apie\Plugins\PsrCacheBridge;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Cache\Repository;
