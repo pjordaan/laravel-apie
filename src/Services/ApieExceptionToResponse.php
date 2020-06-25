@@ -9,6 +9,7 @@ use Illuminate\Validation\ValidationException;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
 use W2w\Lib\Apie\Core\Models\ApiResourceFacadeResponse;
 use W2w\Lib\Apie\Exceptions\ValidationException as ApieValidationException;
 use W2w\Lib\Apie\Interfaces\ResourceSerializerInterface;
@@ -42,7 +43,18 @@ class ApieExceptionToResponse
             $exception,
             $request->header('accept')
         );
-        return $this->httpFoundationFactory->createResponse($apiRes->getResponse()->withStatus($statusCode));
+        try {
+            $response = $apiRes->getResponse();
+        } catch (NotAcceptableHttpException $notAcceptableHttpException) {
+            // accept header is not allowed, so assume to return default accept header.
+            $apiRes = new ApiResourceFacadeResponse(
+                app(ResourceSerializerInterface::class),
+                $exception,
+                null
+            );
+            $response = $apiRes->getResponse();
+        }
+        return $this->httpFoundationFactory->createResponse($response->withStatus($statusCode));
     }
 
     public function isApieAction(Request $request): bool
