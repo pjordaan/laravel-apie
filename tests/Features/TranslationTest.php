@@ -16,6 +16,7 @@ class TranslationTest extends AbstractLaravelTestCase
     {
         $config = $application->make('config');
         $config->set('app.name', __CLASS__);
+        $config->set('apie.use_deprecated_apie_object_normalizer', false);
         $resources = [ApplicationInfo::class, Translation::class];
         $config->set('apie.translations', ['en', 'nl', 'be']);
         $config->set('apie.resources', $resources);
