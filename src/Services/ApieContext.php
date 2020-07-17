@@ -44,6 +44,9 @@ final class ApieContext
             /** @var Request $request */
             $request = $this->container->get(Request::class);
             $contexts = $request->route('context');
+            if (is_string($contexts) && $contexts) {
+                $contexts = explode('.', $contexts);
+            }
             if (is_array($contexts)) {
                 $context = $this;
                 while ($contexts && $context) {

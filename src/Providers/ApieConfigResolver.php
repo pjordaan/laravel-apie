@@ -41,6 +41,7 @@ class ApieConfigResolver
         $resolver->setDefaults($defaults)
                  ->setAllowedTypes('use_deprecated_apie_object_normalizer', ['bool'])
                  ->setAllowedTypes('resources', ['string[]', ApiResourcesInterface::class])
+                 ->setAllowedTypes('translations', ['string[]'])
                  ->setAllowedTypes('plugins', ['string[]'])
                  ->setAllowedTypes('resources-service', ['null', 'string'])
                  ->setAllowedTypes('mock', ['null', 'bool'])

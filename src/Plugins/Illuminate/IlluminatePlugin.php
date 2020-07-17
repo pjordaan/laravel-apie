@@ -6,6 +6,7 @@ use erasys\OpenApi\Spec\v3\Document;
 use erasys\OpenApi\Spec\v3\Info;
 use erasys\OpenApi\Spec\v3\License;
 use erasys\OpenApi\Spec\v3\Schema;
+use Illuminate\Auth\Authenticatable;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ use W2w\Laravel\Apie\Events\OpenApiSpecGenerated;
 use W2w\Laravel\Apie\Plugins\Illuminate\Encoders\DefaultContentTypeFormatRetriever;
 use W2w\Laravel\Apie\Plugins\Illuminate\Normalizers\CollectionNormalizer;
 use W2w\Laravel\Apie\Plugins\Illuminate\Normalizers\LazyCollectionNormalizer;
+use W2w\Laravel\Apie\Plugins\Illuminate\ObjectAccess\AuthObjectAccess;
 use W2w\Laravel\Apie\Plugins\Illuminate\ResourceFactories\FromIlluminateContainerFactory;
 use W2w\Laravel\Apie\Plugins\Illuminate\Schema\CollectionSchemaBuilder;
 use W2w\Laravel\Apie\Providers\ApieConfigResolver;
@@ -209,7 +211,9 @@ class IlluminatePlugin implements ObjectAccessProviderInterface, ResourceProvide
     public function getObjectAccesses(): array
     {
         $objectAccess = $this->resolvedConfig['object-access'];
-        $results = [];
+        $results = [
+            Authenticatable::class => new AuthObjectAccess(),
+        ];
         foreach ($objectAccess as $key => $objectAccessClass) {
             $service = $this->container->make($objectAccessClass);
             if (!($service instanceof ObjectAccessInterface)) {

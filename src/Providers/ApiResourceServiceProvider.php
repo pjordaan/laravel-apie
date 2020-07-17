@@ -14,6 +14,8 @@ use Symfony\Component\Serializer\SerializerInterface;
 use W2w\Laravel\Apie\Plugins\Illuminate\DataLayers\StatusFromDatabaseRetriever;
 use W2w\Laravel\Apie\Plugins\Illuminate6Cache\Illuminate6CachePlugin;
 use W2w\Laravel\Apie\Plugins\Illuminate\IlluminatePlugin;
+use W2w\Laravel\Apie\Plugins\IlluminateTranslation\DataLayers\TranslationRetriever;
+use W2w\Laravel\Apie\Plugins\IlluminateTranslation\IlluminateTranslationPlugin;
 use W2w\Laravel\Apie\Plugins\PsrCacheBridge\PsrCacheBridgePlugin;
 use W2w\Laravel\Apie\Services\ApieContext;
 use W2w\Laravel\Apie\Services\ApieExceptionToResponse;
@@ -150,6 +152,9 @@ class ApiResourceServiceProvider extends ServiceProvider
         if (!empty($config['resource-config'])) {
             $plugins[] = new FakeAnnotationsPlugin($config['resource-config']);
         }
+        if (!empty($config['translations'])) {
+            $plugins[] = new IlluminateTranslationPlugin($config['translations']);
+        }
         if (!empty($config['caching'])) {
             if ($this->app->bound('cache.psr6')) {
                 $plugins[] = new Illuminate6CachePlugin($this->app);
@@ -223,6 +228,8 @@ class ApiResourceServiceProvider extends ServiceProvider
         $this->app->bind(FileStorageDataLayer::class, function () {
             return $this->app->get(FileStorageDataLayerContainer::class)->getCurrentFileStorageDataLayer();
         });
+
+        $this->app->singleton(TranslationRetriever::class);
 
         /**
          * ApieExceptionToResponse::class: converts exception to an Apie response.

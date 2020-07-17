@@ -3,6 +3,8 @@
 
 namespace W2w\Laravel\Apie\Services;
 
+use W2w\Laravel\Apie\Middleware\HandleAcceptLanguage;
+
 class ApieRouteLoader
 {
     private $context;
@@ -30,10 +32,14 @@ class ApieRouteLoader
                     $this->routeLoader->addDocUrl($context->getContextKey());
                 }
             );
+            $middleware = $context->getConfig('apie-middleware');
+            if ($context->getConfig('translations')) {
+                array_unshift($middleware, HandleAcceptLanguage::class. ':' . implode(',', $context->getConfig('translations')));
+            }
             $this->routeLoader->context(
                 $context->getContextKey(),
                 $context->getConfig('api-url'),
-                $context->getConfig('apie-middleware'),
+                $middleware,
                 function () use ($context) {
                     $this->routeLoader->addResourceUrl($context->getContextKey());
                 }

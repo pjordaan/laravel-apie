@@ -20,6 +20,11 @@ return [
     'resources'              => [ApplicationInfo::class, Status::class],
 
     /**
+     * If this config contains content, an accept header can be added and Apie will add Laravel middleware to set the correct locale.
+     */
+    'translations' => [/** 'nl', 'de' */],
+
+    /**
      * Sub actions adds additional commands as a sub url route and will return the return value back as answer
      * If properly typehinted this can be auto-wired by Apie and the return value can be used as well.
      */
