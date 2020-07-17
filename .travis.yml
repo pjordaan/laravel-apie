@@ -14,6 +14,7 @@ install:
   - "composer require ocramius/package-versions:1.4 --no-update --ignore-platform-reqs"
   - "composer require orchestra/testbench:${VERSION} --no-update --ignore-platform-reqs"
   - "composer install --ignore-platform-reqs"
+  - "composer show"
 jobs:
   allow_failures:
     - php: nightly
