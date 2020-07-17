@@ -153,7 +153,7 @@ class ApiResourceServiceProvider extends ServiceProvider
             $plugins[] = new FakeAnnotationsPlugin($config['resource-config']);
         }
         if (!empty($config['translations'])) {
-            $plugins[] = new IlluminateTranslationPlugin($config['translations']);
+            $plugins[] = new IlluminateTranslationPlugin($config['translations'], $this->app->make('translator'));
         }
         if (!empty($config['caching'])) {
             if ($this->app->bound('cache.psr6')) {

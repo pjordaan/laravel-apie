@@ -5,6 +5,8 @@ namespace W2w\Laravel\Apie\Plugins\IlluminateTranslation;
 use erasys\OpenApi\Spec\v3\Document;
 use erasys\OpenApi\Spec\v3\Operation;
 use erasys\OpenApi\Spec\v3\Parameter;
+use Illuminate\Contracts\Translation\Translator;
+use W2w\Laravel\Apie\Plugins\IlluminateTranslation\SubActions\TransChoiceSubAction;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\ValueObjects\Locale;
 use W2w\Lib\Apie\Events\DecodeEvent;
 use W2w\Lib\Apie\Events\DeleteResourceEvent;
@@ -17,20 +19,27 @@ use W2w\Lib\Apie\Events\StoreExistingResourceEvent;
 use W2w\Lib\Apie\Events\StoreNewResourceEvent;
 use W2w\Lib\Apie\PluginInterfaces\OpenApiEventProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\ResourceLifeCycleInterface;
+use W2w\Lib\Apie\PluginInterfaces\SubActionsProviderInterface;
 
-class IlluminateTranslationPlugin implements OpenApiEventProviderInterface, ResourceLifeCycleInterface
+class IlluminateTranslationPlugin implements OpenApiEventProviderInterface, ResourceLifeCycleInterface, SubActionsProviderInterface
 {
     /**
      * @var array
      */
     private $locales;
+    /**
+     * @var Translator
+     */
+    private $translator;
 
     /**
      * @param string[] $locales
+     * @param Translator $translator
      */
-    public function __construct(array $locales)
+    public function __construct(array $locales, Translator $translator)
     {
         $this->locales = $locales;
+        $this->translator = $translator;
         Locale::$locales = $this->locales;
     }
 
@@ -146,5 +155,12 @@ class IlluminateTranslationPlugin implements OpenApiEventProviderInterface, Reso
 
     public function onPostCreateNormalizedData(NormalizeEvent $event)
     {
+    }
+
+    public function getSubActions()
+    {
+        return [
+            'withPlaceholders' => [new TransChoiceSubAction($this->translator)]
+        ];
     }
 }

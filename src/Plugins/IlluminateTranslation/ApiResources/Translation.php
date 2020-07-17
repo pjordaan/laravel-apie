@@ -8,7 +8,8 @@ use W2w\Laravel\Apie\Plugins\IlluminateTranslation\ValueObjects\Locale;
 
 /**
  * @ApiResource(
- *    retrieveClass=TranslationRetriever::class
+ *     retrieveClass=TranslationRetriever::class,
+ *     disabledMethods={"get-all"}
  * )
  */
 class Translation

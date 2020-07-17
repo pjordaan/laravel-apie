@@ -82,77 +82,7 @@ paths:
               - en
               - nl
               - be
-  /translation:
-    get:
-      responses:
-        200:
-          description: 'Retrieves all instances of translation'
-          headers:
-            x-ratelimit-limit:
-              $ref: '#/components/headers/x-ratelimit-limit'
-            x-ratelimit-remaining:
-              $ref: '#/components/headers/x-ratelimit-remaining'
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  title: translation
-                  description: 'translation get for groups get, read'
-                  type: object
-                  properties: { id: { type: string, nullable: false }, translation: { type: string, nullable: false }, locale: { type: string, format: locale, enum: [en, nl, be] } }
-                  xml: { name: item }
-            application/xml:
-              schema:
-                type: array
-                items:
-                  title: translation
-                  description: 'translation get for groups get, read'
-                  type: object
-                  properties: { id: { type: string, nullable: false }, translation: { type: string, nullable: false }, locale: { type: string, format: locale, enum: [en, nl, be] } }
-                  xml: { name: item }
-                xml:
-                  name: response
-        401:
-          $ref: '#/components/responses/NotAuthorized'
-        429:
-          $ref: '#/components/responses/TooManyRequests'
-        500:
-          $ref: '#/components/responses/InternalError'
-        502:
-          $ref: '#/components/responses/ServerDependencyError'
-        503:
-          $ref: '#/components/responses/MaintenanceMode'
-      tags:
-        - translation
-      summary: 'get/search all instances of translation'
-      operationId: resourceGetAllTranslation
-      parameters:
-        -
-          name: page
-          in: query
-          description: 'pagination index counting from 0'
-          schema:
-            type: integer
-            minimum: 0
-        -
-          name: limit
-          in: query
-          description: 'number of results'
-          schema:
-            type: integer
-            minimum: 1
-        -
-          name: Accept-Language
-          in: header
-          description: language
-          schema:
-            type: string
-            format: locale
-            enum:
-              - en
-              - nl
-              - be
+  /translation: {  }
   '/translation/{id}':
     get:
       responses:
@@ -173,8 +103,6 @@ paths:
                   id: { type: string, nullable: false }
                   translation: { type: string, nullable: false }
                   locale: { type: string, format: locale, enum: [en, nl, be] }
-                xml:
-                  name: item
             application/xml:
               schema:
                 title: translation
@@ -214,6 +142,79 @@ paths:
               - en
               - nl
               - be
+    parameters:
+      -
+        name: id
+        in: path
+        description: 'the id of the resource'
+        required: true
+        schema:
+          type: string
+  '/translation/{id}/withPlaceholders':
+    post:
+      responses:
+        200:
+          description: 'Retrieves return value of withPlaceholders'
+          headers:
+            x-ratelimit-limit:
+              $ref: '#/components/headers/x-ratelimit-limit'
+            x-ratelimit-remaining:
+              $ref: '#/components/headers/x-ratelimit-remaining'
+        401:
+          $ref: '#/components/responses/NotAuthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        429:
+          $ref: '#/components/responses/TooManyRequests'
+        500:
+          $ref: '#/components/responses/InternalError'
+        502:
+          $ref: '#/components/responses/ServerDependencyError'
+        503:
+          $ref: '#/components/responses/MaintenanceMode'
+      tags:
+        - translation
+      operationId: resourcePostSubActionTranslationWithPlaceholders
+      parameters:
+        -
+          name: Accept-Language
+          in: header
+          description: language
+          schema:
+            type: string
+            format: locale
+            enum:
+              - en
+              - nl
+              - be
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                replace:
+                  type: array
+                  items: { oneOf: [{ type: string, nullable: true }, { type: integer }, { type: boolean }] }
+                  nullable: false
+                amount:
+                  type: integer
+                  nullable: false
+          application/xml:
+            schema:
+              type: object
+              properties:
+                replace:
+                  type: array
+                  items: { oneOf: [{ type: string, nullable: true }, { type: integer }, { type: boolean }] }
+                  nullable: false
+                amount:
+                  type: integer
+                  nullable: false
+              xml:
+                name: item
+        description: 'the resource as JSON to persist'
+        required: true
     parameters:
       -
         name: id

@@ -54,6 +54,83 @@ class TranslationTest extends AbstractLaravelTestCase
         ]);
     }
 
+    /**
+     * @dataProvider subactionProvider
+     */
+    public function testSubActionWorksAsIntended(string $expected, string $id, string $language, array $placeholders, int $amount)
+    {
+        $this->withoutExceptionHandling();
+        $loader = app('translation.loader');
+        $loader->addNamespace('unittest', __DIR__ . '/data');
+        $response = $this->postJson(
+            '/api/translation/' . $id . '/withPlaceholders',
+            [
+                'replace' => $placeholders,
+                'amount' => $amount,
+            ],
+            [
+                'accept-language' => $language,
+                'accept' => 'application/json',
+                'content-type' => 'application/json'
+            ]
+        );
+        $response->assertOk();
+        $this->assertEquals(json_encode($expected), $response->getContent());
+    }
+
+    public function subactionProvider()
+    {
+        yield [
+            'Er zijn meerdere appels',
+            'unittest::plural.apples',
+            'nl',
+            [],
+            12
+        ];
+        yield [
+            'There are many apples',
+            'unittest::plural.apples',
+            'en',
+            [],
+            0
+        ];
+        yield [
+            'Er zijn enkele peren',
+            'unittest::plural.pears',
+            'nl',
+            [],
+            12
+        ];
+        yield [
+            'There are some pears',
+            'unittest::plural.pears',
+            'en',
+            [],
+            12
+        ];
+        yield [
+            'Dit heeft een :placeholder placeholder',
+            'unittest::plural.translation',
+            'nl',
+            [],
+            1
+        ];
+        yield [
+            'Dit heeft een pizza placeholder',
+            'unittest::plural.translation',
+            'nl',
+            ['placeholder' => 'pizza'],
+            1
+        ];
+        yield [
+            'This has a pizza placeholder',
+            'unittest::plural.translation',
+            'en',
+            ['placeholder' => 'pizza'],
+            1
+        ];
+    }
+
     protected function getPackageProviders($app)
     {
         return [ApiResourceServiceProvider::class];
