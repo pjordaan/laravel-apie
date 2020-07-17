@@ -16,11 +16,11 @@
         "php": "^7.2",
         "doctrine/annotations": "^1.7",
         "doctrine/cache": "^1.8",
-        "illuminate/container": "^5.6|^6.0",
-        "illuminate/contracts": "^5.6|^6.0",
-        "illuminate/database": "^5.6|^6.0",
-        "illuminate/http": "^5.6|^6.0",
-        "illuminate/routing": "^5.6|^6.0",
+        "illuminate/container": "^5.6|^6.0|^7.0",
+        "illuminate/contracts": "^5.6|^6.0|^7.0",
+        "illuminate/database": "^5.6|^6.0|^7.0",
+        "illuminate/http": "^5.6|^6.0|^7.0",
+        "illuminate/routing": "^5.6|^6.0|^7.0",
         "ramsey/uuid": "^3.8",
         "symfony/cache": "^4.4|^5.0",
         "symfony/options-resolver": "^4.4|^5.0",
@@ -53,7 +53,7 @@
     },
     "require-dev": {
         "mockery/mockery": "^1.2",
-        "nunomaduro/larastan": "^0.4.3|^0.5",
+        "nunomaduro/larastan": "^0.4.3|^0.5|^0.6.1",
         "orchestra/testbench": "3.6.*"
     },
     "suggest": {

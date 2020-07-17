@@ -19,6 +19,6 @@ class TransChoiceSubAction
 
     public function handle(Translation $translation, array $replace = [], int $amount = 1): string
     {
-        return $this->translator->transChoice($translation->getId(), $amount, $replace);
+        return $this->translator->choice($translation->getId(), $amount, $replace);
     }
 }
