@@ -60,6 +60,7 @@ class ApiResourceServiceProvider extends ServiceProvider
                 ]
             );
         }
+        $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang', 'apie');
 
         $this->loadMigrationsFrom(__DIR__ . '/../../migrations');
     }
@@ -153,7 +154,11 @@ class ApiResourceServiceProvider extends ServiceProvider
             $plugins[] = new FakeAnnotationsPlugin($config['resource-config']);
         }
         if (!empty($config['translations'])) {
-            $plugins[] = new IlluminateTranslationPlugin($config['translations'], $this->app->make('translator'));
+            $plugins[] = new IlluminateTranslationPlugin(
+                $config['translations'],
+                $this->app->make('translator'),
+                $this->app
+            );
         }
         if (!empty($config['caching'])) {
             if ($this->app->bound('cache.psr6')) {

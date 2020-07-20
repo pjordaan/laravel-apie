@@ -6,6 +6,10 @@ use erasys\OpenApi\Spec\v3\Document;
 use erasys\OpenApi\Spec\v3\Operation;
 use erasys\OpenApi\Spec\v3\Parameter;
 use Illuminate\Contracts\Translation\Translator;
+use Illuminate\Foundation\Application;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use W2w\Laravel\Apie\Plugins\IlluminateTranslation\Normalizers\LocationableExceptionNormalizer;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\SubActions\TransChoiceSubAction;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\ValueObjects\Locale;
 use W2w\Lib\Apie\Events\DecodeEvent;
@@ -17,29 +21,42 @@ use W2w\Lib\Apie\Events\RetrievePaginatedResourcesEvent;
 use W2w\Lib\Apie\Events\RetrieveSingleResourceEvent;
 use W2w\Lib\Apie\Events\StoreExistingResourceEvent;
 use W2w\Lib\Apie\Events\StoreNewResourceEvent;
+use W2w\Lib\Apie\PluginInterfaces\ApieAwareInterface;
+use W2w\Lib\Apie\PluginInterfaces\ApieAwareTrait;
+use W2w\Lib\Apie\PluginInterfaces\NormalizerProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\OpenApiEventProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\ResourceLifeCycleInterface;
 use W2w\Lib\Apie\PluginInterfaces\SubActionsProviderInterface;
+use W2w\Lib\Apie\Plugins\Core\Normalizers\ExceptionNormalizer;
 
-class IlluminateTranslationPlugin implements OpenApiEventProviderInterface, ResourceLifeCycleInterface, SubActionsProviderInterface
+class IlluminateTranslationPlugin implements ApieAwareInterface, OpenApiEventProviderInterface, ResourceLifeCycleInterface, SubActionsProviderInterface, NormalizerProviderInterface
 {
+    use ApieAwareTrait;
+
     /**
      * @var array
      */
     private $locales;
+
     /**
      * @var Translator
      */
     private $translator;
 
     /**
+     * @var Application
+     */
+    private $application;
+
+    /**
      * @param string[] $locales
      * @param Translator $translator
      */
-    public function __construct(array $locales, Translator $translator)
+    public function __construct(array $locales, Translator $translator, Application $application)
     {
         $this->locales = $locales;
         $this->translator = $translator;
+        $this->application = $application;
         Locale::$locales = $this->locales;
     }
 
@@ -147,6 +164,12 @@ class IlluminateTranslationPlugin implements OpenApiEventProviderInterface, Reso
 
     public function onPostCreateResponse(ResponseEvent $event)
     {
+        $response = $event->getResponse();
+        $locale = $this->application->getLocale();
+        if ($locale && !$response->hasHeader('Content-Language')) {
+            $event->setResponse($response->withAddedHeader('Content-Language', $this->application->getLocale()));
+        }
+
     }
 
     public function onPreCreateNormalizedData(NormalizeEvent $event)
@@ -161,6 +184,16 @@ class IlluminateTranslationPlugin implements OpenApiEventProviderInterface, Reso
     {
         return [
             'withPlaceholders' => [new TransChoiceSubAction($this->translator)]
+        ];
+    }
+
+    public function getNormalizers(): array
+    {
+        return [
+            new LocationableExceptionNormalizer(
+                new ExceptionNormalizer($this->getApie()->isDebug()),
+                $this->application->make(Translator::class)
+            ),
         ];
     }
 }

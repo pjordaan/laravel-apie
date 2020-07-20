@@ -4,11 +4,27 @@
 namespace W2w\Laravel\Apie\Tests\Features;
 
 use Illuminate\Translation\FileLoader;
+use ReflectionMethod;
+use RuntimeException;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\SerializerInterface;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\ApiResources\Translation;
 use W2w\Laravel\Apie\Providers\ApiResourceServiceProvider;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
 use W2w\Laravel\Apie\Tests\Mocks\TranslationServiceProvider;
+use W2w\Lib\Apie\Core\SearchFilters\PhpPrimitive;
+use W2w\Lib\Apie\Exceptions\InvalidIdException;
+use W2w\Lib\Apie\Exceptions\InvalidPageLimitException;
+use W2w\Lib\Apie\Exceptions\InvalidValueForValueObjectException;
+use W2w\Lib\Apie\Exceptions\MethodNotAllowedException;
+use W2w\Lib\Apie\Exceptions\PageIndexShouldNotBeNegativeException;
 use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
+use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\CouldNotConvertException;
+use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\LocalizationableException;
+use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\NameNotFoundException;
+use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\ObjectAccessException;
+use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\ObjectWriteException;
+use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\ValidationException;
 
 class TranslationTest extends AbstractLaravelTestCase
 {
@@ -31,7 +47,7 @@ class TranslationTest extends AbstractLaravelTestCase
         $response->assertStatus(406);
     }
 
-    public function testAcceptLanguageIsAdded()
+    public function testAcceptLanguageIsAddedToSpec()
     {
         $this->withoutExceptionHandling();
         $response = $this->get('/api/doc.yml');
@@ -48,6 +64,7 @@ class TranslationTest extends AbstractLaravelTestCase
         $loader->addNamespace('unittest', __DIR__ . '/data');
         $response = $this->get('/api/translation/unittest::auth.failed', ['accept-language' => 'nl', 'accept' => 'application/json']);
         $response->assertOk();
+        $response->assertHeader('Content-Language', 'nl');
         $response->assertJson([
             'id' => 'unittest::auth.failed',
             'translation' => 'Authorisatie gefaald',
@@ -135,5 +152,59 @@ class TranslationTest extends AbstractLaravelTestCase
     protected function getPackageProviders($app)
     {
         return [ApiResourceServiceProvider::class];
+    }
+
+    /**
+     * @dataProvider localizationErrorProvider
+     */
+    public function testLocalizationableNormalizerWorks(string $expectedMessage, LocalizationableException $exception)
+    {
+        /** @var Serializer $serializer */
+        $serializer = resolve(SerializerInterface::class);
+        $this->assertEquals($expectedMessage, $serializer->normalize($exception)['message']);
+    }
+
+    public function localizationErrorProvider()
+    {
+        yield [
+            'Value "42" for value object php_primitive is not in the right format',
+            new InvalidValueForValueObjectException('42', PhpPrimitive::class),
+        ];
+        yield [
+            'Id "this is not an id" is not valid as identifier',
+            new InvalidIdException('this is not an id'),
+        ];
+        yield [
+            'page should not be lower than 0',
+            new PageIndexShouldNotBeNegativeException(),
+        ];
+        yield [
+            'Method PIZZA is not allowed',
+            new MethodNotAllowedException('PIZZA'),
+        ];
+        yield [
+            'limit should not be lower than 1',
+            new InvalidPageLimitException()
+        ];
+        yield [
+            'A validation error occured.',
+            new ValidationException(['error' => ['name' => 'test']]),
+        ];
+        yield [
+            'Bond007 not found!',
+            new NameNotFoundException('Bond007'),
+        ];
+        yield [
+            'Expected int, got string',
+            new CouldNotConvertException('int', 'string')
+        ];
+        yield [
+            'Could not read property localizationErrorProvider: "test"',
+            new ObjectAccessException(new ReflectionMethod(__METHOD__), 'fieldName', new RuntimeException('test')),
+        ];
+        yield [
+            'Could not write property localizationErrorProvider: "test"',
+            new ObjectWriteException(new ReflectionMethod(__METHOD__), 'fieldName', new RuntimeException('test')),
+        ];
     }
 }
