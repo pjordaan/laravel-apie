@@ -11,15 +11,12 @@ use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\LocalizationableException;
 
 class LocationableExceptionNormalizer implements NormalizerInterface
 {
+    use SharedTranslatorTrait;
+
     /**
      * @var ExceptionNormalizer
      */
     private $exceptionNormalizer;
-
-    /**
-     * @var Translator
-     */
-    private $translator;
 
     public function __construct(ExceptionNormalizer $exceptionNormalizer, Translator $translator)
     {
@@ -34,20 +31,7 @@ class LocationableExceptionNormalizer implements NormalizerInterface
     {
         /** @var LocalizationableException|Throwable $object */
         $data = $this->exceptionNormalizer->normalize($object, $format, $context);
-        $i18n = $object->getI18n();
-        $replacements = [];
-        foreach ($i18n->getReplacements() as $key => $value) {
-            if (is_array($value)) {
-                $replacements[$key] = json_encode($value);
-            } else {
-                $replacements[$key] = $value;
-            }
-        }
-        $data['message'] = $this->translator->choice(
-            'apie::' . $i18n->getMessageString(),
-            $i18n->getAmount(),
-            $replacements
-        );
+        $data['message'] = $this->translate($object->getI18n());
         return $data;
     }
 

@@ -60,6 +60,14 @@ class ApiResourceServiceProvider extends ServiceProvider
                 ]
             );
         }
+        if (function_exists('resource_path')) {
+            $this->publishes(
+                [
+                    __DIR__ . '/../../resources/lang' => resource_path('lang/vendor/apie'),
+                ]
+            );
+        }
+
         $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang', 'apie');
 
         $this->loadMigrationsFrom(__DIR__ . '/../../migrations');

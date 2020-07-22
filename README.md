@@ -31,6 +31,7 @@ is added to enable the forwards compatible 4.* release.
 13. [Laravel components integration](docs/13-laravel-component-integrations.md)
 14. [PSR6 Cache integration](docs/14-cache-integration.md)
 15. [L5-swagger integration](docs/15-l5swagger-integration.md)
+16. [Localization aware API](docs/16-localization.md)
 
 ## Installation
 In your Laravel package you should do the usual steps to install a Laravel package.

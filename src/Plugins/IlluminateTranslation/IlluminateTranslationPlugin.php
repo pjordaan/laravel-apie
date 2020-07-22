@@ -10,6 +10,7 @@ use Illuminate\Foundation\Application;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\Normalizers\LocationableExceptionNormalizer;
+use W2w\Laravel\Apie\Plugins\IlluminateTranslation\Normalizers\ValidationExceptionNormalizer;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\SubActions\TransChoiceSubAction;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\ValueObjects\Locale;
 use W2w\Lib\Apie\Events\DecodeEvent;
@@ -167,7 +168,11 @@ class IlluminateTranslationPlugin implements ApieAwareInterface, OpenApiEventPro
         $response = $event->getResponse();
         $locale = $this->application->getLocale();
         if ($locale && !$response->hasHeader('Content-Language')) {
-            $event->setResponse($response->withAddedHeader('Content-Language', $this->application->getLocale()));
+            $event->setResponse(
+                $response
+                    ->withAddedHeader('Content-Language', $this->application->getLocale())
+                    ->withAddedHeader('Vary', 'Accept-Language')
+            );
         }
 
     }
@@ -189,11 +194,13 @@ class IlluminateTranslationPlugin implements ApieAwareInterface, OpenApiEventPro
 
     public function getNormalizers(): array
     {
+        $normalizer = new LocationableExceptionNormalizer(
+            new ExceptionNormalizer($this->getApie()->isDebug()),
+            $this->application->make(Translator::class)
+        );
         return [
-            new LocationableExceptionNormalizer(
-                new ExceptionNormalizer($this->getApie()->isDebug()),
-                $this->application->make(Translator::class)
-            ),
+            new ValidationExceptionNormalizer($normalizer, $this->application->make(Translator::class)),
+            $normalizer,
         ];
     }
 }

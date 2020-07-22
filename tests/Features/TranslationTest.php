@@ -19,6 +19,7 @@ use W2w\Lib\Apie\Exceptions\InvalidValueForValueObjectException;
 use W2w\Lib\Apie\Exceptions\MethodNotAllowedException;
 use W2w\Lib\Apie\Exceptions\PageIndexShouldNotBeNegativeException;
 use W2w\Lib\Apie\Plugins\ApplicationInfo\ApiResources\ApplicationInfo;
+use W2w\Lib\ApieObjectAccessNormalizer\Errors\ErrorBag;
 use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\CouldNotConvertException;
 use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\LocalizationableException;
 use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\NameNotFoundException;
@@ -187,7 +188,7 @@ class TranslationTest extends AbstractLaravelTestCase
             new InvalidPageLimitException()
         ];
         yield [
-            'A validation error occured.',
+            'A validation error occurred.',
             new ValidationException(['error' => ['name' => 'test']]),
         ];
         yield [
@@ -205,6 +206,56 @@ class TranslationTest extends AbstractLaravelTestCase
         yield [
             'Could not write property localizationErrorProvider: "test"',
             new ObjectWriteException(new ReflectionMethod(__METHOD__), 'fieldName', new RuntimeException('test')),
+        ];
+    }
+
+    /**
+     * @dataProvider validationProvider
+     */
+    public function testValidationLocalizationWorks(array $expected, ValidationException $exception)
+    {
+        /** @var Serializer $serializer */
+        $serializer = resolve(SerializerInterface::class);
+        $this->assertEquals($expected, $serializer->normalize($exception));
+    }
+
+    public function validationProvider()
+    {
+        yield [
+            [
+                'type' => "ValidationException",
+                'message' => 'A validation error occurred.',
+                'code' => 0,
+                'errors' => [],
+            ],
+            new ValidationException([])
+        ];
+        $bag = new ErrorBag('');
+        $bag->addThrowable('test', new ObjectWriteException(new ReflectionMethod(__METHOD__), 'fieldName', new RuntimeException('test')));
+        $exception = new ValidationException($bag);
+        yield [
+            [
+                'type' => "ValidationException",
+                'message' => 'A validation error occurred.',
+                'code' => 0,
+                'errors' => [
+                    'test' => ['Could not write property validationProvider: "test"']
+                ],
+            ],
+            $exception
+        ];
+        $anotherBag = new ErrorBag('');
+        $anotherBag->addThrowable('field', $exception);
+        yield [
+            [
+                'type' => "ValidationException",
+                'message' => 'A validation error occurred.',
+                'code' => 0,
+                'errors' => [
+                    'test' => ['Could not write property validationProvider: "test"']
+                ],
+            ],
+            new ValidationException($anotherBag)
         ];
     }
 }
