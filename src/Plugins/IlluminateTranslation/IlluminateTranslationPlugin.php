@@ -3,8 +3,10 @@
 namespace W2w\Laravel\Apie\Plugins\IlluminateTranslation;
 
 use erasys\OpenApi\Spec\v3\Document;
+use erasys\OpenApi\Spec\v3\Header;
 use erasys\OpenApi\Spec\v3\Operation;
 use erasys\OpenApi\Spec\v3\Parameter;
+use erasys\OpenApi\Spec\v3\Reference;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Foundation\Application;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -63,6 +65,10 @@ class IlluminateTranslationPlugin implements ApieAwareInterface, OpenApiEventPro
 
     public function onOpenApiDocGenerated(Document $document): Document
     {
+        $document->components->headers['accept-language'] = new Header(
+            'Language of response',
+            ['schema' => Locale::toSchema()]
+        );
         foreach ($document->paths as $path) {
             $this->patchOperation($path->get);
             $this->patchOperation($path->put);
@@ -93,6 +99,12 @@ class IlluminateTranslationPlugin implements ApieAwareInterface, OpenApiEventPro
                 'schema' => Locale::toSchema(),
             ]
         );
+        foreach (($operation->responses ?? []) as $response) {
+            if ($response instanceof Reference) {
+                continue;
+            }
+            $response->headers['content-language'] = new Reference('#/components/headers/accept-language');
+        }
     }
 
     public function onPreDeleteResource(DeleteResourceEvent $event)

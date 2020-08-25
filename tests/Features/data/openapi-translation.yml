@@ -21,6 +21,8 @@ paths:
               $ref: '#/components/headers/x-ratelimit-limit'
             x-ratelimit-remaining:
               $ref: '#/components/headers/x-ratelimit-remaining'
+            content-language:
+              $ref: '#/components/headers/accept-language'
           content:
             application/json:
               schema:
@@ -92,6 +94,8 @@ paths:
               $ref: '#/components/headers/x-ratelimit-limit'
             x-ratelimit-remaining:
               $ref: '#/components/headers/x-ratelimit-remaining'
+            content-language:
+              $ref: '#/components/headers/accept-language'
           content:
             application/json:
               schema:
@@ -159,6 +163,8 @@ paths:
               $ref: '#/components/headers/x-ratelimit-limit'
             x-ratelimit-remaining:
               $ref: '#/components/headers/x-ratelimit-remaining'
+            content-language:
+              $ref: '#/components/headers/accept-language'
         401:
           $ref: '#/components/responses/NotAuthorized'
         404:
@@ -364,3 +370,12 @@ components:
       schema:
         type: integer
       example: 94
+    accept-language:
+      description: 'Language of response'
+      schema:
+        type: string
+        format: locale
+        enum:
+          - en
+          - nl
+          - be
