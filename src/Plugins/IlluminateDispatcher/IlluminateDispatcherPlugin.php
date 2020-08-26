@@ -9,6 +9,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Factory;
 use ReflectionClass;
+use RewindableGenerator;
 use W2w\Laravel\Apie\Contracts\HasApieRulesContract;
 use W2w\Lib\Apie\Events\DecodeEvent;
 use W2w\Lib\Apie\Events\DeleteResourceEvent;
@@ -120,7 +121,13 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
     {
         $resources = $event->getResources();
 
-        $event->setResources($this->iterateList($resources));
+        $event->setResources(
+            new RewindableGenerator(
+                function () use (&$resources) {
+                    yield from $this->iterateList($resources);
+                }
+            )
+        );
         $this->dispatch(__FUNCTION__, $event);
     }
 

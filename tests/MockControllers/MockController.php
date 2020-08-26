@@ -9,7 +9,7 @@ class MockController extends Controller
 {
     public function testApiResourceFacadeResponseList(ApiResourceFacadeResponse $response)
     {
-        $resource = $response->getResource();
+        $resource = iterator_to_array($response->getResource());
         return count($resource) . ' ' . get_class($resource[0]) . ' ' . strlen(json_encode($response->getNormalizedData()));
     }
 

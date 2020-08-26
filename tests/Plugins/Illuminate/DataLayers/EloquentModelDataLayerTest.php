@@ -77,7 +77,7 @@ class EloquentModelDataLayerTest extends AbstractLaravelTestCase
             new ClassForEloquentModelDataLayer(1178568022, new EnumValueObject('a'), '0'),
             new ClassForEloquentModelDataLayer(1273124119, new EnumValueObject('a'), '1'),
         ];
-        $this->assertEquals($expected, $actual);
+        $this->assertEquals($expected, iterator_to_array($actual));
     }
 
     public function testPersistNew()

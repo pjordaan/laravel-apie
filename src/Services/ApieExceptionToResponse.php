@@ -11,8 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
 use W2w\Lib\Apie\Core\Models\ApiResourceFacadeResponse;
-use W2w\Lib\Apie\Exceptions\ValidationException as ApieValidationException;
 use W2w\Lib\Apie\Interfaces\ResourceSerializerInterface;
+use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\ValidationException as ApieValidationException;
 
 class ApieExceptionToResponse
 {

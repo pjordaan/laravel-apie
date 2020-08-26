@@ -17,17 +17,23 @@ paths:
         200:
           description: 'Retrieves all instances of application_info'
           headers:
-            x-ratelimit-limit:
-              $ref: '#/components/headers/x-ratelimit-limit'
-            x-ratelimit-remaining:
-              $ref: '#/components/headers/x-ratelimit-remaining'
+            x-pagination-count:
+              $ref: '#/components/headers/Count'
+            x-pagination-previous:
+              $ref: '#/components/headers/Url'
+            x-pagination-next:
+              $ref: '#/components/headers/Url'
+            x-pagination-first:
+              $ref: '#/components/headers/Url'
+            x-pagination-last:
+              $ref: '#/components/headers/Url'
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  title: application_info
-                  description: 'application_info get for groups get, read'
+                  title: ApplicationInfo
+                  description: 'ApplicationInfo get for groups get, read'
                   type: object
                   properties:
                     app_name:
@@ -42,14 +48,12 @@ paths:
                     debug:
                       type: boolean
                       nullable: false
-                  xml:
-                    name: item
             application/xml:
               schema:
                 type: array
                 items:
-                  title: application_info
-                  description: 'application_info get for groups get, read'
+                  title: ApplicationInfo
+                  description: 'ApplicationInfo get for groups get, read'
                   type: object
                   properties:
                     app_name:
@@ -68,16 +72,6 @@ paths:
                     name: item
                 xml:
                   name: response
-        401:
-          $ref: '#/components/responses/NotAuthorized'
-        429:
-          $ref: '#/components/responses/TooManyRequests'
-        500:
-          $ref: '#/components/responses/InternalError'
-        502:
-          $ref: '#/components/responses/ServerDependencyError'
-        503:
-          $ref: '#/components/responses/MaintenanceMode'
       tags:
         - application_info
       summary: 'get/search all instances of application_info'
@@ -103,17 +97,23 @@ paths:
         200:
           description: 'Retrieves all instances of status'
           headers:
-            x-ratelimit-limit:
-              $ref: '#/components/headers/x-ratelimit-limit'
-            x-ratelimit-remaining:
-              $ref: '#/components/headers/x-ratelimit-remaining'
+            x-pagination-count:
+              $ref: '#/components/headers/Count'
+            x-pagination-previous:
+              $ref: '#/components/headers/Url'
+            x-pagination-next:
+              $ref: '#/components/headers/Url'
+            x-pagination-first:
+              $ref: '#/components/headers/Url'
+            x-pagination-last:
+              $ref: '#/components/headers/Url'
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  title: status
-                  description: 'status get for groups get, read'
+                  title: Status
+                  description: 'Status get for groups get, read'
                   type: object
                   properties:
                     id:
@@ -127,28 +127,18 @@ paths:
                       nullable: true
                     context:
                       type: array
-                      items:
-                        oneOf:
-                          -
-                            type: string
-                            nullable: true
-                          -
-                            type: integer
-                          -
-                            type: boolean
+                      items: {  }
                       nullable: true
                     no_errors:
                       description: 'Returns true to tell the status check is ''healthy''.'
                       type: boolean
                       nullable: false
-                  xml:
-                    name: item
             application/xml:
               schema:
                 type: array
                 items:
-                  title: status
-                  description: 'status get for groups get, read'
+                  title: Status
+                  description: 'Status get for groups get, read'
                   type: object
                   properties:
                     id:
@@ -162,15 +152,7 @@ paths:
                       nullable: true
                     context:
                       type: array
-                      items:
-                        oneOf:
-                          -
-                            type: string
-                            nullable: true
-                          -
-                            type: integer
-                          -
-                            type: boolean
+                      items: {  }
                       nullable: true
                     no_errors:
                       description: 'Returns true to tell the status check is ''healthy''.'
@@ -180,16 +162,6 @@ paths:
                     name: item
                 xml:
                   name: response
-        401:
-          $ref: '#/components/responses/NotAuthorized'
-        429:
-          $ref: '#/components/responses/TooManyRequests'
-        500:
-          $ref: '#/components/responses/InternalError'
-        502:
-          $ref: '#/components/responses/ServerDependencyError'
-        503:
-          $ref: '#/components/responses/MaintenanceMode'
       tags:
         - status
       summary: 'get/search all instances of status'
@@ -220,16 +192,12 @@ paths:
       responses:
         200:
           description: 'Retrieves a single instance of status'
-          headers:
-            x-ratelimit-limit:
-              $ref: '#/components/headers/x-ratelimit-limit'
-            x-ratelimit-remaining:
-              $ref: '#/components/headers/x-ratelimit-remaining'
+          headers: {  }
           content:
             application/json:
               schema:
-                title: status
-                description: 'status get for groups get, read'
+                title: Status
+                description: 'Status get for groups get, read'
                 type: object
                 properties:
                   id:
@@ -243,26 +211,16 @@ paths:
                     nullable: true
                   context:
                     type: array
-                    items:
-                      oneOf:
-                        -
-                          type: string
-                          nullable: true
-                        -
-                          type: integer
-                        -
-                          type: boolean
+                    items: {  }
                     nullable: true
                   no_errors:
                     description: 'Returns true to tell the status check is ''healthy''.'
                     type: boolean
                     nullable: false
-                xml:
-                  name: item
             application/xml:
               schema:
-                title: status
-                description: 'status get for groups get, read'
+                title: Status
+                description: 'Status get for groups get, read'
                 type: object
                 properties:
                   id:
@@ -276,15 +234,7 @@ paths:
                     nullable: true
                   context:
                     type: array
-                    items:
-                      oneOf:
-                        -
-                          type: string
-                          nullable: true
-                        -
-                          type: integer
-                        -
-                          type: boolean
+                    items: {  }
                     nullable: true
                   no_errors:
                     description: 'Returns true to tell the status check is ''healthy''.'
@@ -292,18 +242,8 @@ paths:
                     nullable: false
                 xml:
                   name: item
-        401:
-          $ref: '#/components/responses/NotAuthorized'
         404:
           $ref: '#/components/responses/NotFound'
-        429:
-          $ref: '#/components/responses/TooManyRequests'
-        500:
-          $ref: '#/components/responses/InternalError'
-        502:
-          $ref: '#/components/responses/ServerDependencyError'
-        503:
-          $ref: '#/components/responses/MaintenanceMode'
       tags:
         - status
       summary: 'retrieve a single instance of status'
@@ -341,6 +281,15 @@ components:
   responses:
     InvalidFormat:
       description: 'The body input could not be parsed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 'Response when resource could not be found'
       content:
         application/json:
           schema:
@@ -399,68 +348,14 @@ components:
                     type: string
             xml:
               name: response
-    TooManyRequests:
-      description: 'Too many requests per seconds were sent'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Error'
-    MaintenanceMode:
-      description: 'App is in maintenance mode'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Error'
-    NotFound:
-      description: 'Response when resource could not be found'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Error'
-    NotAuthorized:
-      description: 'You have no permission to do this call'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Error'
-    InternalError:
-      description: 'An internal error occured'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Error'
-    ServerDependencyError:
-      description: 'The server required an external response which threw an error'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Error'
   headers:
-    x-ratelimit-limit:
-      description: 'Request limit per hour'
+    Count:
+      description: 'number of results'
       schema:
-        type: integer
-      example: 100
-    x-ratelimit-remaining:
-      description: 'Request limit per hour'
+        type: number
+        format: int
+    Url:
+      description: 'url of header'
       schema:
-        type: integer
-      example: 94
+        type: string
+        format: url

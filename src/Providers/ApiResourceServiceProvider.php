@@ -103,15 +103,6 @@ class ApiResourceServiceProvider extends ServiceProvider
             $config = $this->app->get('config');
             $res = ApieConfigResolver::resolveConfig($config->get('apie') ?? []);
             $config->set('apie', $res);
-            if (empty($res['use_deprecated_apie_object_normalizer'])) {
-                ContextualNormalizer::disableNormalizer(ApieObjectNormalizer::class);
-                ContextualNormalizer::disableDenormalizer(ApieObjectNormalizer::class);
-            } else {
-                @trigger_error(
-                    'You are still using the deprecated apie object normalizer, enable it with use_deprecated_apie_object_normalizer = false in the config to get the 4.0 normalizer active',
-                    E_USER_DEPRECATED
-                );
-            }
             return $res;
         });
 

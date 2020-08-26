@@ -17,12 +17,18 @@ paths:
         200:
           description: 'Retrieves all instances of application_info'
           headers:
-            x-ratelimit-limit:
-              $ref: '#/components/headers/x-ratelimit-limit'
-            x-ratelimit-remaining:
-              $ref: '#/components/headers/x-ratelimit-remaining'
             content-language:
               $ref: '#/components/headers/accept-language'
+            x-pagination-count:
+              $ref: '#/components/headers/Count'
+            x-pagination-previous:
+              $ref: '#/components/headers/Url'
+            x-pagination-next:
+              $ref: '#/components/headers/Url'
+            x-pagination-first:
+              $ref: '#/components/headers/Url'
+            x-pagination-last:
+              $ref: '#/components/headers/Url'
           content:
             application/json:
               schema:
@@ -43,16 +49,6 @@ paths:
                   xml: { name: item }
                 xml:
                   name: response
-        401:
-          $ref: '#/components/responses/NotAuthorized'
-        429:
-          $ref: '#/components/responses/TooManyRequests'
-        500:
-          $ref: '#/components/responses/InternalError'
-        502:
-          $ref: '#/components/responses/ServerDependencyError'
-        503:
-          $ref: '#/components/responses/MaintenanceMode'
       tags:
         - application_info
       summary: 'get/search all instances of application_info'
@@ -90,10 +86,6 @@ paths:
         200:
           description: 'Retrieves a single instance of translation'
           headers:
-            x-ratelimit-limit:
-              $ref: '#/components/headers/x-ratelimit-limit'
-            x-ratelimit-remaining:
-              $ref: '#/components/headers/x-ratelimit-remaining'
             content-language:
               $ref: '#/components/headers/accept-language'
           content:
@@ -117,18 +109,8 @@ paths:
                   locale: { type: string, format: locale, enum: [en, nl, be] }
                 xml:
                   name: item
-        401:
-          $ref: '#/components/responses/NotAuthorized'
         404:
           $ref: '#/components/responses/NotFound'
-        429:
-          $ref: '#/components/responses/TooManyRequests'
-        500:
-          $ref: '#/components/responses/InternalError'
-        502:
-          $ref: '#/components/responses/ServerDependencyError'
-        503:
-          $ref: '#/components/responses/MaintenanceMode'
       tags:
         - translation
       summary: 'retrieve a single instance of translation'
@@ -159,24 +141,10 @@ paths:
         200:
           description: 'Retrieves return value of withPlaceholders'
           headers:
-            x-ratelimit-limit:
-              $ref: '#/components/headers/x-ratelimit-limit'
-            x-ratelimit-remaining:
-              $ref: '#/components/headers/x-ratelimit-remaining'
             content-language:
               $ref: '#/components/headers/accept-language'
-        401:
-          $ref: '#/components/responses/NotAuthorized'
         404:
           $ref: '#/components/responses/NotFound'
-        429:
-          $ref: '#/components/responses/TooManyRequests'
-        500:
-          $ref: '#/components/responses/InternalError'
-        502:
-          $ref: '#/components/responses/ServerDependencyError'
-        503:
-          $ref: '#/components/responses/MaintenanceMode'
       tags:
         - translation
       operationId: resourcePostSubActionTranslationWithPlaceholders
@@ -260,6 +228,15 @@ components:
         application/xml:
           schema:
             $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 'Response when resource could not be found'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
     ValidationError:
       description: 'The body input was in a proper format, but the input values were not valid'
       content:
@@ -305,71 +282,7 @@ components:
                   items: { type: string }
             xml:
               name: response
-    TooManyRequests:
-      description: 'Too many requests per seconds were sent'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Error'
-    MaintenanceMode:
-      description: 'App is in maintenance mode'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Error'
-    NotFound:
-      description: 'Response when resource could not be found'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Error'
-    NotAuthorized:
-      description: 'You have no permission to do this call'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Error'
-    InternalError:
-      description: 'An internal error occured'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Error'
-    ServerDependencyError:
-      description: 'The server required an external response which threw an error'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Error'
   headers:
-    x-ratelimit-limit:
-      description: 'Request limit per hour'
-      schema:
-        type: integer
-      example: 100
-    x-ratelimit-remaining:
-      description: 'Request limit per hour'
-      schema:
-        type: integer
-      example: 94
     accept-language:
       description: 'Language of response'
       schema:
@@ -379,3 +292,13 @@ components:
           - en
           - nl
           - be
+    Count:
+      description: 'number of results'
+      schema:
+        type: number
+        format: int
+    Url:
+      description: 'url of header'
+      schema:
+        type: string
+        format: url

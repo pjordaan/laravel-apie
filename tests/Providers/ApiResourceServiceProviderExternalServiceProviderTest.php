@@ -8,6 +8,7 @@ class ApiResourceServiceProviderExternalServiceProviderTest extends AbstractLara
 {
     public function test_external_rest_api_works_as_intended()
     {
+        $this->withoutExceptionHandling();
         $url = route('apie.test.all', ['resource' => 'application_info'], false);
         $this->assertEquals('/external-api/test/application_info', $url);
 

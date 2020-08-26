@@ -3,8 +3,7 @@
 
 namespace W2w\Laravel\Apie\Exceptions;
 
-
-use W2w\Lib\Apie\Exceptions\ApieException;
+use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\ApieException;
 
 class ApieContextMissingException extends ApieException
 {

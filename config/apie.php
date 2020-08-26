@@ -9,12 +9,6 @@ use W2w\Lib\Apie\Plugins\StatusCheck\DataLayers\StatusCheckRetriever;
 
 return [
     /**
-     * For BC reasons the ApieObjectNormalizer is still turned on. In Version 4 this one will be replaced
-     * and the serialization will change. Set to false to get the version 4 functionality.
-     * It has effect on the serialization and the schema generation.
-     */
-    'use_deprecated_apie_object_normalizer' => true,
-    /**
      * A list of classes to be used as Api resources.
      */
     'resources'              => [ApplicationInfo::class, Status::class],
@@ -33,8 +27,8 @@ return [
     ],
 
     /**
-     * Object access only makes sense if use_deprecated_apie_object_normalizer is false. An Object Access instance
-     * can tell how to access an object. The Object Class will be instantiated with the app container.
+     * An Object Access instance can tell how to access an object. The Object Class will be instantiated with
+     * the app container.
      */
     'object-access'             => [
         // ClassName::class => ObjectAccessClass::class,

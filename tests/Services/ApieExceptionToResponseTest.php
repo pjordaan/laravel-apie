@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\Serializer;
 use W2w\Laravel\Apie\Services\ApieExceptionToResponse;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
 use W2w\Lib\Apie\Exceptions\ResourceNotFoundException;
-use W2w\Lib\Apie\Exceptions\ValidationException;
+use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\ValidationException;
 
 class ApieExceptionToResponseTest extends AbstractLaravelTestCase
 {
@@ -107,7 +107,7 @@ class ApieExceptionToResponseTest extends AbstractLaravelTestCase
             ],
             "application/xml",
             $xmlRequest,
-            new ValidationException(['pizza' => 'It has anchovy!']),
+            new ValidationException(['pizza' => ['It has anchovy!']]),
             'xml'
         ];
 

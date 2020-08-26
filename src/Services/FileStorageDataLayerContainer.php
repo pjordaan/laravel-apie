@@ -40,7 +40,7 @@ class FileStorageDataLayerContainer
         if (!isset($this->instantiated[$context])) {
             $this->instantiated[$context] = new FileStorageDataLayer(
                 $this->storagePath . DIRECTORY_SEPARATOR . $context,
-                $apie->getPropertyAccessor()
+                $apie->getIdentifierExtractor()
             );
         }
         return $this->instantiated[$context];

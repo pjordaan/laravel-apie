@@ -8,6 +8,7 @@ use erasys\OpenApi\Spec\v3\License;
 use erasys\OpenApi\Spec\v3\Schema;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -22,13 +23,18 @@ use W2w\Laravel\Apie\Plugins\Illuminate\ObjectAccess\AuthObjectAccess;
 use W2w\Laravel\Apie\Plugins\Illuminate\ResourceFactories\FromIlluminateContainerFactory;
 use W2w\Laravel\Apie\Plugins\Illuminate\Schema\CollectionSchemaBuilder;
 use W2w\Laravel\Apie\Providers\ApieConfigResolver;
+use W2w\Lib\Apie\Core\ApiResourceMetadataFactory;
+use W2w\Lib\Apie\Core\ClassResourceConverter;
+use W2w\Lib\Apie\Core\IdentifierExtractor;
 use W2w\Lib\Apie\Core\Resources\ApiResourcesInterface;
+use W2w\Lib\Apie\Core\SearchFilters\SearchFilterRequest;
 use W2w\Lib\Apie\Exceptions\InvalidClassTypeException;
 use W2w\Lib\Apie\Interfaces\ApiResourceFactoryInterface;
 use W2w\Lib\Apie\Interfaces\FormatRetrieverInterface;
 use W2w\Lib\Apie\PluginInterfaces\ApieConfigInterface;
 use W2w\Lib\Apie\PluginInterfaces\ApiResourceFactoryProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\EncoderProviderInterface;
+use W2w\Lib\Apie\PluginInterfaces\FrameworkConnectionInterface;
 use W2w\Lib\Apie\PluginInterfaces\NormalizerProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\ObjectAccessProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\OpenApiEventProviderInterface;
@@ -38,7 +44,7 @@ use W2w\Lib\Apie\PluginInterfaces\SchemaProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\SubActionsProviderInterface;
 use W2w\Lib\ApieObjectAccessNormalizer\ObjectAccess\ObjectAccessInterface;
 
-class IlluminatePlugin implements ObjectAccessProviderInterface, ResourceProviderInterface, ApieConfigInterface, OpenApiInfoProviderInterface, ApiResourceFactoryProviderInterface, EncoderProviderInterface, NormalizerProviderInterface, OpenApiEventProviderInterface, SchemaProviderInterface, SubActionsProviderInterface
+class IlluminatePlugin implements ObjectAccessProviderInterface, ResourceProviderInterface, ApieConfigInterface, OpenApiInfoProviderInterface, ApiResourceFactoryProviderInterface, EncoderProviderInterface, NormalizerProviderInterface, OpenApiEventProviderInterface, SchemaProviderInterface, SubActionsProviderInterface, FrameworkConnectionInterface
 {
     private $container;
 
@@ -184,7 +190,7 @@ class IlluminatePlugin implements ObjectAccessProviderInterface, ResourceProvide
             Collection::class => new CollectionSchemaBuilder(),
         ];
         if (class_exists(LazyCollection::class)) {
-            $schemas[LazyCollection::class] = new LazyCollectionNormalizer();
+            $schemas[LazyCollection::class] = new CollectionSchemaBuilder();
         }
         return $schemas;
     }
@@ -222,5 +228,79 @@ class IlluminatePlugin implements ObjectAccessProviderInterface, ResourceProvide
             $results[$key] = $service;
         }
         return $results;
+    }
+
+    public function getService(string $id): object
+    {
+        return $this->container->make($id);
+    }
+
+    public function getUrlForResource(object $resource): ?string
+    {
+        return null;
+        $baseUrl = $this->getBaseUrl();
+        /**
+         * @var ClassResourceConverter
+         */
+        $classResourceConverter = $this->container->make(ClassResourceConverter::class);
+        /**
+         * @var IdentifierExtractor
+         */
+        $identifierExtractor = $this->container->make(IdentifierExtractor::class);
+        /**
+         * @var ApiResourceMetadataFactory
+         */
+        $apiMetadataFactory = $this->container->make(ApiResourceMetadataFactory::class);
+        $metadata = $apiMetadataFactory->getMetadata($resource);
+        $identifier = $identifierExtractor->getIdentifierValue($resource, $metadata->getContext());
+        if (!$identifier || !$metadata->allowGet()) {
+            return null;
+        }
+        return $this->getBaseUrl() . '/' . $classResourceConverter->normalize($metadata->getClassName()) . '/' . $identifier;
+    }
+
+    public function getOverviewUrlForResourceClass(string $resourceClass, ?SearchFilterRequest $filterRequest = null
+    ): ?string {
+        return null;
+        /**
+         * @var ClassResourceConverter
+         */
+        $classResourceConverter = $this->container->make(ClassResourceConverter::class);
+        /**
+         * @var ApiResourceMetadataFactory
+         */
+        $apiMetadataFactory = $this->container->make(ApiResourceMetadataFactory::class);
+        $metadata = $apiMetadataFactory->getMetadata($resourceClass);
+        if (!$metadata->allowGetAll()) {
+            return null;
+        }
+        $query = '';
+        if ($filterRequest) {
+            $searchQuery = $filterRequest->getSearches();
+            $searchQuery['page'] = $filterRequest->getPageIndex();
+            $searchQuery['limit'] = $filterRequest->getNumberOfItems();
+            $query = '?' . http_build_query($searchQuery);
+        }
+        return $this->getBaseUrl() . '/' . $classResourceConverter->normalize($metadata->getClassName()) . $query;
+    }
+
+    public function getExampleUrl(string $resourceClass): ?string
+    {
+        return null;
+    }
+
+    public function getAcceptLanguage(): ?string
+    {
+        return $this->container->get(Translator::class)->getLocale();
+    }
+
+    public function getContentLanguage(): ?string
+    {
+        if ($this->container->has(Request::class)) {
+            /** @var Request $request */
+            $request = $this->container->get(Request::class);
+            return $request->header('Content-Language', $this->getAcceptLanguage());
+        }
+        return null;
     }
 }

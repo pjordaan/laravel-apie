@@ -92,7 +92,7 @@ class DatabaseQueryRetrieverTest extends AbstractLaravelTestCase
             new ClassForDatabaseQueryRetriever('a', 2101566889, 100),
             new ClassForDatabaseQueryRetriever('b', 2137389542, 100)
         ];
-        $this->assertEquals($expected, $actual);
+        $this->assertEquals($expected, iterator_to_array($actual));
     }
 
     public function testRetrieveAll_missing_configuration()

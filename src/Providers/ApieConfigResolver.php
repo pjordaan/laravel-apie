@@ -39,7 +39,6 @@ class ApieConfigResolver
         $resolver = new OptionsResolver();
 
         $resolver->setDefaults($defaults)
-                 ->setAllowedTypes('use_deprecated_apie_object_normalizer', ['bool'])
                  ->setAllowedTypes('resources', ['string[]', ApiResourcesInterface::class])
                  ->setAllowedTypes('translations', ['string[]'])
                  ->setAllowedTypes('plugins', ['string[]'])
