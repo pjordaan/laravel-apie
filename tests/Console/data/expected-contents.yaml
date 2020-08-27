@@ -355,7 +355,7 @@ components:
         type: number
         format: int
     Url:
-      description: 'url of header'
+      description: 'pagination url'
       schema:
         type: string
         format: url
