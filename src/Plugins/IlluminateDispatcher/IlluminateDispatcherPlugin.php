@@ -11,6 +11,7 @@ use Illuminate\Validation\Factory;
 use ReflectionClass;
 use RewindableGenerator;
 use W2w\Laravel\Apie\Contracts\HasApieRulesContract;
+use W2w\Laravel\Apie\Plugins\IlluminateDispatcher\Helpers\PaginatorHelper;
 use W2w\Lib\Apie\Events\DecodeEvent;
 use W2w\Lib\Apie\Events\DeleteResourceEvent;
 use W2w\Lib\Apie\Events\ModifySingleResourceEvent;
@@ -122,23 +123,14 @@ class IlluminateDispatcherPlugin implements ResourceLifeCycleInterface
         $resources = $event->getResources();
 
         $event->setResources(
-            new RewindableGenerator(
-                function () use (&$resources) {
-                    yield from $this->iterateList($resources);
+            PaginatorHelper::convertToPaginator(
+                $resources,
+                function (object $resource) {
+                    return !$this->gate->getPolicyFor($resource) || $this->gate->allows('view', $resource);
                 }
             )
         );
         $this->dispatch(__FUNCTION__, $event);
-    }
-
-    private function iterateList(iterable $resourceList)
-    {
-        foreach ($resourceList as $resource) {
-            // do policy check for every individual item because of polymorphic item list.
-            if (!$this->gate->getPolicyFor($resource) || $this->gate->allows('view', $resource)) {
-                yield $resource;
-            }
-        }
     }
 
     /**

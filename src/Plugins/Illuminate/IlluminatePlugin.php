@@ -262,26 +262,6 @@ class IlluminatePlugin implements ObjectAccessProviderInterface, ResourceProvide
     public function getOverviewUrlForResourceClass(string $resourceClass, ?SearchFilterRequest $filterRequest = null
     ): ?string {
         return null;
-        /**
-         * @var ClassResourceConverter
-         */
-        $classResourceConverter = $this->container->make(ClassResourceConverter::class);
-        /**
-         * @var ApiResourceMetadataFactory
-         */
-        $apiMetadataFactory = $this->container->make(ApiResourceMetadataFactory::class);
-        $metadata = $apiMetadataFactory->getMetadata($resourceClass);
-        if (!$metadata->allowGetAll()) {
-            return null;
-        }
-        $query = '';
-        if ($filterRequest) {
-            $searchQuery = $filterRequest->getSearches();
-            $searchQuery['page'] = $filterRequest->getPageIndex();
-            $searchQuery['limit'] = $filterRequest->getNumberOfItems();
-            $query = '?' . http_build_query($searchQuery);
-        }
-        return $this->getBaseUrl() . '/' . $classResourceConverter->normalize($metadata->getClassName()) . $query;
     }
 
     public function getExampleUrl(string $resourceClass): ?string
