@@ -160,6 +160,17 @@ paths:
               - en
               - nl
               - be
+        -
+          name: Content-Language
+          in: header
+          description: language
+          schema:
+            type: string
+            format: locale
+            enum:
+              - en
+              - nl
+              - be
       requestBody:
         content:
           application/json:

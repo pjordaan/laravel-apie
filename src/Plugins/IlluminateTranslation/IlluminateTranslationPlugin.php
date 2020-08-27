@@ -71,9 +71,9 @@ class IlluminateTranslationPlugin implements ApieAwareInterface, OpenApiEventPro
         );
         foreach ($document->paths as $path) {
             $this->patchOperation($path->get);
-            $this->patchOperation($path->put);
-            $this->patchOperation($path->post);
-            $this->patchOperation($path->patch);
+            $this->patchOperation($path->put, true);
+            $this->patchOperation($path->post, true);
+            $this->patchOperation($path->patch, true);
             $this->patchOperation($path->delete);
             $this->patchOperation($path->options);
             $this->patchOperation($path->head);
@@ -82,7 +82,7 @@ class IlluminateTranslationPlugin implements ApieAwareInterface, OpenApiEventPro
         return $document;
     }
 
-    private function patchOperation(?Operation $operation)
+    private function patchOperation(?Operation $operation, bool $hasBody = false)
     {
         if ($operation === null) {
             return;
@@ -99,6 +99,17 @@ class IlluminateTranslationPlugin implements ApieAwareInterface, OpenApiEventPro
                 'schema' => Locale::toSchema(),
             ]
         );
+        if ($hasBody) {
+            $operation->parameters[] = new Parameter(
+                'Content-Language',
+                Parameter::IN_HEADER,
+                'language',
+                [
+                    'schema' => Locale::toSchema(),
+                ]
+            );
+        }
+
         foreach (($operation->responses ?? []) as $response) {
             if ($response instanceof Reference) {
                 continue;
