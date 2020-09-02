@@ -26,6 +26,8 @@ use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\NameNotFoundException;
 use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\ObjectAccessException;
 use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\ObjectWriteException;
 use W2w\Lib\ApieObjectAccessNormalizer\Exceptions\ValidationException;
+use W2w\Lib\ApieObjectAccessNormalizer\Getters\ReflectionMethodGetter;
+use W2w\Lib\ApieObjectAccessNormalizer\Setters\ReflectionMethodSetter;
 
 class TranslationTest extends AbstractLaravelTestCase
 {
@@ -200,11 +202,11 @@ class TranslationTest extends AbstractLaravelTestCase
         ];
         yield [
             'Could not read property localizationErrorProvider: "test"',
-            new ObjectAccessException(new ReflectionMethod(__METHOD__), 'fieldName', new RuntimeException('test')),
+            new ObjectAccessException(new ReflectionMethodGetter(new ReflectionMethod(__METHOD__)), 'fieldName', new RuntimeException('test')),
         ];
         yield [
             'Could not write property localizationErrorProvider: "test"',
-            new ObjectWriteException(new ReflectionMethod(__METHOD__), 'fieldName', new RuntimeException('test')),
+            new ObjectWriteException(new ReflectionMethodSetter(new ReflectionMethod(__METHOD__)), 'fieldName', new RuntimeException('test')),
         ];
     }
 
@@ -230,7 +232,7 @@ class TranslationTest extends AbstractLaravelTestCase
             new ValidationException([])
         ];
         $bag = new ErrorBag('');
-        $bag->addThrowable('test', new ObjectWriteException(new ReflectionMethod(__METHOD__), 'fieldName', new RuntimeException('test')));
+        $bag->addThrowable('test', new ObjectWriteException(new ReflectionMethodSetter(new ReflectionMethod(__METHOD__)), 'fieldName', new RuntimeException('test')));
         $exception = new ValidationException($bag);
         yield [
             [
