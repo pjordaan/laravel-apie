@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use UnexpectedValueException;
 use W2w\Lib\Apie\Core\SearchFilters\SearchFilterRequest;
 use W2w\Lib\Apie\Interfaces\ResourceSerializerInterface;
+use W2w\Lib\Apie\Plugins\Core\Serializers\SymfonySerializerAdapter;
 
 /**
  * Contains logic to serialize from/to Eloquent models. This is placed in a different class for reusability.
@@ -64,7 +65,7 @@ class EloquentModelSerializer
      */
     public function toModel($resource, string $modelClass, array $mapping = null): Model
     {
-        $array = $this->serializer->normalize($resource, 'application/json');
+        $array = $this->serializer->normalize($resource, SymfonySerializerAdapter::INTERNAL_FOR_DATALAYER);
         if (!is_array($array)) {
             throw new UnexpectedValueException('Resource ' . get_class($resource) . ' was normalized to a non array field');
         }
@@ -109,7 +110,7 @@ class EloquentModelSerializer
     {
         $resourceClass = get_class($resource);
         $modelInstance = $modelClass::where(['id' => $id])->firstOrFail();
-        $array = $this->serializer->normalize($resource, 'application/json');
+        $array = $this->serializer->normalize($resource, SymfonySerializerAdapter::INTERNAL_FOR_DATALAYER);
         if (!is_array($array)) {
             throw new UnexpectedValueException('Resource ' . $resourceClass . ' was normalized to a non array field');
         }
