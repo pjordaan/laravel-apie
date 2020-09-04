@@ -11,6 +11,8 @@ use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Foundation\Application;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use W2w\Laravel\Apie\Contracts\LocalizationableObjectContract;
+use W2w\Laravel\Apie\Plugins\IlluminateTranslation\Normalizers\LocaleAwareStringNormalizer;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\Normalizers\LocationableExceptionNormalizer;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\Normalizers\ValidationExceptionNormalizer;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\SubActions\TransChoiceSubAction;
@@ -27,12 +29,15 @@ use W2w\Lib\Apie\Events\StoreNewResourceEvent;
 use W2w\Lib\Apie\PluginInterfaces\ApieAwareInterface;
 use W2w\Lib\Apie\PluginInterfaces\ApieAwareTrait;
 use W2w\Lib\Apie\PluginInterfaces\NormalizerProviderInterface;
+use W2w\Lib\Apie\PluginInterfaces\ObjectAccessProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\OpenApiEventProviderInterface;
 use W2w\Lib\Apie\PluginInterfaces\ResourceLifeCycleInterface;
 use W2w\Lib\Apie\PluginInterfaces\SubActionsProviderInterface;
 use W2w\Lib\Apie\Plugins\Core\Normalizers\ExceptionNormalizer;
+use W2w\Lib\ApieObjectAccessNormalizer\ObjectAccess\LocalizationAwareObjectAccess;
+use W2w\Lib\ApieObjectAccessNormalizer\ObjectAccess\ObjectAccessInterface;
 
-class IlluminateTranslationPlugin implements ApieAwareInterface, OpenApiEventProviderInterface, ResourceLifeCycleInterface, SubActionsProviderInterface, NormalizerProviderInterface
+class IlluminateTranslationPlugin implements ApieAwareInterface, OpenApiEventProviderInterface, ResourceLifeCycleInterface, SubActionsProviderInterface, NormalizerProviderInterface, ObjectAccessProviderInterface
 {
     use ApieAwareTrait;
 
@@ -54,6 +59,7 @@ class IlluminateTranslationPlugin implements ApieAwareInterface, OpenApiEventPro
     /**
      * @param string[] $locales
      * @param Translator $translator
+     * @param Application $application
      */
     public function __construct(array $locales, Translator $translator, Application $application)
     {
@@ -222,8 +228,21 @@ class IlluminateTranslationPlugin implements ApieAwareInterface, OpenApiEventPro
             $this->application->make(Translator::class)
         );
         return [
+            new LocaleAwareStringNormalizer($this->getApie()),
             new ValidationExceptionNormalizer($normalizer, $this->application->make(Translator::class)),
             $normalizer,
+        ];
+    }
+
+    public function getObjectAccesses(): array
+    {
+        return [
+            LocalizationableObjectContract::class => new LocalizationAwareObjectAccess(
+                $this->getApie(),
+                function (string $locale) {
+                    return new Locale($locale);
+                }
+            )
         ];
     }
 }

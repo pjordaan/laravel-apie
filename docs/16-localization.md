@@ -35,6 +35,65 @@ return [
 First call artisan vendor:publish and publish the translations to resources/lang/vendor/apie
 Feel free to add translations here. By default only english and dutch tranlations are available, but feel free to make
 a PR to add an other language.
+### Entities with localization support.
+Make your class implement LocalizationableObjectContract.
+
+Doing so will offer a different ObjectAccess that checks for 2 arguments in a setter.
+
+```php
+<?php
+use W2w\Laravel\Apie\Contracts\LocalizationableObjectContract;
+use W2w\Laravel\Apie\Plugins\IlluminateTranslation\ValueObjects\Locale;
+class ObjectWithLocalizationExample implements LocalizationableObjectContract
+{
+  private $descriptions = [];
+  
+  public function setDescription(Locale $locale, string $description)
+  {
+    $this->descriptions[$locale->toNative()] = $description);
+  }
+  
+  public function getDescription(Locale $locale): ?string
+  {
+    return $this->descriptions[$locale->toNative()];
+  }
+}
+```
+A special object acces that can provide execution of setters with 2 arguments and less buggy.
+
+### Localization Value object
+If tranlations is on, all pending work should be done. All you have to is add a LocaleAwareString to a property or method
+which is a value object that represents a string translation(s).
+
+It can be used in an entity like this:
+```php
+<?php
+use W2w\Laravel\Apie\Plugins\IlluminateTranslation\ValueObjects\LocaleAwareString;
+class Example {
+    private $description;
+
+    public function __construct()
+    {
+        $this->description = new LocaleAwareString();
+    }
+
+    public function setDescription(LocaleAwareString  $localeAwareString)
+    {
+        $this->description = $this->description->merge($localeAwareString);
+    }
+    public function getDescription(): LocaleAwareString
+    {
+        return $this->description;
+    }
+
+}
+```
+If a POST or PUT request is made, the content-language header will be used to set the correct value.
+For returning the translation is used for the accept-language header. So far this is the only OpenAPI
+API that allows a different content-language and accept-language.
+If no translation is found, null is returned.
+
+Custom things have to be done in data layer classes as this is not trivial to do.
 
 ### Making exceptions with localization
 Make sure you published the translations.

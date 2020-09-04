@@ -3,14 +3,18 @@
 
 namespace W2w\Laravel\Apie\Tests\Features;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Translation\FileLoader;
 use ReflectionMethod;
 use RuntimeException;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\ApiResources\Translation;
+use W2w\Laravel\Apie\Plugins\IlluminateTranslation\ValueObjects\Locale;
+use W2w\Laravel\Apie\Plugins\IlluminateTranslation\ValueObjects\LocaleAwareString;
 use W2w\Laravel\Apie\Providers\ApiResourceServiceProvider;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
+use W2w\Laravel\Apie\Tests\Mocks\LocalizableObject;
 use W2w\Laravel\Apie\Tests\Mocks\TranslationServiceProvider;
 use W2w\Lib\Apie\Core\SearchFilters\PhpPrimitive;
 use W2w\Lib\Apie\Exceptions\InvalidIdException;
@@ -258,5 +262,50 @@ class TranslationTest extends AbstractLaravelTestCase
             ],
             new ValidationException($anotherBag)
         ];
+    }
+
+    public function testSerializeLocalizableObject()
+    {
+        /** @var Serializer $serializer */
+        $serializer = resolve(SerializerInterface::class);
+        $object = new LocalizableObject();
+
+        $object->setDescription(LocaleAwareString::fromNative([
+            'en' => 'Description',
+            'nl' => 'Beschrijving',
+        ]));
+
+        App::setLocale('nl');
+        $this->assertEquals(['description' => 'Beschrijving'], $serializer->normalize($object));
+        App::setLocale('be');
+        $this->assertEquals(['description' => null], $serializer->normalize($object));
+
+        $this->assertEquals(
+            [
+                'description' => [
+                    'en' => 'Description',
+                    'nl' => 'Beschrijving',
+                ],
+            ],
+            $serializer->normalize($object, 'datalayer')
+        );
+
+        $actual = $serializer->denormalize(
+            ['description' => 'Omschrijving'],
+            LocalizableObject::class,
+            'json',
+            ['object_to_populate' => $object]
+        );
+        $this->assertSame($object, $actual);
+        $expected = LocaleAwareString::fromNative([
+            'en' => 'Description',
+            'nl' => 'Beschrijving',
+            'be' => 'Omschrijving'
+        ]);
+        $this->assertEquals(
+            $expected,
+            $object->getDescription()
+        );
+
     }
 }
