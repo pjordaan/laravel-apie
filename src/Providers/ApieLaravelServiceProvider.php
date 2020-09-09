@@ -1,17 +1,24 @@
 <?php
 namespace W2w\Laravel\Apie\Providers;
 
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode;
 use Illuminate\Support\ServiceProvider;
 use Psr\Http\Message\ServerRequestInterface;
 use W2w\Laravel\Apie\Console\DumpOpenApiSpecCommand;
+use W2w\Laravel\Apie\Contracts\ApieMiddlewareBridgeContract;
 use W2w\Laravel\Apie\Controllers\SwaggerUiController;
+use W2w\Laravel\Apie\Middleware\Bridge\MiddlewareToStatusCodeMapper;
 use W2w\Laravel\Apie\Services\ApieContext;
 use W2w\Laravel\Apie\Services\ApieRouteLoader;
 use W2w\Laravel\Apie\Services\LaravelRouteLoader;
 use W2w\Laravel\Apie\Services\RequestToFacadeResponseConverter;
 use W2w\Laravel\Apie\Services\RouteLoaderInterface;
 use W2w\Lib\Apie\Core\Models\ApiResourceFacadeResponse;
+use W2w\Lib\Apie\OpenApiSchema\OpenApiSchemaGenerator;
 
 /**
  * Service provider for Apie to link to Laravel (and that do not work in Lumen)
@@ -73,9 +80,26 @@ class ApieLaravelServiceProvider extends ServiceProvider
             return $converter->convertUnknownResourceClassToResponse($request);
         });
 
+        $this->registerMiddlewareBridges();
+
         if ($this->app->runningInConsole()) {
             $this->commands([DumpOpenApiSpecCommand::class]);
         }
+    }
+
+    private function registerMiddlewareBridges()
+    {
+        $this->app->bind(MiddlewareToStatusCodeMapper::class, function (Application $app) {
+            return new MiddlewareToStatusCodeMapper(
+                $app->get(OpenApiSchemaGenerator::class),
+                [
+                    401 => [Authenticate::class, 'Unauthenticated', 'User is not logged in'],
+                    403 => [Authorize::class, 'Unauthorized', 'Invalid action for logged in user'],
+                    503 => [CheckForMaintenanceMode::class, 'Maintenance', 'Bad gateway or application in maintenance mode'],
+                ]
+            );
+        });
+        $this->app->tag([MiddlewareToStatusCodeMapper::class], [ApieMiddlewareBridgeContract::class]);
     }
 
     public function registerResourceClass(string $resourceClass)

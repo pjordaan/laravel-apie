@@ -2,7 +2,8 @@
 
 namespace W2w\Laravel\Apie\Providers;
 
-use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Http\Kernel as KernelContract;
+use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
@@ -14,6 +15,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use W2w\Laravel\Apie\Plugins\Illuminate\DataLayers\StatusFromDatabaseRetriever;
 use W2w\Laravel\Apie\Plugins\Illuminate6Cache\Illuminate6CachePlugin;
 use W2w\Laravel\Apie\Plugins\Illuminate\IlluminatePlugin;
+use W2w\Laravel\Apie\Plugins\IlluminateMiddleware\IlluminateMiddlewarePlugin;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\DataLayers\TranslationRetriever;
 use W2w\Laravel\Apie\Plugins\IlluminateTranslation\IlluminateTranslationPlugin;
 use W2w\Laravel\Apie\Plugins\PsrCacheBridge\PsrCacheBridgePlugin;
@@ -165,6 +167,16 @@ class ApiResourceServiceProvider extends ServiceProvider
             } elseif (class_exists(CacheItemPool::class)) {
                 $plugins[] = new PsrCacheBridgePlugin($this->app);
             }
+        }
+        // since we do not have a hard dependency on Laravel we require this check
+        if (class_exists(Kernel::class)
+            && isset($this->app[KernelContract::class])
+            && $this->app[KernelContract::class] instanceof Kernel
+        ) {
+            $plugins[] = new IlluminateMiddlewarePlugin(
+                $this->app->get(ApieContext::class),
+                $this->app[KernelContract::class]
+            );
         }
         $plugins[] = new IlluminatePlugin($this->app, $config);
         return $plugins;
