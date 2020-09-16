@@ -30,8 +30,8 @@ class HeaderMapper implements ApieMiddlewareBridgeContract
         foreach ($this->mapping as $className => $data) {
             if ($middlewareClass === $className || is_a($middlewareClass, $className, true)) {
                 list($header, $schema, $description) = $data;
-                if (isset($operation->responses[200])) {
-                    $operation->responses[200]->headers[$header] = new Header($description, ['schema' => $scheman]);
+                if (($operation->responses[200] ?? null) instanceof Response) {
+                    $operation->responses[200]->headers[$header] = new Header($description, ['schema' => $schema]);
                 }
             }
         }

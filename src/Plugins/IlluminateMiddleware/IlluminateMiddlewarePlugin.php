@@ -18,11 +18,6 @@ use W2w\Lib\Apie\PluginInterfaces\OpenApiEventProviderInterface;
 class IlluminateMiddlewarePlugin implements OpenApiEventProviderInterface
 {
     /**
-     * @var ApieContext
-     */
-    private $apieContext;
-
-    /**
      * @var Container
      */
     private $container;

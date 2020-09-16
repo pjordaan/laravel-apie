@@ -1,0 +1,362 @@
+openapi: 3.0.1
+info:
+  title: 'Laravel REST api'
+  version: '1.0'
+  description: ''
+  contact:
+    name: 'Way2web Software'
+    url: ''
+    email: ''
+  license:
+    name: 'Apache 2.0'
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+paths:
+  /application_info:
+    get:
+      responses:
+        200:
+          description: 'Retrieves all instances of application_info'
+          headers:
+            etag:
+              description: 'etag cache header'
+              schema:
+                type: string
+                format: md5
+                default: 25f9240a8f67de5f4ad800c2e14f3c49
+                example: 25f9240a8f67de5f4ad800c2e14f3c49
+            x-RateLimit-Limit:
+              description: 'Rate limit'
+              schema:
+                type: number
+            x-RateLimit-Limit-Remaining:
+              description: 'Requests remaining'
+              schema:
+                type: number
+            Retry-After:
+              schema:
+                type: number
+                format: timestamp
+            x-Ratelimit-Reset:
+              schema:
+                type: number
+                format: timestamp
+            x-pagination-count:
+              $ref: '#/components/headers/Count'
+            x-pagination-previous:
+              $ref: '#/components/headers/Url'
+            x-pagination-next:
+              $ref: '#/components/headers/Url'
+            x-pagination-first:
+              $ref: '#/components/headers/Url'
+            x-pagination-last:
+              $ref: '#/components/headers/Url'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  title: ApplicationInfo
+                  description: 'ApplicationInfo get for groups get, read'
+                  type: object
+                  properties: { app_name: { type: string, nullable: false }, environment: { type: string, nullable: false }, hash: { type: string, nullable: false }, debug: { type: boolean, nullable: false } }
+            application/xml:
+              schema:
+                type: array
+                items:
+                  title: ApplicationInfo
+                  description: 'ApplicationInfo get for groups get, read'
+                  type: object
+                  properties: { app_name: { type: string, nullable: false }, environment: { type: string, nullable: false }, hash: { type: string, nullable: false }, debug: { type: boolean, nullable: false } }
+                  xml: { name: item }
+                xml:
+                  name: response
+        429:
+          $ref: '#/components/responses/TooManyRequests'
+      tags:
+        - application_info
+      summary: 'get/search all instances of application_info'
+      operationId: resourceGetAllApplicationInfo
+      parameters:
+        -
+          name: page
+          in: query
+          description: 'pagination index counting from 0'
+          schema:
+            type: integer
+            minimum: 0
+        -
+          name: limit
+          in: query
+          description: 'number of results'
+          schema:
+            type: integer
+            minimum: 1
+  /status:
+    get:
+      responses:
+        200:
+          description: 'Retrieves all instances of status'
+          headers:
+            etag:
+              description: 'etag cache header'
+              schema:
+                type: string
+                format: md5
+                default: 25f9240a8f67de5f4ad800c2e14f3c49
+                example: 25f9240a8f67de5f4ad800c2e14f3c49
+            x-RateLimit-Limit:
+              description: 'Rate limit'
+              schema:
+                type: number
+            x-RateLimit-Limit-Remaining:
+              description: 'Requests remaining'
+              schema:
+                type: number
+            Retry-After:
+              schema:
+                type: number
+                format: timestamp
+            x-Ratelimit-Reset:
+              schema:
+                type: number
+                format: timestamp
+            x-pagination-count:
+              $ref: '#/components/headers/Count'
+            x-pagination-previous:
+              $ref: '#/components/headers/Url'
+            x-pagination-next:
+              $ref: '#/components/headers/Url'
+            x-pagination-first:
+              $ref: '#/components/headers/Url'
+            x-pagination-last:
+              $ref: '#/components/headers/Url'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  title: Status
+                  description: 'Status get for groups get, read'
+                  type: object
+                  properties: { id: { type: string, nullable: false }, status: { type: string, nullable: false }, optional_reference: { type: string, nullable: true }, context: { type: array, items: {  }, nullable: true }, no_errors: { description: 'Returns true to tell the status check is ''healthy''.', type: boolean, nullable: false } }
+            application/xml:
+              schema:
+                type: array
+                items:
+                  title: Status
+                  description: 'Status get for groups get, read'
+                  type: object
+                  properties: { id: { type: string, nullable: false }, status: { type: string, nullable: false }, optional_reference: { type: string, nullable: true }, context: { type: array, items: {  }, nullable: true }, no_errors: { description: 'Returns true to tell the status check is ''healthy''.', type: boolean, nullable: false } }
+                  xml: { name: item }
+                xml:
+                  name: response
+        429:
+          $ref: '#/components/responses/TooManyRequests'
+      tags:
+        - status
+      summary: 'get/search all instances of status'
+      operationId: resourceGetAllStatus
+      parameters:
+        -
+          name: page
+          in: query
+          description: 'pagination index counting from 0'
+          schema:
+            type: integer
+            minimum: 0
+        -
+          name: limit
+          in: query
+          description: 'number of results'
+          schema:
+            type: integer
+            minimum: 1
+        -
+          name: status
+          in: query
+          description: 'search filter status'
+          schema:
+            type: string
+  '/status/{id}':
+    get:
+      responses:
+        200:
+          description: 'Retrieves a single instance of status'
+          headers:
+            etag:
+              description: 'etag cache header'
+              schema:
+                type: string
+                format: md5
+                default: 25f9240a8f67de5f4ad800c2e14f3c49
+                example: 25f9240a8f67de5f4ad800c2e14f3c49
+            x-RateLimit-Limit:
+              description: 'Rate limit'
+              schema:
+                type: number
+            x-RateLimit-Limit-Remaining:
+              description: 'Requests remaining'
+              schema:
+                type: number
+            Retry-After:
+              schema:
+                type: number
+                format: timestamp
+            x-Ratelimit-Reset:
+              schema:
+                type: number
+                format: timestamp
+          content:
+            application/json:
+              schema:
+                title: Status
+                description: 'Status get for groups get, read'
+                type: object
+                properties:
+                  id: { type: string, nullable: false }
+                  status: { type: string, nullable: false }
+                  optional_reference: { type: string, nullable: true }
+                  context: { type: array, items: {  }, nullable: true }
+                  no_errors: { description: 'Returns true to tell the status check is ''healthy''.', type: boolean, nullable: false }
+            application/xml:
+              schema:
+                title: Status
+                description: 'Status get for groups get, read'
+                type: object
+                properties:
+                  id: { type: string, nullable: false }
+                  status: { type: string, nullable: false }
+                  optional_reference: { type: string, nullable: true }
+                  context: { type: array, items: {  }, nullable: true }
+                  no_errors: { description: 'Returns true to tell the status check is ''healthy''.', type: boolean, nullable: false }
+                xml:
+                  name: item
+        404:
+          $ref: '#/components/responses/NotFound'
+        429:
+          $ref: '#/components/responses/TooManyRequests'
+      tags:
+        - status
+      summary: 'retrieve a single instance of status'
+      operationId: resourceGetSingleStatus
+    parameters:
+      -
+        name: id
+        in: path
+        description: 'the id of the resource'
+        required: true
+        schema:
+          type: string
+servers:
+  -
+    url: 'http://localhost/api'
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        type:
+          type: string
+        message:
+          type: string
+        code:
+          oneOf:
+            -
+              type: string
+            -
+              type: integer
+        trace:
+          type: string
+      xml:
+        name: response
+  responses:
+    InvalidFormat:
+      description: 'The body input could not be parsed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 'Response when resource could not be found'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ValidationError:
+      description: 'The body input was in a proper format, but the input values were not valid'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              message:
+                type: string
+              code:
+                oneOf:
+                  - { type: string }
+                  - { type: integer }
+              trace:
+                type: string
+              errors:
+                type: object
+                additionalProperties:
+                  type: array
+                  items: { type: string }
+            xml:
+              name: response
+        application/xml:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              message:
+                type: string
+              code:
+                oneOf:
+                  - { type: string }
+                  - { type: integer }
+              trace:
+                type: string
+              errors:
+                type: object
+                additionalProperties:
+                  type: array
+                  items: { type: string }
+            xml:
+              name: response
+    TooManyRequests:
+      description: 'Request limit has been reached'
+      content:
+        application/json:
+          schema:
+            title: Exception
+            description: 'Exception get for groups base, read, get'
+            type: object
+            properties:
+              message: {  }
+              code: {  }
+              file: {  }
+              line: {  }
+              trace: {  }
+              previous: {  }
+              trace_as_string: {  }
+  headers:
+    Count:
+      description: 'number of results'
+      schema:
+        type: number
+        format: int
+    Url:
+      description: 'pagination url'
+      schema:
+        type: string
+        format: url

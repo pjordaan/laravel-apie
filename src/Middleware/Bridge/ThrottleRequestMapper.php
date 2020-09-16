@@ -37,30 +37,28 @@ class ThrottleRequestMapper implements ApieMiddlewareBridgeContract
 
     public function patch(Operation $operation, Components $components, string $middlewareClass)
     {
-        var_dump($middlewareClass);
-        if ($middlewareClass !== ThrottleRequestsWithRedis::class || $middlewareClass !== ThrottleRequests::class) {
+        if ($middlewareClass !== ThrottleRequestsWithRedis::class && $middlewareClass !== ThrottleRequests::class) {
             return;
         }
         $schema = $this->schemaGenerator->createSchema(
-            TooManyRequestsHttpException::class,
+            Exception::class,
             'get',
             ['base', 'read', 'get']
         );
         $media = new MediaType([
             'schema' => $schema
         ]);
-        $operation->responses[429] = new Response(
-            'Request limit has been reached',
-            [
-                'schema' => new Reference('#/components/responses/TooManyRequests')
-            ]
-        );
+        $operation->responses[429] = new Reference('#/components/responses/TooManyRequests');
+
         foreach ($operation->responses as $response) {
-            $response->headers['X-RateLimit-Limit'] = new Header('Rate limit', ['schema' => SchemaFactory::createNumberSchema()]);
-            $response->headers['X-RateLimit-Limit-Remaining'] = new Header('Requests remaining', ['schema' => SchemaFactory::createNumberSchema()]);
+            if (!($response instanceof Response)) {
+                continue;
+            }
+            $response->headers['x-RateLimit-Limit'] = new Header('Rate limit', ['schema' => SchemaFactory::createNumberSchema()]);
+            $response->headers['x-RateLimit-Limit-Remaining'] = new Header('Requests remaining', ['schema' => SchemaFactory::createNumberSchema()]);
             $response->headers['Retry-After'] = new Header(null, ['schema' => SchemaFactory::createNumberSchema('timestamp')]);
-            $response->headers['X-Ratelimit-Reset'] = new Header(null, ['schema' => SchemaFactory::createNumberSchema('timestamp')]);
+            $response->headers['x-Ratelimit-Reset'] = new Header(null, ['schema' => SchemaFactory::createNumberSchema('timestamp')]);
         }
-        $components->responses['TooManyRequests'] = new Response('Request limit has been reached', [clone $media]);
+        $components->responses['TooManyRequests'] = new Response('Request limit has been reached', ['application/json' => clone $media]);
     }
 }

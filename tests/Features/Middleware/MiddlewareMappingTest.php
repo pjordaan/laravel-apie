@@ -3,32 +3,26 @@
 namespace W2w\Laravel\Apie\Tests\Features\Middleware;
 
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
-use Illuminate\Foundation\Application;
+use Illuminate\Http\Middleware\SetCacheHeaders;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
 
 class MiddlewareMappingTest extends AbstractLaravelTestCase
 {
-    protected function setUpDatabase(Application $application, string $db = ':memory:'): void
+    protected function getEnvironmentSetUp($application)
     {
         $config = $application['config'];
-        $config->set('database.default', 'testbench');
-        $config->set(
-            'database.connections.testbench',
-            [
-                'driver'   => 'sqlite',
-                'database' => $db,
-                'prefix'   => '',
-            ]
-        );
-        var_dump(__METHOD__);
-        $config->set('apie.apie-middleware', ['throttle:80,1', AuthenticateWithBasicAuth::class]);
+        $config->set('apie.apie-middleware', ['throttle:80,1', AuthenticateWithBasicAuth::class, SetCacheHeaders::class]);
+        parent::getEnvironmentSetUp($application);
     }
 
     public function test_openapi_spec()
-    {var_dump(__METHOD__);
+    {
         $this->withoutExceptionHandling();
         $response = $this->get('/api/doc.yml');
+        file_put_contents(__DIR__ . '/doc.yml', $response->getContent());
         $response->assertSeeText(429);
-        $response->assertSeeText('X-RateLimit-Limit');
+        $response->assertSeeText('x-RateLimit-Limit');
+        $response->assertSeeText('etag');
+        $response->assertSeeText('md5');
     }
 }

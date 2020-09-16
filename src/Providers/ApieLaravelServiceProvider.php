@@ -22,6 +22,7 @@ use W2w\Laravel\Apie\Services\LaravelRouteLoader;
 use W2w\Laravel\Apie\Services\RequestToFacadeResponseConverter;
 use W2w\Laravel\Apie\Services\RouteLoaderInterface;
 use W2w\Lib\Apie\Core\Models\ApiResourceFacadeResponse;
+use W2w\Lib\Apie\OpenApiSchema\Factories\SchemaFactory;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSchemaGenerator;
 
 /**
@@ -96,8 +97,16 @@ class ApieLaravelServiceProvider extends ServiceProvider
         $this->app->bind(ThrottleRequestMapper::class);
         $this->app->bind(HeaderMapper::class, function (Application $app) {
             return new HeaderMapper([
-                SetCacheHeaders::class => [],
-                FrameGuard::class => [],
+                SetCacheHeaders::class => [
+                    'etag',
+                    SchemaFactory::createStringSchema('md5', md5(__CLASS__)),
+                    'etag cache header',
+                ],
+                FrameGuard::class => [
+                    'x-Frame-Options',
+                    SchemaFactory::createStringSchema(null, 'SAMEORIGIN'),
+                    'Adds IFRAME protection'
+                ],
             ]);
         });
         $this->app->bind(MiddlewareToStatusCodeMapper::class, function (Application $app) {

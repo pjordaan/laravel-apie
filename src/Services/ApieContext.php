@@ -3,6 +3,7 @@
 
 namespace W2w\Laravel\Apie\Services;
 
+use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use W2w\Laravel\Apie\Exceptions\ApieContextMissingException;
@@ -26,7 +27,7 @@ final class ApieContext
     private $instantiatedContexts;
 
     public function __construct(Container $container, Apie $apie, array $config, array& $contexts)
-    {var_dump(__METHOD__);
+    {
         $this->container = $container;
         $this->apie = $apie;
         $this->config = $config;
