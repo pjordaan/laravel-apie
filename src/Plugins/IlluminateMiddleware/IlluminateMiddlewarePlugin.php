@@ -5,8 +5,9 @@ namespace W2w\Laravel\Apie\Plugins\IlluminateMiddleware;
 use erasys\OpenApi\Spec\v3\Components;
 use erasys\OpenApi\Spec\v3\Document;
 use erasys\OpenApi\Spec\v3\Operation;
-use Illuminate\Foundation\Http\Kernel;
+use Illuminate\Container\Container;
 use W2w\Laravel\Apie\Contracts\ApieMiddlewareBridgeContract;
+use W2w\Laravel\Apie\Plugins\IlluminateMiddleware\MiddlewareResolver\MiddlewareResolver;
 use W2w\Laravel\Apie\Services\ApieContext;
 use W2w\Lib\Apie\Exceptions\InvalidClassTypeException;
 use W2w\Lib\Apie\PluginInterfaces\OpenApiEventProviderInterface;
@@ -22,14 +23,26 @@ class IlluminateMiddlewarePlugin implements OpenApiEventProviderInterface
     private $apieContext;
 
     /**
-     * @var Kernel
+     * @var Container
      */
-    private $kernel;
+    private $container;
 
-    public function __construct(ApieContext $apieContext, Kernel $kernel)
+    /**
+     * @var MiddlewareResolver
+     */
+    private $resolver;
+
+    public function __construct(Container $container)
     {
-        $this->apieContext = $apieContext;
-        $this->kernel = $kernel;
+        $this->container = $container;
+    }
+
+    private function getMiddlewareResolver(): MiddlewareResolver
+    {
+        if (!$this->resolver) {
+            $this->resolver = new MiddlewareResolver($this->container);
+        }
+        return $this->resolver;
     }
 
     public function onOpenApiDocGenerated(Document $document): Document
@@ -38,12 +51,19 @@ class IlluminateMiddlewarePlugin implements OpenApiEventProviderInterface
             $document->components = new Components([]);
         }
         $components = $document->components;
-        $middleware = $this->apieContext->getActiveContext()->getConfig('apie-middleware');
-        $resolver = new MiddlewareResolver\MiddlewareResolver($this->kernel, $this->kernel->getApplication());
+        $middleware = $this->container->make(ApieContext::class)->getActiveContext()->getConfig('apie-middleware');
+        $resolver = $this->getMiddlewareResolver();
         $middlewareClasses = iterator_to_array($resolver->resolveMiddleware($middleware));
         foreach ($document->paths as $key => $pathItem) {
             $this->patch($pathItem->get, $components, $middlewareClasses);
+            $this->patch($pathItem->post, $components, $middlewareClasses);
+            $this->patch($pathItem->put, $components, $middlewareClasses);
+            $this->patch($pathItem->patch, $components, $middlewareClasses);
+            $this->patch($pathItem->delete, $components, $middlewareClasses);
+            $this->patch($pathItem->head, $components, $middlewareClasses);
+            $this->patch($pathItem->options, $components, $middlewareClasses);
         }
+        return $document;
     }
 
     private function patch(?Operation $operation, Components $components, array $middlewareClasses)
@@ -51,7 +71,7 @@ class IlluminateMiddlewarePlugin implements OpenApiEventProviderInterface
         if (null == $operation) {
             return;
         }
-        foreach ($this->kernel->getApplication()->tagged([ApieMiddlewareBridgeContract::class]) as $apieMiddleware) {
+        foreach ($this->container->tagged(ApieMiddlewareBridgeContract::class) as $apieMiddleware) {
             if (!($apieMiddleware instanceof ApieMiddlewareBridgeContract)) {
                 throw new InvalidClassTypeException(get_class($apieMiddleware), ApieMiddlewareBridgeContract::class);
             }

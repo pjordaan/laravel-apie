@@ -4,8 +4,9 @@ namespace W2w\Laravel\Apie\Plugins\IlluminateMiddleware\MiddlewareResolver;
 
 use Generator;
 use Illuminate\Contracts\Container\Container;
-use Illuminate\Foundation\Http\Kernel;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Routing\MiddlewareNameResolver;
+use Illuminate\Routing\Router;
 use ReflectionMethod;
 use ReflectionProperty;
 
@@ -16,42 +17,13 @@ use ReflectionProperty;
 class MiddlewareResolver
 {
     /**
-     * @var Kernel
-     */
-    private $kernel;
-
-    /**
      * @var Container
      */
     private $container;
 
-    public function __construct(Kernel $kernel, Container $container)
+    public function __construct(Container $container)
     {
-        $this->kernel = $kernel;
         $this->container = $container;
-    }
-
-    /**
-     * Gets Kernel middleware that is always being executed.
-     *
-     * @return array
-     */
-    protected function getKernelMiddleware(): array
-    {
-        return $this->getHiddenPropertyValue('middleware');
-    }
-
-    /**
-     * Runs the parseMiddleware from the kernel.
-     *
-     * @param string $middleware
-     * @return mixed[]
-     */
-    protected function parseMiddleware(string $middleware): array
-    {
-        $method = new ReflectionMethod($this->kernel, 'parseMiddleware');
-        $method->setAccessible(true);
-        return $method->invoke($this->kernel, $middleware);
     }
 
     /**
@@ -62,9 +34,9 @@ class MiddlewareResolver
      */
     final protected function getHiddenPropertyValue($propertyField)
     {
-        $method = new ReflectionProperty($this->kernel, $propertyField);
+        $method = new ReflectionProperty($this->container->make('router'), $propertyField);
         $method->setAccessible(true);
-        return $method->getValue($this->kernel);
+        return $method->getValue($this->container->make('router'));
     }
 
     /**
@@ -74,7 +46,7 @@ class MiddlewareResolver
      */
     protected function getMiddlewareMapping(): array
     {
-        return $this->getHiddenPropertyValue('routeMiddleware');
+        return $this->getHiddenPropertyValue('middleware');
     }
 
     /**
@@ -90,25 +62,25 @@ class MiddlewareResolver
     /**
      * Returns all classes that are being used as middleware.
      *
-     * @param array $middleware
+     * @param array $middlewares
      * @return Generator<string>
      */
-    public function resolveMiddleware(array $middleware): Generator
+    public function resolveMiddleware(array $middlewares): Generator
     {
-        $middlewares = array_merge($this->getKernelMiddleware(), $middleware);
         $map = $this->getMiddlewareMapping();
         $middlewareGroups = $this->getMiddlewareGroups();
 
         foreach ($middlewares as $middleware) {
 
             $resolvedMiddleware = MiddlewareNameResolver::resolve($middleware, $map, $middlewareGroups);
-            // To avoid closures, etc.
-            if (!is_string($resolvedMiddleware)) {
-                continue;
-            }
-            [$name] = $this->parseMiddleware($resolvedMiddleware);
-            if (class_exists($name)) {
-                yield $name;
+            if (is_string($resolvedMiddleware)) {
+                $pos = strpos($resolvedMiddleware, ':');
+                if ($pos !== false) {
+                    $resolvedMiddleware = substr($resolvedMiddleware, 0, $pos);
+                }
+                if (class_exists($resolvedMiddleware)) {
+                    yield $resolvedMiddleware;
+                }
             }
         }
     }

@@ -20,10 +20,11 @@ abstract class AbstractLaravelTestCase extends TestCase
         $config = $application['config'];
         $config->set('database.default', 'testbench');
         $config->set(
-            'database.connections.testbench', [
-            'driver'   => 'sqlite',
-            'database' => $db,
-            'prefix'   => '',
+            'database.connections.testbench',
+            [
+                'driver'   => 'sqlite',
+                'database' => $db,
+                'prefix'   => '',
             ]
         );
     }

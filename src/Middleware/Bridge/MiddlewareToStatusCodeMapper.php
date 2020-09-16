@@ -42,13 +42,13 @@ class MiddlewareToStatusCodeMapper implements ApieMiddlewareBridgeContract
         ]);
         foreach ($this->mapping as $statusCode => $data) {
             list($className, $identifier, $description) = $data;
-            $operation->responses[$statusCode] = new Response(
-                $description,
-                [
-                    'schema' => new Reference('#/components/responses/' . $identifier)
-                ]
-            );
             if ($middlewareClass === $className || is_a($middlewareClass, $className, true)) {
+                $operation->responses[$statusCode] = new Response(
+                    $description,
+                    [
+                        'schema' => new Reference('#/components/responses/' . $identifier)
+                    ]
+                );
                 $components->responses[$identifier] = new Response($description, [clone $media]);
             }
         }

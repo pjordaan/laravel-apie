@@ -2,8 +2,7 @@
 
 namespace W2w\Laravel\Apie\Providers;
 
-use Illuminate\Contracts\Http\Kernel as KernelContract;
-use Illuminate\Foundation\Http\Kernel;
+use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
@@ -32,10 +31,9 @@ use W2w\Lib\Apie\Core\Resources\ApiResourcesInterface;
 use W2w\Lib\Apie\DefaultApie;
 use W2w\Lib\Apie\Exceptions\InvalidClassTypeException;
 use W2w\Lib\Apie\Interfaces\ResourceSerializerInterface;
+use W2w\Lib\Apie\OpenApiSchema\OpenApiSchemaGenerator;
 use W2w\Lib\Apie\OpenApiSchema\OpenApiSpecGenerator;
 use W2w\Lib\Apie\Plugins\ApplicationInfo\DataLayers\ApplicationInfoRetriever;
-use W2w\Lib\Apie\Plugins\Core\Normalizers\ApieObjectNormalizer;
-use W2w\Lib\Apie\Plugins\Core\Normalizers\ContextualNormalizer;
 use W2w\Lib\Apie\Plugins\Core\Serializers\SymfonySerializerAdapter;
 use W2w\Lib\Apie\Plugins\FakeAnnotations\FakeAnnotationsPlugin;
 use W2w\Lib\Apie\Plugins\FileStorage\DataLayers\FileStorageDataLayer;
@@ -169,13 +167,11 @@ class ApiResourceServiceProvider extends ServiceProvider
             }
         }
         // since we do not have a hard dependency on Laravel we require this check
-        if (class_exists(Kernel::class)
-            && isset($this->app[KernelContract::class])
-            && $this->app[KernelContract::class] instanceof Kernel
+        if (class_exists(Router::class)
+            && $this->app->bound('router')
         ) {
             $plugins[] = new IlluminateMiddlewarePlugin(
-                $this->app->get(ApieContext::class),
-                $this->app[KernelContract::class]
+                $this->app
             );
         }
         $plugins[] = new IlluminatePlugin($this->app, $config);
@@ -196,6 +192,13 @@ class ApiResourceServiceProvider extends ServiceProvider
          */
         $this->app->bind(ApiResourcePersister::class, function () {
             return new ApiResourcePersister($this->app->get(Apie::class)->getApiResourceMetadataFactory());
+        });
+
+        /**
+         * OpenApiSchemaGenerator: create schema's from objects.
+         */
+        $this->app->bind(OpenApiSchemaGenerator::class, function () {
+            return $this->app->get(Apie::class)->getSchemaGenerator();
         });
 
         /**

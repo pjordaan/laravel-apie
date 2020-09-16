@@ -1,6 +1,8 @@
 <?php
 namespace W2w\Laravel\Apie\Tests\Console;
 
+use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\PendingCommand;
 use Symfony\Component\Console\Exception\RuntimeException;
 use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
@@ -8,6 +10,19 @@ use W2w\Laravel\Apie\Tests\AbstractLaravelTestCase;
 class DumpOpenApiSpecCommandTest extends AbstractLaravelTestCase
 {
     private $filename;
+
+    protected function setUpDatabase(Application $application, string $db = ':memory:'): void
+    {
+        parent::setUpDatabase($application, $db);
+        $application['config']->set(
+            'apie.apie-middleware',
+            [
+                AuthenticateWithBasicAuth::class,
+                'auth:api',
+                'api'
+            ]
+        );
+    }
 
     protected function setUp(): void
     {

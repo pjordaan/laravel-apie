@@ -6,12 +6,16 @@ use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode;
+use Illuminate\Http\Middleware\FrameGuard;
+use Illuminate\Http\Middleware\SetCacheHeaders;
 use Illuminate\Support\ServiceProvider;
 use Psr\Http\Message\ServerRequestInterface;
 use W2w\Laravel\Apie\Console\DumpOpenApiSpecCommand;
 use W2w\Laravel\Apie\Contracts\ApieMiddlewareBridgeContract;
 use W2w\Laravel\Apie\Controllers\SwaggerUiController;
+use W2w\Laravel\Apie\Middleware\Bridge\HeaderMapper;
 use W2w\Laravel\Apie\Middleware\Bridge\MiddlewareToStatusCodeMapper;
+use W2w\Laravel\Apie\Middleware\Bridge\ThrottleRequestMapper;
 use W2w\Laravel\Apie\Services\ApieContext;
 use W2w\Laravel\Apie\Services\ApieRouteLoader;
 use W2w\Laravel\Apie\Services\LaravelRouteLoader;
@@ -89,6 +93,13 @@ class ApieLaravelServiceProvider extends ServiceProvider
 
     private function registerMiddlewareBridges()
     {
+        $this->app->bind(ThrottleRequestMapper::class);
+        $this->app->bind(HeaderMapper::class, function (Application $app) {
+            return new HeaderMapper([
+                SetCacheHeaders::class => [],
+                FrameGuard::class => [],
+            ]);
+        });
         $this->app->bind(MiddlewareToStatusCodeMapper::class, function (Application $app) {
             return new MiddlewareToStatusCodeMapper(
                 $app->get(OpenApiSchemaGenerator::class),
@@ -99,7 +110,7 @@ class ApieLaravelServiceProvider extends ServiceProvider
                 ]
             );
         });
-        $this->app->tag([MiddlewareToStatusCodeMapper::class], [ApieMiddlewareBridgeContract::class]);
+        $this->app->tag([HeaderMapper::class, ThrottleRequestMapper::class, MiddlewareToStatusCodeMapper::class], [ApieMiddlewareBridgeContract::class]);
     }
 
     public function registerResourceClass(string $resourceClass)

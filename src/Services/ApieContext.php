@@ -26,7 +26,7 @@ final class ApieContext
     private $instantiatedContexts;
 
     public function __construct(Container $container, Apie $apie, array $config, array& $contexts)
-    {
+    {var_dump(__METHOD__);
         $this->container = $container;
         $this->apie = $apie;
         $this->config = $config;
